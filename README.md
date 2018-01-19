@@ -85,6 +85,6 @@ Add the JitPack repository to your root build.gradle:
 Add the Gradle dependency:
 ```groovy
 	dependencies {
-		compile 'com.github.amitclickapps:retrofit-util:latest'
+		compile 'com.github.amitsahni:http:latest'
 	}
 ```
