@@ -14,13 +14,6 @@ public class Builder {
 
     private WebParam webParam;
 
-    public Builder(@NonNull Activity context, @NonNull String url) {
-        webParam = new WebParam();
-        webParam.activityContext = context;
-        webParam.context = context;
-        webParam.url = url;
-    }
-
     public Builder(@NonNull Context context, @NonNull String url) {
         webParam = new WebParam();
         webParam.context = context;

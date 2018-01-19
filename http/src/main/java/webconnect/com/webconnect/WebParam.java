@@ -19,10 +19,6 @@ import webconnect.com.webconnect.listener.ProgressListener;
  */
 public class WebParam implements Serializable {
     /**
-     * The Activity context.
-     */
-    Activity activityContext;
-    /**
      * The Context.
      */
     Context context;
@@ -133,10 +129,6 @@ public class WebParam implements Serializable {
 
     }
 
-
-    public Activity getActivityContext() {
-        return activityContext;
-    }
 
     public Context getContext() {
         return context;

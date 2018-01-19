@@ -73,14 +73,13 @@ public class MainActivityModel extends AndroidViewModel {
                 .headerParam(headerMap)
                 .callback(new OnWebCallback() {
                     @Override
-                    public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
-                        if (object == null) return;
-                        get.postValue(object);
+                    public void onSuccess(@Nullable Object object, int taskId, Response response) {
+
                     }
 
                     @Override
-                    public <T> void onError(@Nullable T object, String error, int taskId) {
-                        get.postValue(object);
+                    public void onError(@Nullable Object object, String error, int taskId) {
+
                     }
                 }).connect();
     }
@@ -104,7 +103,8 @@ public class MainActivityModel extends AndroidViewModel {
                     public <T> void onError(@Nullable T object, String error, int taskId) {
                         post.setValue(object);
                     }
-                }).connect();
+                })
+                .connect();
         return requestMap;
     }
 
