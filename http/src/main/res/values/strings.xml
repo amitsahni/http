@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">WebConnect</string>
+
+    <!--Erorr messages-->
+    <string name="error_no_records_found">No records found!</string>
+    <string name="error_webservice">Error in web server response.</string>
+    <string name="error_internet_connection">Please check your internet connection.</string>
+    <string name="error_server_connection">Can\'t connect to server. Please try after some time.</string>
+    <string name="error_certificate_exception">Trust anchor for certification path not found.</string>
+</resources>
