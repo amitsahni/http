@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import retrofit2.Response;
 import webconnect.com.webconnect.WebConnect;
 import webconnect.com.webconnect.listener.OnWebCallback;
 
@@ -73,7 +72,7 @@ public class MainActivityModel extends AndroidViewModel {
                 .headerParam(headerMap)
                 .callback(new OnWebCallback() {
                     @Override
-                    public void onSuccess(@Nullable Object object, int taskId, Response response) {
+                    public void onSuccess(@Nullable Object object, int taskId) {
 
                     }
 
@@ -93,7 +92,7 @@ public class MainActivityModel extends AndroidViewModel {
                 .bodyParam(requestMap)
                 .callback(new OnWebCallback() {
                     @Override
-                    public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
+                    public <T> void onSuccess(@Nullable T object, int taskId) {
                         if (object != null) {
                             post.setValue(object);
                         }
@@ -117,7 +116,7 @@ public class MainActivityModel extends AndroidViewModel {
                 .bodyParam(requestMap)
                 .callback(new OnWebCallback() {
                     @Override
-                    public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
+                    public <T> void onSuccess(@Nullable T object, int taskId) {
                         if (object != null) {
                             put.setValue(object);
                         }
@@ -139,7 +138,7 @@ public class MainActivityModel extends AndroidViewModel {
                 .bodyParam(requestMap)
                 .callback(new OnWebCallback() {
                     @Override
-                    public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
+                    public <T> void onSuccess(@Nullable T object, int taskId) {
                         if (object != null) {
                             delete.setValue(object);
                         }
