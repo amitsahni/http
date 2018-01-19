@@ -13,7 +13,7 @@
 ```
         WebConnect.with(this.activity, ENDPOINT_GET)
                         .get()
-                        .callback(new WebHandler.OnWebCallback() {
+                        .callback(new OnWebCallback() {
                             @Override
                             public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
                                 
@@ -39,7 +39,7 @@
                  .multipart()
                  .multipartParam(requestMap)
                  .multipartParamFile(requestFile)
-                 .callback(new WebHandler.OnWebCallback() {
+                 .callback(new OnWebCallback() {
                      @Override
                      public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
                          
@@ -58,7 +58,7 @@
 File file = new File(Environment.getExternalStorageDirectory(), "temp.jpg");
         WebConnect.with(this.activity, "https://s3.amazonaws.com/uifaces/faces/twitter/calebogden/128.jpg")
                 .download(file)
-                .callback(new WebHandler.OnWebCallback() {
+                .callback(new OnWebCallback() {
                     @Override
                     public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
                     
