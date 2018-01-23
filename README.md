@@ -11,22 +11,87 @@
 
 ### Api calling using Webconnect
 ```
-        WebConnect.with(this.activity, ENDPOINT_GET)
+       WebConnect.with(this.activity, ENDPOINT_GET)
                         .get()
-                        .callback(new OnWebCallback() {
-                            @Override
-                            public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
-                                
-                            }
-        
-                            @Override
-                            public <T> void onError(@Nullable T object, String error, int taskId) {
-                               
-                            }
-                        }).connect();
+                         .callback(new OnWebCallback() {
+                         @Override
+                         public void onSuccess(@Nullable Object object, int taskId) {
+                         
+                         }
+                         @Override
+                         public void onError(@Nullable Object object, String error, int taskId) {
+                        
+                         }
+                         }).connect();
+ ```
+ ### HTTP POST
+ ```
+       Map<String, String> requestMap = new LinkedHashMap<>();
+               requestMap.put("name", "Amit");
+               requestMap.put("job", "manager");
+               WebConnect.with(this.activity, ENDPOINT_POST)
+                       .post()
+                       .bodyParam(requestMap)
+                       .callback(new OnWebCallback() {
+                           @Override
+                           public <T> void onSuccess(@Nullable T object, int taskId) {
+                               if (object != null) {
+                                   post.setValue(object);
+                               }
+                           }
+       
+                           @Override
+                           public <T> void onError(@Nullable T object, String error, int taskId) {
+                               post.setValue(object);
+                           }
+                       })
+                       .connect();                  
+                         
 ```
+### HTTP PUT
+```
+Map<String, String> requestMap = new LinkedHashMap<>();
+        requestMap.put("name", "Amit Singh");
+        requestMap.put("job", "manager");
+        WebConnect.with(activity, ENDPOINT_PUT)
+                .put()
+                .bodyParam(requestMap)
+                .callback(new OnWebCallback() {
+                    @Override
+                    public <T> void onSuccess(@Nullable T object, int taskId) {
+                        if (object != null) {
+                            put.setValue(object);
+                        }
+                    }
 
+                    @Override
+                    public <T> void onError(@Nullable T object, String error, int taskId) {
+                        put.setValue(object);
+                    }
+                }).connect();
+```
+### HTTP Delete
+```
+Map<String, String> requestMap = new LinkedHashMap<>();
+        requestMap.put("name", "Amit Singh");
+        requestMap.put("job", "manager");
+        WebConnect.with(activity, ENDPOINT_PUT)
+                .delete()
+                .bodyParam(requestMap)
+                .callback(new OnWebCallback() {
+                    @Override
+                    public <T> void onSuccess(@Nullable T object, int taskId) {
+                        if (object != null) {
+                            delete.setValue(object);
+                        }
+                    }
 
+                    @Override
+                    public <T> void onError(@Nullable T object, String error, int taskId) {
+                        delete.setValue(object);
+                    }
+                }).connect();
+```
 #### Multipart
 ```
  Map<String, String> requestMap = new LinkedHashMap<>();
@@ -41,7 +106,7 @@
                  .multipartParamFile(requestFile)
                  .callback(new OnWebCallback() {
                      @Override
-                     public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
+                     public <T> void onSuccess(@Nullable T object, int taskId) {
                          
                      }
  
@@ -60,7 +125,7 @@ File file = new File(Environment.getExternalStorageDirectory(), "temp.jpg");
                 .download(file)
                 .callback(new OnWebCallback() {
                     @Override
-                    public <T> void onSuccess(@Nullable T object, int taskId, Response response) {
+                    public <T> void onSuccess(@Nullable T object, int taskId) {
                     
                     }
 
