@@ -93,16 +93,6 @@ public class BuilderRequest {
         public T timeOut(long connectTimeOut, long readTimeOut) {
             param.connectTimeOut = connectTimeOut;
             param.readTimeOut = readTimeOut;
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            interceptor.setLevel(ApiConfiguration.isDebug() ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-            okHttpClient = new OkHttpClient().newBuilder()
-                    .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                    .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
-                    .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                    .addInterceptor(interceptor)
-                    .cache(ApiConfiguration.getOkHttpClient().cache())
-                    .dispatcher(ApiConfiguration.getOkHttpClient().dispatcher())
-                    .build();
             return (T) this;
         }
 
@@ -152,7 +142,13 @@ public class BuilderRequest {
             }
             getBuilder.addQueryParameter(param.queryParam)
                     .addHeaders(param.headerParam);
-            if (okHttpClient != null) {
+            if (param.connectTimeOut != 0
+                    && param.readTimeOut != 0) {
+                okHttpClient = ApiConfiguration.getOkHttpClient().newBuilder()
+                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
+                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .build();
                 getBuilder.setOkHttpClient(okHttpClient);
             }
             getBuilder = param.isCacheEnabled ? getBuilder.getResponseOnlyIfCached() : getBuilder.getResponseOnlyFromNetwork();
@@ -206,9 +202,15 @@ public class BuilderRequest {
                     break;
                 }
             }
-            if (okHttpClient == null)
-                okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param);
-
+            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param);
+            if (param.connectTimeOut != 0
+                    && param.readTimeOut != 0) {
+                okHttpClient = okHttpClient.newBuilder()
+                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
+                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .build();
+            }
             if (param.isCacheEnabled) {
                 builder.cacheControl(CacheControl.FORCE_CACHE);
             } else {
@@ -287,16 +289,6 @@ public class BuilderRequest {
         public T timeOut(long connectTimeOut, long readTimeOut) {
             param.connectTimeOut = connectTimeOut;
             param.readTimeOut = readTimeOut;
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            interceptor.setLevel(ApiConfiguration.isDebug() ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-            okHttpClient = new OkHttpClient().newBuilder()
-                    .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                    .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
-                    .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                    .addInterceptor(interceptor)
-                    .cache(ApiConfiguration.getOkHttpClient().cache())
-                    .dispatcher(ApiConfiguration.getOkHttpClient().dispatcher())
-                    .build();
             return (T) this;
         }
 
@@ -362,7 +354,13 @@ public class BuilderRequest {
             if (param.file != null) {
                 postBuilder.addFileBody(param.file);
             }
-            if (okHttpClient != null) {
+            if (param.connectTimeOut != 0
+                    && param.readTimeOut != 0) {
+                okHttpClient = ApiConfiguration.getOkHttpClient().newBuilder()
+                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
+                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .build();
                 postBuilder.setOkHttpClient(okHttpClient);
             }
             postBuilder = param.isCacheEnabled ? postBuilder.getResponseOnlyIfCached() : postBuilder.getResponseOnlyFromNetwork();
@@ -434,8 +432,15 @@ public class BuilderRequest {
             if (param.file != null) {
                 //  builder.addFileBody(param.file);
             }
-            if (okHttpClient == null)
-                okHttpClient = HTTPManager.get().getDefaultOkHttpClient(webParam);
+            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param);
+            if (param.connectTimeOut != 0
+                    && param.readTimeOut != 0) {
+                okHttpClient = okHttpClient.newBuilder()
+                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
+                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .build();
+            }
 
             if (webParam.isCacheEnabled) {
                 builder.cacheControl(CacheControl.FORCE_CACHE);
@@ -516,16 +521,6 @@ public class BuilderRequest {
         public T timeOut(long connectTimeOut, long readTimeOut) {
             param.connectTimeOut = connectTimeOut;
             param.readTimeOut = readTimeOut;
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            interceptor.setLevel(ApiConfiguration.isDebug() ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-            okHttpClient = new OkHttpClient().newBuilder()
-                    .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                    .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
-                    .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                    .addInterceptor(interceptor)
-                    .cache(ApiConfiguration.getOkHttpClient().cache())
-                    .dispatcher(ApiConfiguration.getOkHttpClient().dispatcher())
-                    .build();
             return (T) this;
         }
 
@@ -578,7 +573,13 @@ public class BuilderRequest {
                     .addQueryParameter(param.queryParam)
                     .setTag(param.taskId)
                     .addHeaders(param.headerParam);
-            if (okHttpClient != null) {
+            if (param.connectTimeOut != 0
+                    && param.readTimeOut != 0) {
+                okHttpClient = ApiConfiguration.getOkHttpClient().newBuilder()
+                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
+                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .build();
                 downloadBuilder.setOkHttpClient(okHttpClient);
             }
             Rx2ANRequest okHttpRequest = downloadBuilder.build();
@@ -621,8 +622,15 @@ public class BuilderRequest {
                     break;
                 }
             }
-            if (okHttpClient == null)
-                okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param);
+            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param);
+            if (param.connectTimeOut != 0
+                    && param.readTimeOut != 0) {
+                okHttpClient = okHttpClient.newBuilder()
+                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
+                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .build();
+            }
 
             if (param.isCacheEnabled) {
                 builder.cacheControl(CacheControl.FORCE_CACHE);
@@ -652,6 +660,7 @@ public class BuilderRequest {
 
         public MultiPartBuilder(WebParam param) {
             this.param = param;
+            param.debug = true;
         }
 
         @Override
@@ -690,16 +699,6 @@ public class BuilderRequest {
         public T timeOut(long connectTimeOut, long readTimeOut) {
             param.connectTimeOut = connectTimeOut;
             param.readTimeOut = readTimeOut;
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            interceptor.setLevel(ApiConfiguration.isDebug() ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-            okHttpClient = new OkHttpClient().newBuilder()
-                    .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                    .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
-                    .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                    .addInterceptor(interceptor)
-                    .cache(ApiConfiguration.getOkHttpClient().cache())
-                    .dispatcher(ApiConfiguration.getOkHttpClient().dispatcher())
-                    .build();
             return (T) this;
         }
 
@@ -742,6 +741,11 @@ public class BuilderRequest {
             return (T) this;
         }
 
+        public T debug(boolean isLog) {
+            param.debug = isLog;
+            return (T) this;
+        }
+
         @Override
         public void connect() {
             execute().subscribe(new Callback.UploadRequestCallback(param));
@@ -756,7 +760,21 @@ public class BuilderRequest {
             multipartBuilder
                     .setTag(param.taskId)
                     .addHeaders(param.headerParam);
-            if (okHttpClient != null) {
+            if (param.connectTimeOut != 0
+                    && param.readTimeOut != 0) {
+                okHttpClient = ApiConfiguration.getOkHttpClient().newBuilder()
+                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
+                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .build();
+                multipartBuilder.setOkHttpClient(okHttpClient);
+            }
+            if (!param.debug) {
+                HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+                interceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
+                okHttpClient = okHttpClient.newBuilder()
+                        .addInterceptor(interceptor)
+                        .build();
                 multipartBuilder.setOkHttpClient(okHttpClient);
             }
             return multipartBuilder
@@ -837,15 +855,32 @@ public class BuilderRequest {
             } else {
                 builder.cacheControl(CacheControl.FORCE_NETWORK);
             }
-            okHttpClient = okHttpClient.newBuilder().addNetworkInterceptor(new Interceptor() {
-                @Override
-                public Response intercept(Chain chain) throws IOException {
-                    Response originalResponse = chain.proceed(chain.request());
-                    return originalResponse.newBuilder()
-                            .body(new HTTPInternalNetworking.ProgressResponseBody(originalResponse.body(), param))
-                            .build();
-                }
-            }).build();
+            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param);
+            if (param.connectTimeOut != 0
+                    && param.readTimeOut != 0) {
+                okHttpClient = okHttpClient.newBuilder()
+                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
+                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .build();
+            }
+            if (!param.debug) {
+                HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+                interceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
+                okHttpClient = okHttpClient.newBuilder()
+                        .addInterceptor(interceptor)
+                        .build();
+            }
+            okHttpClient = okHttpClient.newBuilder()
+                    .addNetworkInterceptor(new Interceptor() {
+                        @Override
+                        public Response intercept(Chain chain) throws IOException {
+                            Response originalResponse = chain.proceed(chain.request());
+                            return originalResponse.newBuilder()
+                                    .body(new HTTPInternalNetworking.ProgressResponseBody(originalResponse.body(), param))
+                                    .build();
+                        }
+                    }).build();
             okhttp3.Request okHttpRequest = builder.build();
             Call call = okHttpClient.newCall(okHttpRequest);
             return new RxObservable.SimpleANObservable<>(param, call)

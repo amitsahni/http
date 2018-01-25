@@ -1,6 +1,5 @@
 package webconnect.com.webconnect;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 
@@ -82,7 +81,7 @@ public class WebParam implements Serializable {
     /**
      * Download File anyType
      */
-    boolean isCacheEnabled = false;
+    boolean isCacheEnabled = false, debug = false;
     File file;
 
     long requestBodyContentlength = -1;

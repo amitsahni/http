@@ -68,6 +68,7 @@ public class MainActivityModel extends AndroidViewModel {
         headerMap.put("Auth-Token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOjEwODMsImlhdCI6IjIwMTgtMDEtMTIgMDc6NTg6NTAgVVRDIn0.mXkySHf71fa3vdLwUWaIqoqd5nUR2Z3dJ1INq5t4Clo");
         WebConnect.with(this.activity, "leases")
                 .get()
+                .timeOut(100L,50L)
                 .baseUrl("http://api.qa.leasing.clicksandbox.com/v1/app/")
                 .headerParam(headerMap)
                 .callback(new OnWebCallback() {
