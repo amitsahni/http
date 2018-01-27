@@ -32,10 +32,10 @@ public class MainActivityModel extends AndroidViewModel {
 //        this.activity = activity;
 //    }
 
-    private MutableLiveData<Object> get = new MutableLiveData<>();
-    private MutableLiveData<Object> post = new MutableLiveData<>();
-    private MutableLiveData<Object> put = new MutableLiveData<>();
-    private MutableLiveData<Object> delete = new MutableLiveData<>();
+    private MutableLiveData<Object> get = new MutableLiveData<Object>();
+    private MutableLiveData<Object> post = new MutableLiveData<Object>();
+    private MutableLiveData<Object> put = new MutableLiveData<Object>();
+    private MutableLiveData<Object> delete = new MutableLiveData<Object>();
 
     public MainActivityModel(@NonNull Application application) {
         super(application);
@@ -63,12 +63,12 @@ public class MainActivityModel extends AndroidViewModel {
 //01-17 12:10:53.412 6765-24325/com.brickspms D/OkHttp:
 
     public void get() {
-        Map<String, String> headerMap = new LinkedHashMap<>();
+        Map<String, String> headerMap = new LinkedHashMap<String, String>();
         headerMap.put("slug", "default");
         headerMap.put("Auth-Token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOjEwODMsImlhdCI6IjIwMTgtMDEtMTIgMDc6NTg6NTAgVVRDIn0.mXkySHf71fa3vdLwUWaIqoqd5nUR2Z3dJ1INq5t4Clo");
         WebConnect.with(this.activity, "leases")
                 .get()
-                .timeOut(100L,50L)
+                .timeOut(100L, 50L)
                 .baseUrl("http://api.qa.leasing.clicksandbox.com/v1/app/")
                 .headerParam(headerMap)
                 .callback(new OnWebCallback() {
@@ -85,7 +85,7 @@ public class MainActivityModel extends AndroidViewModel {
     }
 
     public Map<String, String> post() {
-        Map<String, String> requestMap = new LinkedHashMap<>();
+        Map<String, String> requestMap = new LinkedHashMap<String, String>();
         requestMap.put("name", "Amit");
         requestMap.put("job", "manager");
         WebConnect.with(this.activity, ENDPOINT_POST)
@@ -109,7 +109,7 @@ public class MainActivityModel extends AndroidViewModel {
     }
 
     public void put() {
-        Map<String, String> requestMap = new LinkedHashMap<>();
+        Map<String, String> requestMap = new LinkedHashMap<String, String>();
         requestMap.put("name", "Amit Singh");
         requestMap.put("job", "manager");
         WebConnect.with(activity, ENDPOINT_PUT)
@@ -131,7 +131,7 @@ public class MainActivityModel extends AndroidViewModel {
     }
 
     public void delete() {
-        Map<String, String> requestMap = new LinkedHashMap<>();
+        Map<String, String> requestMap = new LinkedHashMap<String, String>();
         requestMap.put("name", "Amit Singh");
         requestMap.put("job", "manager");
         WebConnect.with(activity, ENDPOINT_PUT)
