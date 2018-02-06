@@ -760,9 +760,10 @@ public class BuilderRequest {
             multipartBuilder
                     .setTag(param.taskId)
                     .addHeaders(param.headerParam);
+            okHttpClient = ApiConfiguration.getOkHttpClient();
             if (param.connectTimeOut != 0
                     && param.readTimeOut != 0) {
-                okHttpClient = ApiConfiguration.getOkHttpClient().newBuilder()
+                okHttpClient = okHttpClient.newBuilder()
                         .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
                         .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
                         .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
