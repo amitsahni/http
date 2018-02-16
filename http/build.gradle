@@ -25,6 +25,7 @@ dependencies {
     compile deps.okhttp
     compile deps.interceptor
     compile deps.commonsio
+    compile deps.commonlang3
     compile deps.networking
 }
 

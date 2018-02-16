@@ -22,7 +22,7 @@ public class WebParam implements Serializable {
     HttpType httpType = HttpType.GET;
     Map<String, ?> requestParam = new LinkedHashMap<>();
     Map<String, String> queryParam = new LinkedHashMap<>();
-    Map<String, String> multipartParam = new LinkedHashMap<>();
+    Map<String, ?> multipartParam = new LinkedHashMap<>();
     Map<String, File> multipartParamFile = new LinkedHashMap<>();
     Map<String, String> headerParam = new LinkedHashMap<>();
     OnWebCallback callback;

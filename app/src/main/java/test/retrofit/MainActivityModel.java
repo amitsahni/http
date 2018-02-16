@@ -10,6 +10,12 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.androidnetworking.utils.ParseUtil;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -88,9 +94,17 @@ public class MainActivityModel extends AndroidViewModel {
         Map<String, String> requestMap = new LinkedHashMap<String, String>();
         requestMap.put("name", "Amit");
         requestMap.put("job", "manager");
+        Map<String, Object> requestMap1 = new LinkedHashMap<String, Object>();
+        requestMap1.put("name", requestMap);
+        Gson gson = new Gson();
+        String value = gson.toJson(requestMap1);
+        JsonObject object = gson.fromJson(value,JsonObject.class);
+        HashMap<String, String> map = ParseUtil.getParserFactory()
+                .getStringMap(object);
+        //HashMap<String,Object> map = new Gson().fromJson(gson.toJson(requestMap1), new TypeToken<HashMap<String, Object>>(){}.getType());
         WebConnect.with(this.activity, ENDPOINT_POST)
                 .post()
-                .bodyParam(requestMap)
+                .bodyParam(requestMap1)
                 .callback(new OnWebCallback() {
                     @Override
                     public <T> void onSuccess(@Nullable T object, int taskId) {

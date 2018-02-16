@@ -25,6 +25,7 @@ ext.deps = [
         okhttp     : 'com.squareup.okhttp3:okhttp:3.9.1',
         interceptor: 'com.squareup.okhttp3:logging-interceptor:3.9.1',
         commonsio  : 'commons-io:commons-io:2.4',
+        commonlang3  : 'org.apache.commons:commons-lang3:3.6',
         networking : 'com.amitshekhar.android:rx2-android-networking:1.0.1'
 ]
 
