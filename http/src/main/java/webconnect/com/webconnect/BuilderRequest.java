@@ -9,11 +9,8 @@ import com.google.gson.Gson;
 import com.rx2androidnetworking.Rx2ANRequest;
 import com.rx2androidnetworking.Rx2AndroidNetworking;
 
-import org.apache.commons.lang3.SerializationUtils;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -729,7 +726,7 @@ public class BuilderRequest {
             return (T) this;
         }
 
-        public T multipartParam(@NonNull Map<String, ?> multipartParam) {
+        public T multipartParam(@NonNull Map<String, String> multipartParam) {
             param.multipartParam = multipartParam;
             return (T) this;
         }
@@ -827,20 +824,21 @@ public class BuilderRequest {
                             .Builder()
                             .setType(MultipartBody.FORM);
                     try {
-                        for (HashMap.Entry<String, ?> entry : param.multipartParam.entrySet()) {
-                            byte[] data = SerializationUtils.serialize((Serializable) entry.getValue());
-                            RequestBody body = RequestBody.create(null, data);
-                            multipartBuilder.addPart(Headers.of("Content-Disposition",
-                                    "form-data; name=\"" + entry.getKey() + "\""),
-                                    body);
+                        for (HashMap.Entry<String, String> entry : param.multipartParam.entrySet()) {
+                            RequestBody body = RequestBody.create(null, entry.getValue());
+//                            multipartBuilder.addPart(Headers.of("Content-Disposition",
+//                                    "form-data; name=\"" + entry.getKey() + "\""),
+//                                    body);
+                            multipartBuilder.addFormDataPart(entry.getKey(),entry.getKey(),body);
                         }
                         for (HashMap.Entry<String, File> entry : param.multipartParamFile.entrySet()) {
                             String fileName = entry.getValue().getName();
                             RequestBody fileBody = RequestBody.create(MediaType.parse(Utils.getMimeType(fileName)),
                                     entry.getValue());
-                            multipartBuilder.addPart(Headers.of("Content-Disposition",
-                                    "form-data; name=\"" + entry.getKey() + "\"; filename=\"" + fileName + "\""),
-                                    fileBody);
+//                            multipartBuilder.addPart(Headers.of("Content-Disposition",
+//                                    "form-data; name=\"" + entry.getKey() + "\"; filename=\"" + fileName + "\""),
+//                                    fileBody);
+                            multipartBuilder.addFormDataPart(entry.getKey(),entry.getKey(),fileBody);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
