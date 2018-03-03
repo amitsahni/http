@@ -13,6 +13,11 @@ import android.support.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
 import webconnect.com.webconnect.WebConnect;
 import webconnect.com.webconnect.listener.AnalyticsListener;
 import webconnect.com.webconnect.listener.OnWebCallback;
