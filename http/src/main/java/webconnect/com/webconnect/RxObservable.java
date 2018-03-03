@@ -45,11 +45,11 @@ public class RxObservable {
                 T object;
                 if (okHttpResponse.isSuccessful()) {
                     if (okHttpResponse.body() != null) {
-                        if (param.analyticsListener != null) {
-                            param.analyticsListener.onReceived(timeTaken, param.requestBodyContentlength,
+                        if (param.getAnalyticsListener() != null) {
+                            param.getAnalyticsListener().onReceived(timeTaken, param.getRequestBodyContentlength(),
                                     okHttpResponse.body().contentLength(), okHttpResponse.cacheResponse() != null);
                         }
-                        object = (T) new Gson().fromJson(okHttpResponse.body().string(), param.model);
+                        object = (T) new Gson().fromJson(okHttpResponse.body().string(), param.getModel());
                     } else {
                         object = (T) "";
                     }
@@ -94,16 +94,16 @@ public class RxObservable {
                 T object = null;
                 if (okHttpResponse.isSuccessful()) {
                     if (okHttpResponse.body() != null) {
-                        if (param.analyticsListener != null) {
-                            param.analyticsListener.onReceived(timeTaken, param.requestBodyContentlength,
+                        if (param.getAnalyticsListener() != null) {
+                            param.getAnalyticsListener().onReceived(timeTaken, param.getRequestBodyContentlength(),
                                     okHttpResponse.body().contentLength(), okHttpResponse.cacheResponse() != null);
                         }
                         ResponseBody body = okHttpResponse.body();
                         OutputStream out = null;
                         try {
-                            out = new FileOutputStream(param.file);
+                            out = new FileOutputStream(param.getFile());
                             IOUtils.copy(body.byteStream(), out);
-                            object = (T) param.file;
+                            object = (T) param.getFile();
                         } finally {
                             IOUtils.closeQuietly(out);
                         }

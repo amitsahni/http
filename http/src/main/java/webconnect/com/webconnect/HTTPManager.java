@@ -43,7 +43,7 @@ public class HTTPManager {
     OkHttpClient getDefaultOkHttpClient(@NonNull WebParam webParam) {
         if (okHttpClient == null) {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            Cache cache = new Cache(webParam.context.getCacheDir(), cacheSize);
+            Cache cache = new Cache(webParam.getContext().getCacheDir(), cacheSize);
             builder.cache(cache);
             builder.connectTimeout(ApiConfiguration.getConnectTimeOut(), TimeUnit.SECONDS);
             builder.writeTimeout(ApiConfiguration.getConnectTimeOut(), TimeUnit.SECONDS);

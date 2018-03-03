@@ -16,53 +16,53 @@ public class Builder {
 
     public Builder(@NonNull Context context, @NonNull String url) {
         webParam = new WebParam();
-        webParam.context = context;
-        webParam.url = url;
+        webParam.setContext(context);
+        webParam.setUrl(url);
     }
 
     public BuilderRequest.GetRequestBuilder get() {
-        webParam.httpType = WebParam.HttpType.GET;
+        webParam.setHttpType(WebParam.HttpType.GET);
         return new BuilderRequest.GetRequestBuilder(webParam);
     }
 
     public BuilderRequest.HeadRequestBuilder head() {
-        webParam.httpType = WebParam.HttpType.HEAD;
+        webParam.setHttpType(WebParam.HttpType.HEAD);
         return new BuilderRequest.HeadRequestBuilder(webParam);
     }
 
     public BuilderRequest.OptionsRequestBuilder options() {
-        webParam.httpType = WebParam.HttpType.OPTIONS;
+        webParam.setHttpType(WebParam.HttpType.OPTIONS);
         return new BuilderRequest.OptionsRequestBuilder(webParam);
     }
 
     public BuilderRequest.PostRequestBuilder post() {
-        webParam.httpType = WebParam.HttpType.POST;
+        webParam.setHttpType(WebParam.HttpType.POST);
         return new BuilderRequest.PostRequestBuilder(webParam);
     }
 
     public BuilderRequest.PutRequestBuilder put() {
-        webParam.httpType = WebParam.HttpType.PUT;
+        webParam.setHttpType(WebParam.HttpType.PUT);
         return new BuilderRequest.PutRequestBuilder(webParam);
     }
 
     public BuilderRequest.DeleteRequestBuilder delete() {
-        webParam.httpType = WebParam.HttpType.DELETE;
+        webParam.setHttpType(WebParam.HttpType.DELETE);
         return new BuilderRequest.DeleteRequestBuilder(webParam);
     }
 
     public BuilderRequest.PatchRequestBuilder patch() {
-        webParam.httpType = WebParam.HttpType.PATCH;
+        webParam.setHttpType(WebParam.HttpType.PATCH);
         return new BuilderRequest.PatchRequestBuilder(webParam);
     }
 
     public BuilderRequest.DownloadBuilder download(File file) {
-        webParam.httpType = WebParam.HttpType.DOWNLOAD;
-        webParam.file = file;
+        webParam.setHttpType(WebParam.HttpType.DOWNLOAD);
+        webParam.setFile(file);
         return new BuilderRequest.DownloadBuilder(webParam);
     }
 
     public BuilderRequest.MultiPartBuilder multipart() {
-        webParam.httpType = WebParam.HttpType.MULTIPART;
+        webParam.setHttpType(WebParam.HttpType.MULTIPART);
         return new BuilderRequest.MultiPartBuilder(webParam);
     }
 

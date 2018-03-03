@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import webconnect.com.webconnect.WebConnect;
+import webconnect.com.webconnect.listener.AnalyticsListener;
 import webconnect.com.webconnect.listener.OnWebCallback;
 
 /**
@@ -85,7 +86,7 @@ public class MainActivityModel extends AndroidViewModel {
     }
 
     public Map<String, String> post() {
-        Map<String, String> requestMap = new LinkedHashMap<String, String>();
+        Map<String, String> requestMap = new LinkedHashMap<>();
         requestMap.put("name", "Amit");
         requestMap.put("job", "manager");
         WebConnect.with(this.activity, ENDPOINT_POST)
