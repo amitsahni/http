@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 apply plugin: 'com.github.dcendents.android-maven'
 
 android {
@@ -27,6 +28,7 @@ dependencies {
     implementation deps.commonsio
     implementation deps.rxAndroid
     implementation deps.gson
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     //compile deps.networking
 }
 
@@ -52,4 +54,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+repositories {
+    mavenCentral()
 }

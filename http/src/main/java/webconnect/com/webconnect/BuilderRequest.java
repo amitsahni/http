@@ -271,11 +271,6 @@ public class BuilderRequest {
             return this;
         }
 
-        public PostRequestBuilder addFile(@NonNull File file) {
-            param.file = file;
-            return this;
-        }
-
         @Override
         public void connect() {
             performPostRequest().subscribe(new Callback.PostRequestCallback(param));
@@ -337,9 +332,6 @@ public class BuilderRequest {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-            if (this.param.file != null) {
-                //  builder.addFileBody(param.file);
             }
             okHttpClient = HTTPManager.get().getDefaultOkHttpClient(this.param);
             if (this.param.connectTimeOut != 0
@@ -474,14 +466,12 @@ public class BuilderRequest {
 
 
         Observable<?> performDownloadRequest() {
-            MediaType JSON_MEDIA_TYPE =
-                    MediaType.parse("application/json; charset=utf-8");
             String baseUrl = ApiConfiguration.getBaseUrl();
             if (!TextUtils.isEmpty(param.baseUrl)) {
                 baseUrl = param.baseUrl;
             }
             okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
-            HttpUrl.Builder urlBuilder = HttpUrl.parse(param.url).newBuilder();
+            HttpUrl.Builder urlBuilder = HttpUrl.parse(baseUrl + param.url).newBuilder();
             if (param.queryParam != null && param.queryParam.size() > 0) {
                 Set<? extends Map.Entry<String, String>> entries = param.queryParam.entrySet();
                 for (Map.Entry<String, String> entry : entries) {

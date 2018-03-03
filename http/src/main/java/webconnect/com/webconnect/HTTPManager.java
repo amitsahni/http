@@ -16,13 +16,10 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 public class HTTPManager {
     int cacheSize = 10 * 1024 * 1024; // 10 MB
-    private static HTTPManager sManager = new HTTPManager();
-    private final OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+    private static volatile HTTPManager sManager;
     private Dispatcher dispatcher = new Dispatcher();
     final HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
     OkHttpClient okHttpClient = ApiConfiguration.getOkHttpClient();
-    private final MediaType JSON_MEDIA_TYPE =
-            MediaType.parse("application/json; charset=utf-8");
 
     private HTTPManager() {
     }
