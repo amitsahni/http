@@ -5,5 +5,5 @@ package webconnect.com.webconnect.listener;
  */
 
 public interface ProgressListener {
-    void update(long bytesRead, long contentLength);
+    void onProgress(long bytesRead, long contentLength);
 }

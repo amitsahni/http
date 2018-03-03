@@ -55,7 +55,7 @@ public class HTTPInternalNetworking {
                     // read() returns the number of bytes read, or -1 if this source is exhausted.
                     totalBytesRead += bytesRead != -1 ? bytesRead : 0;
                     if (webParam.progressListener != null)
-                        webParam.progressListener.update(totalBytesRead, responseBody.contentLength());
+                        webParam.progressListener.onProgress(totalBytesRead, responseBody.contentLength());
                     return bytesRead;
                 }
             };

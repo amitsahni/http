@@ -12,28 +12,28 @@ import webconnect.com.webconnect.listener.OnWebCallback;
  * Created by amit on 23/9/17.
  */
 
-public interface IProperties {
+public interface IProperties<T> {
 
-    IProperties baseUrl(@NonNull String url);
+    T baseUrl(@NonNull String url);
 
-    IProperties headerParam(@NonNull Map<String, String> headerParam);
+    T headerParam(@NonNull Map<String, String> headerParam);
 
-    IProperties queryParam(@NonNull Map<String, String> queryParam);
+    T queryParam(@NonNull Map<String, String> queryParam);
 
-    IProperties callback(@NonNull OnWebCallback callback);
+    T callback(@NonNull OnWebCallback callback);
 
-    IProperties analyticsListener(@NonNull AnalyticsListener callback);
+    T analyticsListener(@NonNull AnalyticsListener callback);
 
-    IProperties callback(@NonNull OnWebCallback callback,
-                         @NonNull Class<?> success, @NonNull Class<?> error);
+    T callback(@NonNull OnWebCallback callback,
+               @NonNull Class<?> success, @NonNull Class<?> error);
 
-    IProperties taskId(int taskId);
+    T taskId(int taskId);
 
-    IProperties timeOut(long connectTimeOut, long readTimeOut);
+    T timeOut(long connectTimeOut, long readTimeOut);
 
-    IProperties progressDialog(Dialog dialog);
+    T progressDialog(Dialog dialog);
 
-    IProperties cache(boolean isCache);
+    T cache(boolean isCache);
 
     void connect();
 }

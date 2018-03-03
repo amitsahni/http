@@ -6,12 +6,6 @@ package webconnect.com.webconnect;
 
 import android.util.Log;
 
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.AnalyticsListener;
-import com.androidnetworking.interfaces.DownloadListener;
-import com.androidnetworking.interfaces.DownloadProgressListener;
-import com.androidnetworking.interfaces.UploadProgressListener;
-
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -21,6 +15,8 @@ import java.util.concurrent.TimeoutException;
 import io.reactivex.Observer;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
+import webconnect.com.webconnect.listener.AnalyticsListener;
+import webconnect.com.webconnect.listener.ProgressListener;
 
 /**
  * The type Call back.
@@ -53,18 +49,9 @@ public class Callback<T> {
         }
 
         @Override
-        public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+        public void onError(@NonNull Throwable e) {
             if (param.callback != null) {
-                if (e instanceof ANError) {
-                    if (((ANError) e).getErrorCode() != 0) {
-                        Object object = ((ANError) e).getErrorAsObject(param.error);
-                        ((ANError) e).getErrorAsObject(param.error);
-                        param.callback.onError(object, ((ANError) e).getErrorBody(), param.taskId);
-                    } else {
-                        param.callback.onError(e, getError(param, e.getCause()), param.taskId);
-                    }
-                    onComplete();
-                }
+                param.callback.onError(e, getError(param, e), param.taskId);
             }
         }
 
@@ -73,22 +60,6 @@ public class Callback<T> {
             if (param.dialog != null &&
                     param.dialog.isShowing()) {
                 param.dialog.dismiss();
-            }
-        }
-    }
-
-    static class GetOkHttpCallback extends GetRequestCallback {
-        private WebParam param;
-
-        public GetOkHttpCallback(WebParam param) {
-            super(param);
-            this.param = param;
-        }
-
-        @Override
-        public void onError(@NonNull Throwable e) {
-            if (param.callback != null) {
-                param.callback.onError(e, getError(param, e), param.taskId);
             }
         }
     }
@@ -117,18 +88,9 @@ public class Callback<T> {
         }
 
         @Override
-        public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+        public void onError(@NonNull Throwable e) {
             if (param.callback != null) {
-                if (e instanceof ANError) {
-                    if (((ANError) e).getErrorCode() != 0) {
-                        Object object = ((ANError) e).getErrorAsObject(param.error);
-                        ((ANError) e).getErrorAsObject(param.error);
-                        param.callback.onError(object, getError(param, e), param.taskId);
-                    } else {
-                        param.callback.onError(e, getError(param, e.getCause()), param.taskId);
-                    }
-                    onComplete();
-                }
+                param.callback.onError(e, getError(param, e), param.taskId);
             }
         }
 
@@ -141,44 +103,12 @@ public class Callback<T> {
         }
     }
 
-    static class PostOkHttpCallback extends GetRequestCallback {
-        private WebParam param;
-
-        public PostOkHttpCallback(WebParam param) {
-            super(param);
-            this.param = param;
-        }
-
-        @Override
-        public void onError(@NonNull Throwable e) {
-            if (param.callback != null) {
-                param.callback.onError(e, getError(param, e), param.taskId);
-            }
-        }
-    }
-
-    static class DownloadRequestCallback implements DownloadListener, Observer<Object> {
+    static class DownloadRequestCallback implements Observer<Object> {
 
         private WebParam param;
 
         public DownloadRequestCallback(WebParam param) {
             this.param = param;
-        }
-
-        @Override
-        public void onDownloadComplete() {
-            if (param.callback != null) {
-                param.callback.onSuccess(this.param.file, this.param.taskId);
-            }
-        }
-
-        @Override
-        public void onError(ANError anError) {
-            if (param.callback != null && anError.getErrorCode() != 0) {
-                Object object = anError.getErrorAsObject(param.error);
-                param.callback.onError(object, anError.getErrorBody(), param.taskId);
-                onComplete();
-            }
         }
 
         @Override
@@ -192,7 +122,7 @@ public class Callback<T> {
         @Override
         public void onNext(@NonNull Object o) {
             if (param.callback != null) {
-                param.callback.onSuccess(o, param.taskId);
+                param.callback.onSuccess(this.param.file, this.param.taskId);
             }
         }
 
@@ -234,7 +164,7 @@ public class Callback<T> {
         }
     }
 
-    static class ProgressCallback implements DownloadProgressListener {
+    static class ProgressCallback implements ProgressListener {
 
         private WebParam param;
 
@@ -245,12 +175,12 @@ public class Callback<T> {
         @Override
         public void onProgress(long bytesDownloaded, long totalBytes) {
             if (param.progressListener != null) {
-                param.progressListener.update(bytesDownloaded, totalBytes);
+                param.progressListener.onProgress(bytesDownloaded, totalBytes);
             }
         }
     }
 
-    static class UploadProgressCallback implements UploadProgressListener {
+    static class UploadProgressCallback implements ProgressListener {
 
         private WebParam param;
 
@@ -261,7 +191,7 @@ public class Callback<T> {
         @Override
         public void onProgress(long bytesDownloaded, long totalBytes) {
             if (param.progressListener != null) {
-                param.progressListener.update(bytesDownloaded, totalBytes);
+                param.progressListener.onProgress(bytesDownloaded, totalBytes);
             }
         }
     }

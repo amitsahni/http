@@ -21,11 +21,13 @@ android {
 }
 
 dependencies {
-    compile deps.annotations
-    compile deps.okhttp
-    compile deps.interceptor
-    compile deps.commonsio
-    compile deps.networking
+    implementation deps.annotations
+    implementation deps.okhttp
+    implementation deps.interceptor
+    implementation deps.commonsio
+    implementation deps.rxAndroid
+    implementation deps.gson
+    //compile deps.networking
 }
 
 // build a jar with source files

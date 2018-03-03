@@ -1,13 +1,12 @@
 package webconnect.com.webconnect;
 
 import android.app.Dialog;
+import android.content.ContentResolver;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.androidnetworking.utils.Utils;
 import com.google.gson.Gson;
-import com.rx2androidnetworking.Rx2ANRequest;
-import com.rx2androidnetworking.Rx2AndroidNetworking;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,10 +37,9 @@ import webconnect.com.webconnect.listener.ProgressListener;
 /**
  * Created by clickapps on 27/12/17.
  */
-@SuppressWarnings({"unchecked"})
 public class BuilderRequest {
 
-    public static class GetRequestBuilder<T extends GetRequestBuilder> implements IProperties {
+    public static class GetRequestBuilder implements IProperties<GetRequestBuilder> {
 
 
         private WebParam param;
@@ -52,114 +50,72 @@ public class BuilderRequest {
         }
 
         @Override
-        public T baseUrl(@NonNull String url) {
+        public GetRequestBuilder baseUrl(@NonNull String url) {
             param.baseUrl = url;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T headerParam(@NonNull Map<String, String> headerParam) {
+        public GetRequestBuilder headerParam(@NonNull Map<String, String> headerParam) {
             param.headerParam = headerParam;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T callback(@NonNull OnWebCallback callback) {
+        public GetRequestBuilder callback(@NonNull OnWebCallback callback) {
             param.callback = callback;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public IProperties analyticsListener(@NonNull AnalyticsListener callback) {
+        public GetRequestBuilder analyticsListener(@NonNull AnalyticsListener callback) {
             param.analyticsListener = callback;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T callback(@NonNull OnWebCallback callback, @NonNull Class<?> success, @NonNull Class<?> error) {
+        public GetRequestBuilder callback(@NonNull OnWebCallback callback, @NonNull Class<?> success, @NonNull Class<?> error) {
             param.callback = callback;
             param.model = success;
             param.error = error;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T taskId(int taskId) {
+        public GetRequestBuilder taskId(int taskId) {
             param.taskId = taskId;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T timeOut(long connectTimeOut, long readTimeOut) {
+        public GetRequestBuilder timeOut(long connectTimeOut, long readTimeOut) {
             param.connectTimeOut = connectTimeOut;
             param.readTimeOut = readTimeOut;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T progressDialog(Dialog dialog) {
+        public GetRequestBuilder progressDialog(Dialog dialog) {
             param.dialog = dialog;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T cache(boolean isCache) {
+        public GetRequestBuilder cache(boolean isCache) {
             param.isCacheEnabled = isCache;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T queryParam(@NonNull Map<String, String> requestParam) {
+        public GetRequestBuilder queryParam(@NonNull Map<String, String> requestParam) {
             param.queryParam = requestParam;
-            return (T) this;
+            return this;
         }
 
         @Override
         public void connect() {
-            execute().subscribe(new Callback.GetRequestCallback(param));
+            performGetRequest().subscribe(new Callback.GetRequestCallback(param));
         }
-
-
-        public Observable<?> execute() {
-            String baseUrl = param.baseUrl;
-            if (TextUtils.isEmpty(baseUrl)) {
-                baseUrl = ApiConfiguration.getBaseUrl();
-            }
-            Rx2ANRequest.GetRequestBuilder getBuilder;
-            switch (param.httpType) {
-                case GET:
-                    getBuilder = Rx2AndroidNetworking.get(baseUrl + param.url);
-                    break;
-                case HEAD:
-                    getBuilder = Rx2AndroidNetworking.head(baseUrl + param.url);
-                    break;
-                case OPTIONS:
-                    getBuilder = Rx2AndroidNetworking.options(baseUrl + param.url);
-                    break;
-                default:
-                    getBuilder = Rx2AndroidNetworking.get(baseUrl + param.url);
-                    break;
-            }
-            getBuilder.addQueryParameter(param.queryParam)
-                    .addHeaders(param.headerParam);
-            if (param.connectTimeOut != 0
-                    && param.readTimeOut != 0) {
-                okHttpClient = ApiConfiguration.getOkHttpClient().newBuilder()
-                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
-                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        .build();
-                getBuilder.setOkHttpClient(okHttpClient);
-            }
-            getBuilder = param.isCacheEnabled ? getBuilder.getResponseOnlyIfCached() : getBuilder.getResponseOnlyFromNetwork();
-            return getBuilder.setTag(param.taskId)
-                    .build()
-                    .setAnalyticsListener(new Callback.Analytics())
-                    .getObjectObservable(param.model)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread());
-        }
-
 
         public Observable<?> performGetRequest() {
             MediaType JSON_MEDIA_TYPE =
@@ -224,21 +180,21 @@ public class BuilderRequest {
         }
     }
 
-    public static class HeadRequestBuilder extends GetRequestBuilder<HeadRequestBuilder> {
+    public static class HeadRequestBuilder extends GetRequestBuilder {
 
         public HeadRequestBuilder(WebParam param) {
             super(param);
         }
     }
 
-    public static class OptionsRequestBuilder extends GetRequestBuilder<OptionsRequestBuilder> {
+    public static class OptionsRequestBuilder extends GetRequestBuilder {
 
         public OptionsRequestBuilder(WebParam param) {
             super(param);
         }
     }
 
-    public static class PostRequestBuilder<T extends PostRequestBuilder> implements IProperties {
+    public static class PostRequestBuilder implements IProperties<PostRequestBuilder> {
 
         private WebParam param;
         private OkHttpClient okHttpClient;
@@ -248,141 +204,94 @@ public class BuilderRequest {
         }
 
         @Override
-        public T baseUrl(@NonNull String url) {
+        public PostRequestBuilder baseUrl(@NonNull String url) {
             param.baseUrl = url;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T queryParam(@NonNull Map<String, String> requestParam) {
+        public PostRequestBuilder queryParam(@NonNull Map<String, String> requestParam) {
             param.queryParam = requestParam;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T headerParam(@NonNull Map<String, String> headerParam) {
+        public PostRequestBuilder headerParam(@NonNull Map<String, String> headerParam) {
             param.headerParam = headerParam;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T callback(@NonNull OnWebCallback callback) {
+        public PostRequestBuilder callback(@NonNull OnWebCallback callback) {
             param.callback = callback;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T callback(@NonNull OnWebCallback callback, @NonNull Class<?> success, @NonNull Class<?> error) {
+        public PostRequestBuilder callback(@NonNull OnWebCallback callback, @NonNull Class<?> success, @NonNull Class<?> error) {
             param.callback = callback;
             param.model = success;
             param.error = error;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T taskId(int taskId) {
+        public PostRequestBuilder taskId(int taskId) {
             param.taskId = taskId;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T timeOut(long connectTimeOut, long readTimeOut) {
+        public PostRequestBuilder timeOut(long connectTimeOut, long readTimeOut) {
             param.connectTimeOut = connectTimeOut;
             param.readTimeOut = readTimeOut;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T progressDialog(Dialog dialog) {
+        public PostRequestBuilder progressDialog(Dialog dialog) {
             param.dialog = dialog;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T cache(boolean isCache) {
+        public PostRequestBuilder cache(boolean isCache) {
             param.isCacheEnabled = isCache;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public IProperties analyticsListener(@NonNull AnalyticsListener callback) {
+        public PostRequestBuilder analyticsListener(@NonNull AnalyticsListener callback) {
             param.analyticsListener = callback;
-            return (T) this;
+            return this;
         }
 
-        public T bodyParam(@NonNull Map<String, ?> requestParam) {
+        public PostRequestBuilder bodyParam(@NonNull Map<String, ?> requestParam) {
             param.requestParam = requestParam;
-            return (T) this;
+            return this;
         }
 
-        public T addFile(@NonNull File file) {
+        public PostRequestBuilder addFile(@NonNull File file) {
             param.file = file;
-            return (T) this;
+            return this;
         }
 
         @Override
         public void connect() {
-            execute().subscribe(new Callback.PostRequestCallback(param));
+            performPostRequest().subscribe(new Callback.PostRequestCallback(param));
         }
 
-        public Observable<?> execute() {
-            String baseUrl = param.baseUrl;
-            if (TextUtils.isEmpty(baseUrl)) {
-                baseUrl = ApiConfiguration.getBaseUrl();
-            }
-            Rx2ANRequest.PostRequestBuilder postBuilder;
-            switch (param.httpType) {
-                case POST:
-                    postBuilder = Rx2AndroidNetworking.post(baseUrl + param.url);
-                    break;
-                case PUT:
-                    postBuilder = Rx2AndroidNetworking.put(baseUrl + param.url);
-                    break;
-                case DELETE:
-                    postBuilder = Rx2AndroidNetworking.delete(baseUrl + param.url);
-                    break;
-                case PATCH:
-                    postBuilder = Rx2AndroidNetworking.patch(baseUrl + param.url);
-                    break;
-                default:
-                    postBuilder = Rx2AndroidNetworking.post(baseUrl + param.url);
-                    break;
-            }
-            postBuilder.addApplicationJsonBody(param.requestParam)
-                    .addQueryParameter(param.queryParam)
-                    .addHeaders(param.headerParam);
-            if (param.file != null) {
-                postBuilder.addFileBody(param.file);
-            }
-            if (param.connectTimeOut != 0
-                    && param.readTimeOut != 0) {
-                okHttpClient = ApiConfiguration.getOkHttpClient().newBuilder()
-                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
-                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        .build();
-                postBuilder.setOkHttpClient(okHttpClient);
-            }
-            postBuilder = param.isCacheEnabled ? postBuilder.getResponseOnlyIfCached() : postBuilder.getResponseOnlyFromNetwork();
-            return postBuilder.setTag(param.taskId)
-                    .build()
-                    .setAnalyticsListener(new Callback.Analytics())
-                    .getObjectObservable(param.model)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread());
-        }
-
-        public Observable<?> performPostRequest(final WebParam webParam) {
+        public Observable<?> performPostRequest() {
             MediaType JSON_MEDIA_TYPE =
                     MediaType.parse("application/json; charset=utf-8");
             String baseUrl = ApiConfiguration.getBaseUrl();
-            if (!TextUtils.isEmpty(webParam.baseUrl)) {
-                baseUrl = webParam.baseUrl;
+            if (!TextUtils.isEmpty(param.baseUrl)) {
+                baseUrl = param.baseUrl;
             }
             okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
-            HttpUrl.Builder urlBuilder = HttpUrl.parse(baseUrl + param.url).newBuilder();
-            if (param.queryParam != null && param.queryParam.size() > 0) {
-                Set<? extends Map.Entry<String, String>> entries = param.queryParam.entrySet();
+            HttpUrl.Builder urlBuilder = HttpUrl.parse(baseUrl + this.param.url).newBuilder();
+            if (this.param.queryParam != null && this.param.queryParam.size() > 0) {
+                Set<? extends Map.Entry<String, String>> entries = this.param.queryParam.entrySet();
                 for (Map.Entry<String, String> entry : entries) {
                     String name = entry.getKey();
                     String value = entry.getValue();
@@ -391,92 +300,92 @@ public class BuilderRequest {
             }
             builder.url(urlBuilder.build().toString());
 
-            if (webParam.headerParam != null && webParam.headerParam.size() > 0) {
+            if (param.headerParam != null && param.headerParam.size() > 0) {
                 Headers.Builder headerBuilder = new Headers.Builder();
-                for (Map.Entry<String, String> entry : webParam.headerParam.entrySet()) {
+                for (Map.Entry<String, String> entry : param.headerParam.entrySet()) {
                     headerBuilder.add(entry.getKey(), entry.getValue());
                 }
                 builder.headers(headerBuilder.build());
             }
 
             RequestBody requestBody = null;
-            switch (webParam.httpType) {
+            switch (param.httpType) {
                 case POST: {
-                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, new Gson().toJson(webParam.requestParam));
+                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, new Gson().toJson(param.requestParam));
                     builder = builder.post(requestBody);
                     break;
                 }
                 case PUT: {
-                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, new Gson().toJson(webParam.requestParam));
+                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, new Gson().toJson(param.requestParam));
                     builder = builder.put(requestBody);
                     break;
                 }
                 case DELETE: {
-                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, new Gson().toJson(webParam.requestParam));
+                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, new Gson().toJson(param.requestParam));
                     builder = builder.delete(requestBody);
                     break;
                 }
                 case PATCH: {
-                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, new Gson().toJson(webParam.requestParam));
+                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, new Gson().toJson(param.requestParam));
                     builder = builder.patch(requestBody);
                     break;
                 }
             }
             if (requestBody != null) {
                 try {
-                    webParam.requestBodyContentlength = requestBody.contentLength();
+                    param.requestBodyContentlength = requestBody.contentLength();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            if (param.file != null) {
+            if (this.param.file != null) {
                 //  builder.addFileBody(param.file);
             }
-            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param);
-            if (param.connectTimeOut != 0
-                    && param.readTimeOut != 0) {
+            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(this.param);
+            if (this.param.connectTimeOut != 0
+                    && this.param.readTimeOut != 0) {
                 okHttpClient = okHttpClient.newBuilder()
-                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
-                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        .connectTimeout(this.param.connectTimeOut, TimeUnit.SECONDS)
+                        .readTimeout(this.param.readTimeOut, TimeUnit.SECONDS)
+                        .writeTimeout(this.param.connectTimeOut, TimeUnit.SECONDS)
                         .build();
             }
 
-            if (webParam.isCacheEnabled) {
+            if (param.isCacheEnabled) {
                 builder.cacheControl(CacheControl.FORCE_CACHE);
             } else {
                 builder.cacheControl(CacheControl.FORCE_NETWORK);
             }
             okhttp3.Request okHttpRequest = builder.build();
             Call call = okHttpClient.newCall(okHttpRequest);
-            return new RxObservable.SimpleANObservable<>(webParam, call)
+            return new RxObservable.SimpleANObservable<>(param, call)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread());
         }
     }
 
-    public static class PutRequestBuilder extends PostRequestBuilder<PutRequestBuilder> {
+    public static class PutRequestBuilder extends PostRequestBuilder {
 
         public PutRequestBuilder(WebParam param) {
             super(param);
         }
     }
 
-    public static class DeleteRequestBuilder extends PostRequestBuilder<DeleteRequestBuilder> {
+    public static class DeleteRequestBuilder extends PostRequestBuilder {
 
         public DeleteRequestBuilder(WebParam param) {
             super(param);
         }
     }
 
-    public static class PatchRequestBuilder extends PostRequestBuilder<PatchRequestBuilder> {
+    public static class PatchRequestBuilder extends PostRequestBuilder {
 
         public PatchRequestBuilder(WebParam param) {
             super(param);
         }
     }
 
-    public static class DownloadBuilder<T extends DownloadBuilder> implements IProperties {
+    public static class DownloadBuilder implements IProperties<DownloadBuilder> {
 
         private WebParam param;
         private OkHttpClient okHttpClient;
@@ -486,108 +395,83 @@ public class BuilderRequest {
         }
 
         @Override
-        public T baseUrl(@NonNull String url) {
+        public DownloadBuilder baseUrl(@NonNull String url) {
             param.baseUrl = url;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T headerParam(@NonNull Map<String, String> headerParam) {
+        public DownloadBuilder headerParam(@NonNull Map<String, String> headerParam) {
             param.headerParam = headerParam;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T callback(@NonNull OnWebCallback callback) {
+        public DownloadBuilder callback(@NonNull OnWebCallback callback) {
             param.callback = callback;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T callback(@NonNull OnWebCallback callback, @NonNull Class<?> success, @NonNull Class<?> error) {
+        public DownloadBuilder callback(@NonNull OnWebCallback callback, @NonNull Class<?> success, @NonNull Class<?> error) {
             param.callback = callback;
             param.model = success;
             param.error = error;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T taskId(int taskId) {
+        public DownloadBuilder taskId(int taskId) {
             param.taskId = taskId;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T timeOut(long connectTimeOut, long readTimeOut) {
+        public DownloadBuilder timeOut(long connectTimeOut, long readTimeOut) {
             param.connectTimeOut = connectTimeOut;
             param.readTimeOut = readTimeOut;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T progressDialog(Dialog dialog) {
+        public DownloadBuilder progressDialog(Dialog dialog) {
             param.dialog = dialog;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T cache(boolean isCache) {
+        public DownloadBuilder cache(boolean isCache) {
             param.isCacheEnabled = isCache;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public IProperties analyticsListener(@NonNull AnalyticsListener callback) {
+        public DownloadBuilder analyticsListener(@NonNull AnalyticsListener callback) {
             param.analyticsListener = callback;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T queryParam(@NonNull Map<String, String> requestParam) {
+        public DownloadBuilder queryParam(@NonNull Map<String, String> requestParam) {
             param.queryParam = requestParam;
-            return (T) this;
+            return this;
         }
 
-        public T progressListener(@NonNull ProgressListener callback) {
+        public DownloadBuilder progressListener(@NonNull ProgressListener callback) {
             param.progressListener = callback;
-            return (T) this;
+            return this;
         }
 
-        public T file(@NonNull File file) {
+        public DownloadBuilder file(@NonNull File file) {
             param.file = file;
-            return (T) this;
+            return this;
         }
 
         @Override
         public void connect() {
-            download();
+            performDownloadRequest();
         }
 
-        void download() {
-            String baseUrl = param.baseUrl;
-            if (TextUtils.isEmpty(baseUrl)) {
-                baseUrl = ApiConfiguration.getBaseUrl();
-            }
-            Rx2ANRequest.DownloadBuilder downloadBuilder = Rx2AndroidNetworking.download(param.url, param.file.getParent(), param.file.getName());
-            downloadBuilder
-                    .addQueryParameter(param.queryParam)
-                    .setTag(param.taskId)
-                    .addHeaders(param.headerParam);
-            if (param.connectTimeOut != 0
-                    && param.readTimeOut != 0) {
-                okHttpClient = ApiConfiguration.getOkHttpClient().newBuilder()
-                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
-                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        .build();
-                downloadBuilder.setOkHttpClient(okHttpClient);
-            }
-            Rx2ANRequest okHttpRequest = downloadBuilder.build();
-            okHttpRequest
-                    .setAnalyticsListener(new Callback.Analytics())
-                    .setDownloadProgressListener(new Callback.ProgressCallback(param))
-                    .startDownload(new Callback.DownloadRequestCallback(param));
-        }
 
         Observable<?> performDownloadRequest() {
             MediaType JSON_MEDIA_TYPE =
@@ -654,7 +538,7 @@ public class BuilderRequest {
         }
     }
 
-    public static class MultiPartBuilder<T extends MultiPartBuilder> implements IProperties {
+    public static class MultiPartBuilder implements IProperties<MultiPartBuilder> {
         private WebParam param;
         private OkHttpClient okHttpClient;
 
@@ -664,132 +548,92 @@ public class BuilderRequest {
         }
 
         @Override
-        public T baseUrl(@NonNull String url) {
+        public MultiPartBuilder baseUrl(@NonNull String url) {
             param.baseUrl = url;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T headerParam(@NonNull Map<String, String> headerParam) {
+        public MultiPartBuilder headerParam(@NonNull Map<String, String> headerParam) {
             param.headerParam = headerParam;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T callback(@NonNull OnWebCallback callback) {
+        public MultiPartBuilder callback(@NonNull OnWebCallback callback) {
             param.callback = callback;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T callback(@NonNull OnWebCallback callback, @NonNull Class<?> success, @NonNull Class<?> error) {
+        public MultiPartBuilder callback(@NonNull OnWebCallback callback, @NonNull Class<?> success, @NonNull Class<?> error) {
             param.callback = callback;
             param.model = success;
             param.error = error;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T taskId(int taskId) {
+        public MultiPartBuilder taskId(int taskId) {
             param.taskId = taskId;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T timeOut(long connectTimeOut, long readTimeOut) {
+        public MultiPartBuilder timeOut(long connectTimeOut, long readTimeOut) {
             param.connectTimeOut = connectTimeOut;
             param.readTimeOut = readTimeOut;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T progressDialog(Dialog dialog) {
+        public MultiPartBuilder progressDialog(Dialog dialog) {
             param.dialog = dialog;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T cache(boolean isCache) {
+        public MultiPartBuilder cache(boolean isCache) {
             param.isCacheEnabled = isCache;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T analyticsListener(@NonNull AnalyticsListener callback) {
+        public MultiPartBuilder analyticsListener(@NonNull AnalyticsListener callback) {
             param.analyticsListener = callback;
-            return (T) this;
+            return this;
         }
 
         @Override
-        public T queryParam(@NonNull Map<String, String> requestParam) {
+        public MultiPartBuilder queryParam(@NonNull Map<String, String> requestParam) {
             param.queryParam = requestParam;
-            return (T) this;
+            return this;
         }
 
-        public T multipartParam(@NonNull Map<String, String> multipartParam) {
+        public MultiPartBuilder multipartParam(@NonNull Map<String, String> multipartParam) {
             param.multipartParam = multipartParam;
-            return (T) this;
+            return this;
         }
 
-        public T multipartParamFile(@NonNull Map<String, File> multipartFile) {
+        public MultiPartBuilder multipartParamFile(@NonNull Map<String, File> multipartFile) {
             param.multipartParamFile = multipartFile;
-            return (T) this;
+            return this;
         }
 
-        public T progressListener(@NonNull ProgressListener callback) {
+        public MultiPartBuilder progressListener(@NonNull ProgressListener callback) {
             param.progressListener = callback;
-            return (T) this;
+            return this;
         }
 
-        public T debug(boolean isLog) {
+        public MultiPartBuilder logging(boolean isLog) {
             param.debug = isLog;
-            return (T) this;
+            return this;
         }
 
         @Override
         public void connect() {
-            execute().subscribe(new Callback.UploadRequestCallback(param));
+            performMultipartRequest().subscribe(new Callback.UploadRequestCallback(param));
         }
-
-        public Observable<?> execute() {
-            String baseUrl = param.baseUrl;
-            if (TextUtils.isEmpty(baseUrl)) {
-                baseUrl = ApiConfiguration.getBaseUrl();
-            }
-            Rx2ANRequest.MultiPartBuilder multipartBuilder = Rx2AndroidNetworking.upload(baseUrl + param.url);
-            multipartBuilder
-                    .setTag(param.taskId)
-                    .addHeaders(param.headerParam);
-            okHttpClient = ApiConfiguration.getOkHttpClient();
-            if (param.connectTimeOut != 0
-                    && param.readTimeOut != 0) {
-                okHttpClient = okHttpClient.newBuilder()
-                        .connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        .readTimeout(param.readTimeOut, TimeUnit.SECONDS)
-                        .writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        .build();
-                multipartBuilder.setOkHttpClient(okHttpClient);
-            }
-            if (!param.debug) {
-                HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-                interceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
-                okHttpClient = okHttpClient.newBuilder()
-                        .addInterceptor(interceptor)
-                        .build();
-                multipartBuilder.setOkHttpClient(okHttpClient);
-            }
-            return multipartBuilder
-                    .addMultipartParameter(param.queryParam)
-                    .addMultipartFile(param.multipartParamFile)
-                    .addMultipartParameter(param.multipartParam)
-                    .build()
-                    .setAnalyticsListener(new Callback.Analytics())
-                    .setUploadProgressListener(new Callback.UploadProgressCallback(param))
-                    .getObjectObservable(param.model)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread());
-        }
-
 
         public Observable<?> performMultipartRequest() {
             String baseUrl = ApiConfiguration.getBaseUrl();
@@ -829,16 +673,18 @@ public class BuilderRequest {
 //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
 //                                    "form-data; name=\"" + entry.getKey() + "\""),
 //                                    body);
-                            multipartBuilder.addFormDataPart(entry.getKey(),entry.getKey(),body);
+                            multipartBuilder.addFormDataPart(entry.getKey(), entry.getKey(), body);
                         }
                         for (HashMap.Entry<String, File> entry : param.multipartParamFile.entrySet()) {
-                            String fileName = entry.getValue().getName();
-                            RequestBody fileBody = RequestBody.create(MediaType.parse(Utils.getMimeType(fileName)),
+                            Uri uri = Uri.fromFile(entry.getValue());
+                            ContentResolver cR = param.context.getContentResolver();
+                            String mime = cR.getType(uri);
+                            RequestBody fileBody = RequestBody.create(MediaType.parse(mime),
                                     entry.getValue());
 //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
 //                                    "form-data; name=\"" + entry.getKey() + "\"; filename=\"" + fileName + "\""),
 //                                    fileBody);
-                            multipartBuilder.addFormDataPart(entry.getKey(),entry.getKey(),fileBody);
+                            multipartBuilder.addFormDataPart(entry.getKey(), entry.getKey(), fileBody);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
