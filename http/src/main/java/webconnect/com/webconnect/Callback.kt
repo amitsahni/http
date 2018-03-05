@@ -5,19 +5,16 @@ package webconnect.com.webconnect
  */
 
 import android.util.Log
-
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-import java.security.cert.CertificateException
-import java.util.concurrent.TimeoutException
-
 import io.reactivex.Observer
 import io.reactivex.annotations.NonNull
 import io.reactivex.disposables.Disposable
 import webconnect.com.webconnect.listener.AnalyticsListener
 import webconnect.com.webconnect.listener.ProgressListener
-import java.io.File
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.security.cert.CertificateException
+import java.util.concurrent.TimeoutException
 
 /**
  * The type Call back.
@@ -29,10 +26,14 @@ class Callback<T> {
     internal class GetRequestCallback(private val param: WebParam) : Observer<Any> {
 
         override fun onSubscribe(@io.reactivex.annotations.NonNull d: Disposable) {
-            param.dialog?.let {
-                if (!param.dialog?.isShowing!!) {
-                    param.dialog?.show()
+            try {
+                param.dialog?.let {
+                    if (!param.dialog?.isShowing!!) {
+                        param.dialog?.show()
+                    }
                 }
+            } catch (e: Exception) {
+                e.stackTrace
             }
         }
 
@@ -45,10 +46,14 @@ class Callback<T> {
         }
 
         override fun onComplete() {
-            param.dialog?.let {
-                if (param.dialog?.isShowing!!) {
-                    param.dialog?.dismiss()
+            try {
+                param.dialog?.let {
+                    if (param.dialog?.isShowing!!) {
+                        param.dialog?.dismiss()
+                    }
                 }
+            } catch (e: Exception) {
+                e.stackTrace
             }
         }
     }
@@ -56,10 +61,14 @@ class Callback<T> {
     internal open class PostRequestCallback(private val param: WebParam) : Observer<Any> {
 
         override fun onSubscribe(@io.reactivex.annotations.NonNull d: Disposable) {
-            param.dialog?.let {
-                if (!param.dialog?.isShowing!!) {
-                    param.dialog?.show()
+            try {
+                param.dialog?.let {
+                    if (!param.dialog?.isShowing!!) {
+                        param.dialog?.show()
+                    }
                 }
+            } catch (e: Exception) {
+                e.stackTrace
             }
         }
 
@@ -72,10 +81,14 @@ class Callback<T> {
         }
 
         override fun onComplete() {
-            param.dialog?.let {
-                if (param.dialog?.isShowing!!) {
-                    param.dialog?.dismiss()
+            try {
+                param.dialog?.let {
+                    if (param.dialog?.isShowing!!) {
+                        param.dialog?.dismiss()
+                    }
                 }
+            } catch (e: Exception) {
+                e.stackTrace
             }
         }
     }
@@ -83,10 +96,14 @@ class Callback<T> {
     internal class DownloadRequestCallback(private val param: WebParam) : Observer<Any> {
 
         override fun onSubscribe(@NonNull d: Disposable) {
-            param.dialog?.let {
-                if (!param.dialog?.isShowing!!) {
-                    param.dialog?.show()
+            try {
+                param.dialog?.let {
+                    if (!param.dialog?.isShowing!!) {
+                        param.dialog?.show()
+                    }
                 }
+            } catch (e: Exception) {
+                e.stackTrace
             }
         }
 
@@ -99,10 +116,14 @@ class Callback<T> {
         }
 
         override fun onComplete() {
-            param.dialog?.let {
-                if (param.dialog?.isShowing!!) {
-                    param.dialog?.dismiss()
+            try {
+                param.dialog?.let {
+                    if (param.dialog?.isShowing!!) {
+                        param.dialog?.dismiss()
+                    }
                 }
+            } catch (e: Exception) {
+                e.stackTrace
             }
         }
     }
@@ -126,18 +147,14 @@ class Callback<T> {
     internal class ProgressCallback(private val param: WebParam) : ProgressListener {
 
         override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
-            if (param.progressListener != null) {
-                param.progressListener!!.onProgress(bytesDownloaded, totalBytes)
-            }
+            param.progressListener?.onProgress(bytesDownloaded, totalBytes)
         }
     }
 
     internal class UploadProgressCallback(private val param: WebParam) : ProgressListener {
 
         override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
-            if (param.progressListener != null) {
-                param.progressListener!!.onProgress(bytesDownloaded, totalBytes)
-            }
+            param.progressListener?.onProgress(bytesDownloaded, totalBytes)
         }
     }
 
