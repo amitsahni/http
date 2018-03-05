@@ -1,9 +1,11 @@
 package test.retrofit;
 
 import android.app.Application;
+import android.arch.core.util.Function;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
@@ -96,6 +98,21 @@ public class MainActivityModel extends AndroidViewModel {
                     public <T> void onSuccess(@Nullable T object, int taskId) {
                         if (object != null) {
                             post.setValue(object);
+//                            LiveData<String> xyz = Transformations.map(post, new Function<Object, String>() {
+//                                @Override
+//                                public String apply(Object input) {
+//                                    return input.toString();
+//                                }
+//                            });
+//                            LiveData<MainActivityModel> xyz1 = Transformations.switchMap(post, new Function<Object, LiveData<MainActivityModel>>() {
+//                                @Override
+//                                public LiveData<MainActivityModel> apply(Object input) {
+//                                    post.postValue(input);
+//                                    return post;
+//                                }
+//                            });
+//                            object = (T) xyz.getValue();
+
                         }
                     }
 
