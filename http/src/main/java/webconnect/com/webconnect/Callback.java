@@ -48,7 +48,7 @@ public class Callback<T> {
         @Override
         public void onNext(@io.reactivex.annotations.NonNull Object response) {
             if (param.callback != null) {
-                param.callback.onSuccess(response, param.taskId, null);
+                param.callback.onSuccess(response, param.taskId);
             }
         }
 
@@ -112,7 +112,7 @@ public class Callback<T> {
         @Override
         public void onNext(@io.reactivex.annotations.NonNull Object response) {
             if (param.callback != null) {
-                param.callback.onSuccess(response, param.taskId, null);
+                param.callback.onSuccess(response, param.taskId);
             }
         }
 
@@ -168,7 +168,7 @@ public class Callback<T> {
         @Override
         public void onDownloadComplete() {
             if (param.callback != null) {
-                param.callback.onSuccess(this.param.file, this.param.taskId, null);
+                param.callback.onSuccess(this.param.file, this.param.taskId);
             }
         }
 
@@ -192,7 +192,7 @@ public class Callback<T> {
         @Override
         public void onNext(@NonNull Object o) {
             if (param.callback != null) {
-                param.callback.onSuccess(o, param.taskId, null);
+                param.callback.onSuccess(o, param.taskId);
             }
         }
 

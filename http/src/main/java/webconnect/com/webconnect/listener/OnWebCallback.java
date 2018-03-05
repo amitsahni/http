@@ -13,13 +13,11 @@ public interface OnWebCallback {
     /**
      * On success.
      *
-     * @param <T>      the type parameter
-     * @param object   the object
-     * @param response the response
-     * @param taskId   the task id
-     * @param response the status code
+     * @param <T>    the type parameter
+     * @param object the object
+     * @param taskId the task id
      */
-    <T> void onSuccess(@Nullable T object, int taskId, retrofit2.Response response);
+    <T> void onSuccess(@Nullable T object, int taskId);
 
     /**
      * On error.
