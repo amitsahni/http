@@ -38,7 +38,15 @@ class Callback<T> {
         }
 
         override fun onNext(@io.reactivex.annotations.NonNull response: Any) {
-            param.callback?.onSuccess(response, param.taskId)
+            if (response is ObserverModel) {
+                response.also {
+                    if (it.type == 1) {
+                        param.callback?.onSuccess(it.model, param.taskId)
+                    } else {
+                        param.callback?.onError(it.model, "", param.taskId)
+                    }
+                }
+            }
         }
 
         override fun onError(@NonNull e: Throwable) {
@@ -74,7 +82,15 @@ class Callback<T> {
         }
 
         override fun onNext(@io.reactivex.annotations.NonNull response: Any) {
-            param.callback?.onSuccess(response, param.taskId)
+            if (response is ObserverModel) {
+                response.also {
+                    if (it.type == 1) {
+                        param.callback?.onSuccess(it.model, param.taskId)
+                    } else {
+                        param.callback?.onError(it.model, "", param.taskId)
+                    }
+                }
+            }
         }
 
         override fun onError(@NonNull e: Throwable) {

@@ -42,6 +42,7 @@ public class RxObservable {
             try {
                 Response okHttpResponse = call.execute();
                 final long timeTaken = System.currentTimeMillis() - startTime;
+                ObserverModel observerModel = new ObserverModel();
                 T object;
                 if (okHttpResponse.isSuccessful()) {
                     if (okHttpResponse.body() != null) {
@@ -53,7 +54,9 @@ public class RxObservable {
                     } else {
                         object = (T) "";
                     }
-                    observer.onNext(object);
+                    observerModel.setModel(object);
+                    observerModel.setType(1);
+                    observer.onNext((T) observerModel);
                 } else {
                     if (okHttpResponse.body() != null) {
                         if (param.getAnalyticsListener() != null) {
@@ -61,7 +64,9 @@ public class RxObservable {
                                     okHttpResponse.body().contentLength(), okHttpResponse.cacheResponse() != null);
                         }
                         object = (T) new Gson().fromJson(okHttpResponse.body().string(), param.getError());
-                        observer.onNext(object);
+                        observerModel.setModel(object);
+                        observerModel.setType(2);
+                        observer.onNext((T) observerModel);
                     } else {
                         observer.onError(new Throwable(""));
                     }
@@ -109,6 +114,8 @@ public class RxObservable {
                             out = new FileOutputStream(param.getFile());
                             IOUtils.copy(body.byteStream(), out);
                             object = (T) param.getFile();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         } finally {
                             IOUtils.closeQuietly(out);
                         }
