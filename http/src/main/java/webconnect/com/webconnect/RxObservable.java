@@ -56,7 +56,12 @@ public class RxObservable {
                     observer.onNext(object);
                 } else {
                     if (okHttpResponse.body() != null) {
-                        observer.onError(new Throwable(okHttpResponse.body().string()));
+                        if (param.getAnalyticsListener() != null) {
+                            param.getAnalyticsListener().onReceived(timeTaken, param.getRequestBodyContentlength(),
+                                    okHttpResponse.body().contentLength(), okHttpResponse.cacheResponse() != null);
+                        }
+                        object = (T) new Gson().fromJson(okHttpResponse.body().string(), param.getError());
+                        observer.onNext(object);
                     } else {
                         observer.onError(new Throwable(""));
                     }

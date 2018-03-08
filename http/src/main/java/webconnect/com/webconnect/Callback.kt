@@ -43,6 +43,7 @@ class Callback<T> {
 
         override fun onError(@NonNull e: Throwable) {
             param.callback?.onError(e, getError(param, e), param.taskId)
+            onComplete()
         }
 
         override fun onComplete() {
@@ -78,6 +79,7 @@ class Callback<T> {
 
         override fun onError(@NonNull e: Throwable) {
             param.callback?.onError(e, getError(param, e), param.taskId)
+            onComplete()
         }
 
         override fun onComplete() {
@@ -113,6 +115,7 @@ class Callback<T> {
 
         override fun onError(@NonNull e: Throwable) {
             param.callback?.onError(e, getError(param, e), param.taskId)
+            onComplete()
         }
 
         override fun onComplete() {
