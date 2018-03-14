@@ -4,32 +4,19 @@ import android.app.Dialog
 import android.content.ContentResolver
 import android.net.Uri
 import android.text.TextUtils
-
+import android.webkit.MimeTypeMap
 import com.google.gson.Gson
-
-import java.io.File
-import java.io.IOException
-import java.util.HashMap
-import java.util.concurrent.TimeUnit
-
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import okhttp3.CacheControl
-import okhttp3.Call
-import okhttp3.Headers
-import okhttp3.HttpUrl
-import okhttp3.Interceptor
-import okhttp3.MediaType
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody
-import okhttp3.Response
+import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import webconnect.com.webconnect.di.IProperties
 import webconnect.com.webconnect.listener.AnalyticsListener
 import webconnect.com.webconnect.listener.OnWebCallback
 import webconnect.com.webconnect.listener.ProgressListener
+import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by clickapps on 27/12/17.
@@ -553,9 +540,17 @@ class BuilderRequest {
                         for ((key, value) in param.multipartParamFile) {
 
                             val uri = Uri.fromFile(value)
-                            val cR = param.context?.contentResolver
-                            val mime = cR?.getType(uri)
-                            val fileBody = RequestBody.create(MediaType.parse(mime),
+                            var mimeType: String
+                            if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+                                val cR = param.context?.contentResolver
+                                mimeType = cR?.getType(uri).toString()
+                            } else {
+                                val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                                        .toString())
+                                mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                                        fileExtension.toLowerCase())
+                            }
+                            val fileBody = RequestBody.create(MediaType.parse(mimeType),
                                     value)
                             //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
                             //                                    "form-data; name=\"" + entry.getKey() + "\"; filename=\"" + fileName + "\""),
