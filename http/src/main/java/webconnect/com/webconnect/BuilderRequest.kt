@@ -523,54 +523,61 @@ class BuilderRequest {
                 headerBuilder.add(key, value)
             }
             builder.headers(headerBuilder.build())
+            val multipartBuilder = MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+            try {
+                for ((key, value) in param.multipartParam) {
+                    val body = RequestBody.create(null, value)
+                    //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
+                    //                                    "form-data; name=\"" + entry.getKey() + "\""),
+                    //                                    body);
+                    multipartBuilder.addFormDataPart(key, key, body)
+                }
+                for ((key, value) in param.multipartParamFile) {
 
-            var requestBody: RequestBody? = null
-            when (param.httpType) {
-                WebParam.HttpType.MULTIPART -> {
-                    val multipartBuilder = MultipartBody.Builder()
-                            .setType(MultipartBody.FORM)
-                    try {
-                        for ((key, value) in param.multipartParam) {
-                            val body = RequestBody.create(null, value)
-                            //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
-                            //                                    "form-data; name=\"" + entry.getKey() + "\""),
-                            //                                    body);
-                            multipartBuilder.addFormDataPart(key, key, body)
-                        }
-                        for ((key, value) in param.multipartParamFile) {
-
-                            val uri = Uri.fromFile(value)
-                            var mimeType: String
-                            if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
-                                val cR = param.context?.contentResolver
-                                mimeType = cR?.getType(uri).toString()
-                            } else {
-                                val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
-                                        .toString())
-                                mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                                        fileExtension.toLowerCase())
-                            }
-                            val fileBody = RequestBody.create(MediaType.parse(mimeType),
-                                    value)
-                            //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
-                            //                                    "form-data; name=\"" + entry.getKey() + "\"; filename=\"" + fileName + "\""),
-                            //                                    fileBody);
-                            multipartBuilder.addFormDataPart(key, key, fileBody)
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                    val uri = Uri.fromFile(value)
+                    var mimeType: String
+                    if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+                        val cR = param.context?.contentResolver
+                        mimeType = cR?.getType(uri).toString()
+                    } else {
+                        val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                                .toString())
+                        mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                                fileExtension.toLowerCase())
                     }
+                    val fileBody = RequestBody.create(MediaType.parse(mimeType),
+                            value)
+                    //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
+                    //                                    "form-data; name=\"" + entry.getKey() + "\"; filename=\"" + fileName + "\""),
+                    //                                    fileBody);
+                    multipartBuilder.addFormDataPart(key, key, fileBody)
+                }
 
-                    requestBody = multipartBuilder.build()
-                    requestBody?.also {
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            when (param.httpType) {
+                WebParam.HttpType.POST -> {
+                    multipartBuilder.build()?.also {
+                        builder = builder.post(it)
+                        param.requestBodyContentlength = it.contentLength()
+                    }
+                }
+                WebParam.HttpType.PUT -> {
+                    multipartBuilder.build()?.also {
                         builder = builder.put(it)
+                        param.requestBodyContentlength = it.contentLength()
+                    }
+                }
+                WebParam.HttpType.PATCH -> {
+                    multipartBuilder.build()?.also {
+                        builder = builder.patch(it)
+                        param.requestBodyContentlength = it.contentLength()
                     }
                 }
                 else -> {
                 }
-            }
-            requestBody?.let {
-                param.requestBodyContentlength = requestBody.contentLength()
             }
 
             if (param.isCacheEnabled) {
@@ -597,7 +604,7 @@ class BuilderRequest {
                     ?.addNetworkInterceptor { chain ->
                         val originalResponse = chain.proceed(chain.request())
                         originalResponse.newBuilder()
-                                .body(originalResponse.body()?.let { HTTPInternalNetworking.ProgressResponseBody(it, param) })
+                                .body(originalResponse.body()?.also { HTTPInternalNetworking.ProgressResponseBody(it, param) })
                                 .build()
                     }?.build()
             val okHttpRequest = builder.build()
