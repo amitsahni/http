@@ -563,7 +563,7 @@ class BuilderRequest {
 
                     requestBody = multipartBuilder.build()
                     requestBody?.also {
-                        builder = builder.post(it)
+                        builder = builder.put(it)
                     }
                 }
                 else -> {
