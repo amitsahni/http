@@ -234,33 +234,33 @@ class BuilderRequest {
             when (param.httpType) {
                 WebParam.HttpType.POST -> {
                     requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
-                    requestBody?.let {
-                        builder = builder.post(requestBody!!)
+                    requestBody?.also {
+                        builder = builder.post(it)
                     }
                 }
                 WebParam.HttpType.PUT -> {
                     requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
-                    requestBody?.let {
-                        builder = builder.put(requestBody!!)
+                    requestBody?.also {
+                        builder = builder.put(it)
                     }
                 }
                 WebParam.HttpType.DELETE -> {
                     requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
-                    requestBody?.let {
-                        builder = builder.delete(requestBody)
+                    requestBody?.also {
+                        builder = builder.delete(it)
                     }
                 }
                 WebParam.HttpType.PATCH -> {
                     requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
-                    requestBody?.let {
-                        builder = builder.patch(requestBody)
+                    requestBody?.also {
+                        builder = builder.patch(it)
                     }
                 }
                 else -> {
                 }
             }
-            requestBody?.let {
-                param.requestBodyContentlength = requestBody.contentLength()
+            requestBody?.also {
+                param.requestBodyContentlength = it.contentLength()
             }
 
             okHttpClient = HTTPManager.get().getDefaultOkHttpClient(this.param)
@@ -509,7 +509,7 @@ class BuilderRequest {
                 baseUrl = param.baseUrl
             }
 
-            val builder = okhttp3.Request.Builder()
+            var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
             val entries = param.queryParam.entries
             for ((name, value1) in entries) {
@@ -562,6 +562,9 @@ class BuilderRequest {
                     }
 
                     requestBody = multipartBuilder.build()
+                    requestBody?.also {
+                        builder = builder.post(it)
+                    }
                 }
                 else -> {
                 }
