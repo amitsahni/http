@@ -533,7 +533,10 @@ class BuilderRequest {
                     //                                    "form-data; name=\"" + entry.getKey() + "\""),
                     //                                    body);
 //                    multipartBuilder.addFormDataPart(key, value)
-                    multipartBuilder.addPart(body)
+                    val disposition = StringBuilder("form-data; name=")
+                    disposition.append(key)
+                    var headers = Headers.of("Content-Disposition", disposition.toString())
+                    multipartBuilder.addPart(headers, body)
                 }
 //                val body = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.multipartParam))
 //                multipartBuilder.addPart(body)
@@ -555,8 +558,12 @@ class BuilderRequest {
                     //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
                     //                                    "form-data; name=\"" + entry.getKey() + "\"; filename=\"" + fileName + "\""),
                     //                                    fileBody);
-
-                    multipartBuilder.addPart(MultipartBody.Part.create(fileBody))
+                    val disposition = StringBuilder("form-data; name=")
+                    disposition.append(key)
+                    disposition.append("; filename=")
+                    disposition.append(value.name)
+                    var headers = Headers.of("Content-Disposition", disposition.toString())
+                    multipartBuilder.addPart(MultipartBody.Part.create(headers, fileBody))
                 }
 
             } catch (e: Exception) {
