@@ -60,19 +60,4 @@ public class Builder {
         return new BuilderRequest.DownloadBuilder(webParam);
     }
 
-    public BuilderRequest.MultiPartBuilder multipartPost() {
-        webParam.setHttpType(WebParam.HttpType.POST);
-        return new BuilderRequest.MultiPartBuilder(webParam);
-    }
-
-    public BuilderRequest.MultiPartBuilder multipartPut() {
-        webParam.setHttpType(WebParam.HttpType.PUT);
-        return new BuilderRequest.MultiPartBuilder(webParam);
-    }
-
-    public BuilderRequest.MultiPartBuilder multipartPatch() {
-        webParam.setHttpType(WebParam.HttpType.PATCH);
-        return new BuilderRequest.MultiPartBuilder(webParam);
-    }
-
 }

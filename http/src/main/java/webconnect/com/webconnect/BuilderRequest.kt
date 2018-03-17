@@ -204,6 +204,10 @@ class BuilderRequest {
             return this
         }
 
+        fun multipart(): MultiPartBuilder {
+            return BuilderRequest.MultiPartBuilder(param)
+        }
+
         override fun connect() {
             performPostRequest().subscribe(Callback.PostRequestCallback(param))
         }
@@ -529,10 +533,6 @@ class BuilderRequest {
             try {
                 for ((key, value) in param.multipartParam) {
                     val body = RequestBody.create(JSON_MEDIA_TYPE, value)
-                    //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
-                    //                                    "form-data; name=\"" + entry.getKey() + "\""),
-                    //                                    body);
-//                    multipartBuilder.addFormDataPart(key, value)
                     val disposition = StringBuilder("form-data; name=")
                     disposition.append(key)
                     var headers = Headers.of("Content-Disposition", disposition.toString())
@@ -555,9 +555,6 @@ class BuilderRequest {
                     }
                     val fileBody = RequestBody.create(MediaType.parse(mimeType),
                             value)
-                    //                            multipartBuilder.addPart(Headers.of("Content-Disposition",
-                    //                                    "form-data; name=\"" + entry.getKey() + "\"; filename=\"" + fileName + "\""),
-                    //                                    fileBody);
                     val disposition = StringBuilder("form-data; name=")
                     disposition.append(key)
                     disposition.append("; filename=")
@@ -579,6 +576,12 @@ class BuilderRequest {
                 WebParam.HttpType.PUT -> {
                     multipartBuilder.build()?.also {
                         builder = builder.put(it)
+                        param.requestBodyContentlength = it.contentLength()
+                    }
+                }
+                WebParam.HttpType.DELETE -> {
+                    multipartBuilder.build()?.also {
+                        builder = builder.delete(it)
                         param.requestBodyContentlength = it.contentLength()
                     }
                 }

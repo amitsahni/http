@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "test.retrofit"
-        minSdkVersion 14
+        minSdkVersion 17
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -28,7 +28,11 @@ android {
 //        }
 //    }
 }
-
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'android.arch.lifecycle:extensions:1.1.0'
@@ -38,4 +42,5 @@ dependencies {
     compile project(':http')
     compile 'org.greenrobot:eventbus:3.1.1'
     implementation deps.rxAndroid
+    compile(name:'base-release', ext:'aar')
 }

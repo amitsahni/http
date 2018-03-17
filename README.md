@@ -101,6 +101,7 @@ Map<String, String> requestMap = new LinkedHashMap<>();
          Map<String, File> requestFile = new LinkedHashMap<>();
          requestFile.put("file", file);
          WebConnect.with(activity,ENDPOINT_GET)
+                 .post()
                  .multipart()
                  .multipartParam(requestMap)
                  .multipartParamFile(requestFile)

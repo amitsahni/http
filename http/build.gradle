@@ -55,6 +55,4 @@ artifacts {
     archives sourcesJar
     archives javadocJar
 }
-repositories {
-    mavenCentral()
-}
+
