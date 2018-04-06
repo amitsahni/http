@@ -363,7 +363,7 @@ class BuilderRequest {
         }
 
         override fun connect() {
-            performDownloadRequest()
+            performDownloadRequest().subscribe(Callback.DownloadRequestCallback(param))
         }
 
 
