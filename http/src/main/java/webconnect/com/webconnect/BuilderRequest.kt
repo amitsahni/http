@@ -532,7 +532,7 @@ class BuilderRequest {
             val JSON_MEDIA_TYPE = MediaType.parse("multipart/form-data")
             try {
                 for ((key, value) in param.multipartParam) {
-                    val body = RequestBody.create(JSON_MEDIA_TYPE, value)
+                    val body = RequestBody.create(null, value)
                     val disposition = StringBuilder("form-data; name=")
                     disposition.append(key)
                     var headers = Headers.of("Content-Disposition", disposition.toString())
