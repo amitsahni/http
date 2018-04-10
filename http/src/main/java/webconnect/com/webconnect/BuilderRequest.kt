@@ -528,8 +528,7 @@ class BuilderRequest {
             }
             builder.headers(headerBuilder.build())
             val multipartBuilder = MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-            val JSON_MEDIA_TYPE = MediaType.parse("multipart/form-data")
+            val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
             try {
 //                for ((key, value) in param.multipartParam) {
 //                    val body = RequestBody.create(null, value)
