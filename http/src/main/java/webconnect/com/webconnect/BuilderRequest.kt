@@ -483,7 +483,7 @@ class BuilderRequest {
             return this
         }
 
-        fun multipartParam(multipartParam: Map<String, String>): MultiPartBuilder {
+        fun multipartParam(multipartParam: Map<String, Any>): MultiPartBuilder {
             param.multipartParam = multipartParam
             return this
         }
@@ -531,15 +531,15 @@ class BuilderRequest {
                     .setType(MultipartBody.FORM)
             val JSON_MEDIA_TYPE = MediaType.parse("multipart/form-data")
             try {
-                for ((key, value) in param.multipartParam) {
-                    val body = RequestBody.create(null, value)
-                    val disposition = StringBuilder("form-data; name=")
-                    disposition.append(key)
-                    var headers = Headers.of("Content-Disposition", disposition.toString())
-                    multipartBuilder.addPart(headers, body)
-                }
-//                val body = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.multipartParam))
-//                multipartBuilder.addPart(body)
+//                for ((key, value) in param.multipartParam) {
+//                    val body = RequestBody.create(null, value)
+//                    val disposition = StringBuilder("form-data; name=")
+//                    disposition.append(key)
+//                    var headers = Headers.of("Content-Disposition", disposition.toString())
+//                    multipartBuilder.addPart(headers, body)
+//                }
+                val body = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.multipartParam))
+                multipartBuilder.addPart(body)
                 for ((key, value) in param.multipartParamFile) {
 
                     val uri = Uri.fromFile(value)
