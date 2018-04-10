@@ -22,7 +22,7 @@ class WebParam : Serializable {
     var httpType = HttpType.GET
     var requestParam: Map<String, Any> = LinkedHashMap<String, Any>()
     var queryParam: Map<String, String> = LinkedHashMap()
-    var multipartParam: Map<String, Any> = LinkedHashMap()
+    var multipartParam: Map<String, String> = LinkedHashMap()
     var multipartParamFile: Map<String, File> = LinkedHashMap()
     var headerParam: Map<String, String> = LinkedHashMap()
     var callback: OnWebCallback? = null
