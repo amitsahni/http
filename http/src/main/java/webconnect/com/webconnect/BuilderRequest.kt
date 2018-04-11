@@ -528,15 +528,17 @@ class BuilderRequest {
             }
             builder.headers(headerBuilder.build())
             val multipartBuilder = MultipartBody.Builder()
-            val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
+                    .setType(MultipartBody.FORM)
+            val JSON_MEDIA_TYPE = MediaType.parse("multipart/form-data")
             try {
                 for ((key, value) in param.multipartParam) {
-                    val body = RequestBody.create(null, value)
+                    val body = RequestBody.create(JSON_MEDIA_TYPE, value)
                     val disposition = StringBuilder("form-data; name=")
                     disposition.append(key)
                     var headers = Headers.of("Content-Disposition", disposition.toString())
+                    var part = MultipartBody.Part.createFormData(key, value);
 //                    multipartBuilder.addPart(headers, body)
-                    multipartBuilder.addPart(MultipartBody.Part.create(headers, body))
+                    multipartBuilder.addPart(part)
                 }
 //                val body = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.multipartParam))
 //                multipartBuilder.addPart(body)
@@ -560,7 +562,9 @@ class BuilderRequest {
                     disposition.append("; filename=")
                     disposition.append(value.name)
                     var headers = Headers.of("Content-Disposition", disposition.toString())
-                    multipartBuilder.addPart(MultipartBody.Part.create(headers, fileBody))
+                    var part = MultipartBody.Part.createFormData(key, value.name, fileBody);
+                    //multipartBuilder.addPart(MultipartBody.Part.create(headers, fileBody))
+                    multipartBuilder.addPart(part)
                 }
 
             } catch (e: Exception) {
