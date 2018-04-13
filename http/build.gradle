@@ -28,7 +28,7 @@ dependencies {
     implementation deps.commonsio
     implementation deps.rxAndroid
     implementation deps.gson
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation deps.kotlin
     //compile deps.networking
 }
 

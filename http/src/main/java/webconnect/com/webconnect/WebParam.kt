@@ -36,6 +36,7 @@ class WebParam : Serializable {
     var readTimeOut: Long = 0L
     var isCacheEnabled = false
     var debug = false
+    var isJson = false
     var file: File? = null
     var requestBodyContentlength: Long = -1L
 

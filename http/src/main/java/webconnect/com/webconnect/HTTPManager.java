@@ -2,11 +2,11 @@ package webconnect.com.webconnect;
 
 import android.support.annotation.NonNull;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.Dispatcher;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -38,6 +38,17 @@ public class HTTPManager {
             }
         }
         return sManager;
+    }
+
+    String convertFormData(@NonNull Map<String, String> map) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (sb.length() > 0) {
+                sb.append("&");
+            }
+            sb.append(String.format("%s=%s", entry.getKey(), entry.getValue()));
+        }
+        return sb.toString();
     }
 
     OkHttpClient getDefaultOkHttpClient(@NonNull WebParam webParam) {

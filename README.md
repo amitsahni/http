@@ -118,6 +118,11 @@ Map<String, String> requestMap = new LinkedHashMap<>();
                  }).connect();
 
 ```
+#### Following method will only allowed for POST, PUT, DELETE, PATCH
+
+- bodyParam() - Used to send data in body as raw json
+- formDataParam() - Used to send data as form-data
+ 
 -----
 #### Download File/Image (Anything)
 ```

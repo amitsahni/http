@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit
  * Created by clickapps on 27/12/17.
  */
 class BuilderRequest {
-
     open class GetRequestBuilder(private val param: WebParam) : IProperties<GetRequestBuilder> {
         private var okHttpClient: OkHttpClient? = null
 
@@ -201,6 +200,12 @@ class BuilderRequest {
 
         fun bodyParam(requestParam: Map<String, Any>): PostRequestBuilder {
             param.requestParam = requestParam
+            param.isJson = true
+            return this
+        }
+
+        fun formDataParam(requestParam: Map<String, String>): PostRequestBuilder {
+            param.requestParam = requestParam
             return this
         }
 
@@ -214,6 +219,7 @@ class BuilderRequest {
 
         fun performPostRequest(): Observable<*> {
             val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
+            var FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
             var baseUrl = ApiConfiguration.getBaseUrl()
             if (!TextUtils.isEmpty(param.baseUrl)) {
                 baseUrl = param.baseUrl
@@ -237,25 +243,41 @@ class BuilderRequest {
             var requestBody: RequestBody? = null
             when (param.httpType) {
                 WebParam.HttpType.POST -> {
-                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    if (!param.isJson) {
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                    } else {
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    }
                     requestBody?.also {
                         builder = builder.post(it)
                     }
                 }
                 WebParam.HttpType.PUT -> {
-                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    if (!param.isJson) {
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                    } else {
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    }
                     requestBody?.also {
                         builder = builder.put(it)
                     }
                 }
                 WebParam.HttpType.DELETE -> {
-                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    if (!param.isJson) {
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                    } else {
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    }
                     requestBody?.also {
                         builder = builder.delete(it)
                     }
                 }
                 WebParam.HttpType.PATCH -> {
-                    requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    if (!param.isJson) {
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                    } else {
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    }
                     requestBody?.also {
                         builder = builder.patch(it)
                     }
