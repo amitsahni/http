@@ -30,10 +30,9 @@
         android:layout_height="wrap_content"
         android:text="Delete" />
 
-    <android.base.ui.widget.BaseImageView
+    <ImageView
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:tint="@color/colorPrimary"
-        android:src="@drawable/ic_loading" />
+        android:tint="@color/colorPrimary" />
 
 </LinearLayout>

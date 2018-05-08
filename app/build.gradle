@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "test.retrofit"
-        minSdkVersion 17
+        minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -35,12 +35,16 @@ repositories {
 }
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'android.arch.lifecycle:extensions:1.1.0'
-    compile 'com.android.support:appcompat-v7:27.0.2'
-    compile 'com.jakewharton:butterknife:8.8.1'
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
-    compile project(':http')
-    compile 'org.greenrobot:eventbus:3.1.1'
+    implementation project(':http')
+    implementation 'org.greenrobot:eventbus:3.1.1'
     implementation deps.rxAndroid
-    compile(name:'base-release', ext:'aar')
+   // implementation(name:'base-release', ext:'aar')
+//    compile('com.crashlytics.sdk.android:crashlytics:KIT_VERSION@aar') {
+//        transitive = true;
+//    }
+//    implementation 'com.github.amitsahni:sparta:1.0.0-test'
 }
