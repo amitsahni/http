@@ -41,7 +41,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation project(':http')
     implementation 'org.greenrobot:eventbus:3.1.1'
-    implementation deps.rxAndroid
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
    // implementation(name:'base-release', ext:'aar')
 //    compile('com.crashlytics.sdk.android:crashlytics:KIT_VERSION@aar') {
 //        transitive = true;
