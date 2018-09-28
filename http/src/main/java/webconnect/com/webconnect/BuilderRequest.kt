@@ -142,6 +142,8 @@ class BuilderRequest {
 
     class OptionsRequestBuilder(param: WebParam) : GetRequestBuilder(param)
 
+    /******************************************************************************************/
+
     open class PostRequestBuilder(private val param: WebParam) : IProperties<PostRequestBuilder> {
         private var okHttpClient: OkHttpClient? = null
 
@@ -318,9 +320,12 @@ class BuilderRequest {
 
     class PatchRequestBuilder(param: WebParam) : PostRequestBuilder(param)
 
-    class DownloadBuilder(private val param: WebParam) : IProperties<DownloadBuilder> {
-        private var okHttpClient: OkHttpClient? = null
+    /******************************************************************************************/
 
+    open class DownloadBuilder(val param: WebParam) : IProperties<DownloadBuilder> {
+        private var okHttpClient: OkHttpClient? = null
+        private val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
+        private var FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
         override fun baseUrl(url: String): DownloadBuilder {
             param.baseUrl = url
             return this
@@ -369,8 +374,8 @@ class BuilderRequest {
             return this
         }
 
-        override fun queryParam(requestParam: Map<String, String>): DownloadBuilder {
-            param.queryParam = requestParam
+        override fun queryParam(queryParam: Map<String, String>): DownloadBuilder {
+            param.queryParam = queryParam
             return this
         }
 
@@ -408,10 +413,30 @@ class BuilderRequest {
                 headerBuilder.add(key, value)
             }
             builder.headers(headerBuilder.build())
-
+            var requestBody: RequestBody? = null
             when (param.httpType) {
-                WebParam.HttpType.DOWNLOAD -> {
+                WebParam.HttpType.GET -> {
                     builder = builder.get()
+                }
+                WebParam.HttpType.POST -> {
+                    if (!param.isJson) {
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                    } else {
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    }
+                    requestBody?.also {
+                        builder = builder.post(it)
+                    }
+                }
+                WebParam.HttpType.PUT -> {
+                    if (!param.isJson) {
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                    } else {
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                    }
+                    requestBody?.also {
+                        builder = builder.put(it)
+                    }
                 }
                 else -> {
                 }
@@ -445,12 +470,27 @@ class BuilderRequest {
         }
     }
 
+    open class DownloadBuilderPost(param: WebParam) : DownloadBuilder(param) {
+
+        fun bodyParam(requestParam: Map<String, Any>): DownloadBuilderPost {
+            param.requestParam = requestParam
+            param.isJson = true
+            return this
+        }
+
+        fun formDataParam(requestParam: Map<String, String>): DownloadBuilderPost {
+            param.requestParam = requestParam
+            return this
+        }
+    }
+
+
+    class DownloadBuilderPut(param: WebParam) : DownloadBuilderPost(param)
+
+    /******************************************************************************************/
+    
     class MultiPartBuilder(private val param: WebParam) : IProperties<MultiPartBuilder> {
         private var okHttpClient: OkHttpClient? = null
-
-        init {
-            param.debug = true
-        }
 
         override fun baseUrl(url: String): MultiPartBuilder {
             param.baseUrl = url
@@ -500,8 +540,8 @@ class BuilderRequest {
             return this
         }
 
-        override fun queryParam(requestParam: Map<String, String>): MultiPartBuilder {
-            param.queryParam = requestParam
+        override fun queryParam(queryParam: Map<String, String>): MultiPartBuilder {
+            param.queryParam = queryParam
             return this
         }
 

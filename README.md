@@ -101,8 +101,8 @@ Map<String, String> requestMap = new LinkedHashMap<>();
          Map<String, File> requestFile = new LinkedHashMap<>();
          requestFile.put("file", file);
          WebConnect.with(activity,ENDPOINT_GET)
-                 .post()
                  .multipart()
+                 .post()
                  .multipartParam(requestMap)
                  .multipartParamFile(requestFile)
                  .callback(new OnWebCallback() {
@@ -129,6 +129,7 @@ Map<String, String> requestMap = new LinkedHashMap<>();
 File file = new File(Environment.getExternalStorageDirectory(), "temp.jpg");
         WebConnect.with(this.activity, "https://s3.amazonaws.com/uifaces/faces/twitter/calebogden/128.jpg")
                 .download(file)
+                .get()
                 .callback(new OnWebCallback() {
                     @Override
                     public <T> void onSuccess(@Nullable T object, int taskId) {
@@ -156,6 +157,6 @@ Add the JitPack repository to your root build.gradle:
 Add the Gradle dependency:
 ```groovy
 	dependencies {
-		compile 'com.github.amitsahni:http:1.0.3.9-alpha'
+		compile 'com.github.amitsahni:http:latest'
 	}
 ```
