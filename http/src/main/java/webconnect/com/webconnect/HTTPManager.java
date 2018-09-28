@@ -2,11 +2,11 @@ package webconnect.com.webconnect;
 
 import android.support.annotation.NonNull;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.Dispatcher;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -16,13 +16,10 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 public class HTTPManager {
     int cacheSize = 10 * 1024 * 1024; // 10 MB
-    private static HTTPManager sManager = new HTTPManager();
-    private final OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+    private static volatile HTTPManager sManager;
     private Dispatcher dispatcher = new Dispatcher();
     final HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
     OkHttpClient okHttpClient = ApiConfiguration.getOkHttpClient();
-    private final MediaType JSON_MEDIA_TYPE =
-            MediaType.parse("application/json; charset=utf-8");
 
     private HTTPManager() {
     }
@@ -43,10 +40,21 @@ public class HTTPManager {
         return sManager;
     }
 
+    String convertFormData(@NonNull Map<String, String> map) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (sb.length() > 0) {
+                sb.append("&");
+            }
+            sb.append(String.format("%s=%s", entry.getKey(), entry.getValue()));
+        }
+        return sb.toString();
+    }
+
     OkHttpClient getDefaultOkHttpClient(@NonNull WebParam webParam) {
         if (okHttpClient == null) {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            Cache cache = new Cache(webParam.context.getCacheDir(), cacheSize);
+            Cache cache = new Cache(webParam.getContext().getCacheDir(), cacheSize);
             builder.cache(cache);
             builder.connectTimeout(ApiConfiguration.getConnectTimeOut(), TimeUnit.SECONDS);
             builder.writeTimeout(ApiConfiguration.getConnectTimeOut(), TimeUnit.SECONDS);

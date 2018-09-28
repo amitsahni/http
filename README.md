@@ -102,6 +102,7 @@ Map<String, String> requestMap = new LinkedHashMap<>();
          requestFile.put("file", file);
          WebConnect.with(activity,ENDPOINT_GET)
                  .multipart()
+                 .post()
                  .multipartParam(requestMap)
                  .multipartParamFile(requestFile)
                  .callback(new OnWebCallback() {
@@ -117,12 +118,18 @@ Map<String, String> requestMap = new LinkedHashMap<>();
                  }).connect();
 
 ```
+#### Following method will only allowed for POST, PUT, DELETE, PATCH
+
+- bodyParam() - Used to send data in body as raw json
+- formDataParam() - Used to send data as form-data
+ 
 -----
 #### Download File/Image (Anything)
 ```
 File file = new File(Environment.getExternalStorageDirectory(), "temp.jpg");
         WebConnect.with(this.activity, "https://s3.amazonaws.com/uifaces/faces/twitter/calebogden/128.jpg")
                 .download(file)
+                .get()
                 .callback(new OnWebCallback() {
                     @Override
                     public <T> void onSuccess(@Nullable T object, int taskId) {

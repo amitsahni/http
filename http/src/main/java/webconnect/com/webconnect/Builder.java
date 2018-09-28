@@ -1,6 +1,5 @@
 package webconnect.com.webconnect;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -14,56 +13,116 @@ public class Builder {
 
     private WebParam webParam;
 
-    public Builder(@NonNull Context context, @NonNull String url) {
+    Builder(@NonNull Context context, @NonNull String url) {
         webParam = new WebParam();
-        webParam.context = context;
-        webParam.url = url;
+        webParam.setContext(context);
+        webParam.setUrl(url);
     }
 
     public BuilderRequest.GetRequestBuilder get() {
-        webParam.httpType = WebParam.HttpType.GET;
+        webParam.setHttpType(WebParam.HttpType.GET);
         return new BuilderRequest.GetRequestBuilder(webParam);
     }
 
     public BuilderRequest.HeadRequestBuilder head() {
-        webParam.httpType = WebParam.HttpType.HEAD;
+        webParam.setHttpType(WebParam.HttpType.HEAD);
         return new BuilderRequest.HeadRequestBuilder(webParam);
     }
 
     public BuilderRequest.OptionsRequestBuilder options() {
-        webParam.httpType = WebParam.HttpType.OPTIONS;
+        webParam.setHttpType(WebParam.HttpType.OPTIONS);
         return new BuilderRequest.OptionsRequestBuilder(webParam);
     }
 
     public BuilderRequest.PostRequestBuilder post() {
-        webParam.httpType = WebParam.HttpType.POST;
+        webParam.setHttpType(WebParam.HttpType.POST);
         return new BuilderRequest.PostRequestBuilder(webParam);
     }
 
     public BuilderRequest.PutRequestBuilder put() {
-        webParam.httpType = WebParam.HttpType.PUT;
+        webParam.setHttpType(WebParam.HttpType.PUT);
         return new BuilderRequest.PutRequestBuilder(webParam);
     }
 
     public BuilderRequest.DeleteRequestBuilder delete() {
-        webParam.httpType = WebParam.HttpType.DELETE;
+        webParam.setHttpType(WebParam.HttpType.DELETE);
         return new BuilderRequest.DeleteRequestBuilder(webParam);
     }
 
+    public MultiPartBuilder multipart() {
+        return new MultiPartBuilder(webParam);
+    }
+
     public BuilderRequest.PatchRequestBuilder patch() {
-        webParam.httpType = WebParam.HttpType.PATCH;
+        webParam.setHttpType(WebParam.HttpType.PATCH);
         return new BuilderRequest.PatchRequestBuilder(webParam);
     }
 
-    public BuilderRequest.DownloadBuilder download(File file) {
-        webParam.httpType = WebParam.HttpType.DOWNLOAD;
-        webParam.file = file;
-        return new BuilderRequest.DownloadBuilder(webParam);
+    public DownloaderBuilder download(File file) {
+        webParam.setHttpType(WebParam.HttpType.DOWNLOAD);
+        webParam.setFile(file);
+        return new DownloaderBuilder(webParam);
     }
 
-    public BuilderRequest.MultiPartBuilder multipart() {
-        webParam.httpType = WebParam.HttpType.MULTIPART;
-        return new BuilderRequest.MultiPartBuilder(webParam);
+    /*
+     * Download Builder
+     */
+    public class DownloaderBuilder {
+
+        private WebParam webParam;
+
+        DownloaderBuilder(WebParam webParam) {
+            this.webParam = webParam;
+        }
+
+        public BuilderRequest.DownloadBuilder get() {
+            webParam.setHttpType(WebParam.HttpType.GET);
+            return new BuilderRequest.DownloadBuilder(webParam);
+        }
+
+        public BuilderRequest.DownloadBuilderPost post() {
+            webParam.setHttpType(WebParam.HttpType.POST);
+            return new BuilderRequest.DownloadBuilderPost(webParam);
+        }
+
+        public BuilderRequest.DownloadBuilderPut put() {
+            webParam.setHttpType(WebParam.HttpType.PUT);
+            return new BuilderRequest.DownloadBuilderPut(webParam);
+        }
+
+    }
+
+    /*
+     * Multipart Builder
+     */
+    public class MultiPartBuilder {
+
+        private WebParam webParam;
+
+        MultiPartBuilder(WebParam webParam) {
+            this.webParam = webParam;
+        }
+
+        public BuilderRequest.MultiPartBuilder post() {
+            webParam.setHttpType(WebParam.HttpType.POST);
+            return new BuilderRequest.MultiPartBuilder(webParam);
+        }
+
+        public BuilderRequest.MultiPartBuilder put() {
+            webParam.setHttpType(WebParam.HttpType.POST);
+            return new BuilderRequest.MultiPartBuilder(webParam);
+        }
+
+        public BuilderRequest.MultiPartBuilder delete() {
+            webParam.setHttpType(WebParam.HttpType.DELETE);
+            return new BuilderRequest.MultiPartBuilder(webParam);
+        }
+
+        public BuilderRequest.MultiPartBuilder patch() {
+            webParam.setHttpType(WebParam.HttpType.PATCH);
+            return new BuilderRequest.MultiPartBuilder(webParam);
+        }
+
     }
 
 }

@@ -42,21 +42,31 @@ public class RxObservable {
             try {
                 Response okHttpResponse = call.execute();
                 final long timeTaken = System.currentTimeMillis() - startTime;
+                ObserverModel observerModel = new ObserverModel();
                 T object;
                 if (okHttpResponse.isSuccessful()) {
                     if (okHttpResponse.body() != null) {
-                        if (param.analyticsListener != null) {
-                            param.analyticsListener.onReceived(timeTaken, param.requestBodyContentlength,
+                        if (param.getAnalyticsListener() != null) {
+                            param.getAnalyticsListener().onReceived(timeTaken, param.getRequestBodyContentlength(),
                                     okHttpResponse.body().contentLength(), okHttpResponse.cacheResponse() != null);
                         }
-                        object = (T) new Gson().fromJson(okHttpResponse.body().string(), param.model);
+                        object = (T) new Gson().fromJson(okHttpResponse.body().string(), param.getModel());
                     } else {
                         object = (T) "";
                     }
-                    observer.onNext(object);
+                    observerModel.setModel(object);
+                    observerModel.setType(1);
+                    observer.onNext((T) observerModel);
                 } else {
                     if (okHttpResponse.body() != null) {
-                        observer.onError(new Throwable(okHttpResponse.body().string()));
+                        if (param.getAnalyticsListener() != null) {
+                            param.getAnalyticsListener().onReceived(timeTaken, param.getRequestBodyContentlength(),
+                                    okHttpResponse.body().contentLength(), okHttpResponse.cacheResponse() != null);
+                        }
+                        object = (T) new Gson().fromJson(okHttpResponse.body().string(), param.getError());
+                        observerModel.setModel(object);
+                        observerModel.setType(2);
+                        observer.onNext((T) observerModel);
                     } else {
                         observer.onError(new Throwable(""));
                     }
@@ -94,16 +104,18 @@ public class RxObservable {
                 T object = null;
                 if (okHttpResponse.isSuccessful()) {
                     if (okHttpResponse.body() != null) {
-                        if (param.analyticsListener != null) {
-                            param.analyticsListener.onReceived(timeTaken, param.requestBodyContentlength,
+                        if (param.getAnalyticsListener() != null) {
+                            param.getAnalyticsListener().onReceived(timeTaken, param.getRequestBodyContentlength(),
                                     okHttpResponse.body().contentLength(), okHttpResponse.cacheResponse() != null);
                         }
                         ResponseBody body = okHttpResponse.body();
                         OutputStream out = null;
                         try {
-                            out = new FileOutputStream(param.file);
+                            out = new FileOutputStream(param.getFile());
                             IOUtils.copy(body.byteStream(), out);
-                            object = (T) param.file;
+                            object = (T) param.getFile();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         } finally {
                             IOUtils.closeQuietly(out);
                         }

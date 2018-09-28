@@ -3,8 +3,6 @@ package webconnect.com.webconnect;
 import android.app.Application;
 import android.support.annotation.NonNull;
 
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.interceptors.HttpLoggingInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -99,7 +97,6 @@ public class ApiConfiguration {
                     .dispatcher(dispatcher)
                     .addInterceptor(interceptor)
                     .build();
-            AndroidNetworking.initialize(context, okHttpClient);
         }
     }
 
