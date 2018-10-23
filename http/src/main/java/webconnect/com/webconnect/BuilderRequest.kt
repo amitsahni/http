@@ -488,7 +488,7 @@ class BuilderRequest {
     class DownloadBuilderPut(param: WebParam) : DownloadBuilderPost(param)
 
     /******************************************************************************************/
-    
+
     class MultiPartBuilder(private val param: WebParam) : IProperties<MultiPartBuilder> {
         private var okHttpClient: OkHttpClient? = null
 
@@ -552,6 +552,11 @@ class BuilderRequest {
 
         fun multipartParamFile(multipartFile: Map<String, File>): MultiPartBuilder {
             param.multipartParamFile = multipartFile
+            return this
+        }
+
+        fun multipartParamListFile(multipartFile: Map<String, List<File>>): MultiPartBuilder {
+            param.multipartParamListFile = multipartFile
             return this
         }
 
@@ -627,6 +632,31 @@ class BuilderRequest {
                     var part = MultipartBody.Part.createFormData(key, value.name, fileBody);
                     //multipartBuilder.addPart(MultipartBody.Part.create(headers, fileBody))
                     multipartBuilder.addPart(part)
+                }
+                for ((key, file) in param.multipartParamListFile) {
+                    for (value in file) {
+                        val uri = Uri.fromFile(value)
+                        var mimeType: String
+                        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+                            val cR = param.context?.contentResolver
+                            mimeType = cR?.getType(uri).toString()
+                        } else {
+                            val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                                    .toString())
+                            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                                    fileExtension.toLowerCase())
+                        }
+                        val fileBody = RequestBody.create(MediaType.parse(mimeType),
+                                value)
+                        val disposition = StringBuilder("form-data; name=")
+                        disposition.append(key)
+                        disposition.append("; filename=")
+                        disposition.append(value.name)
+                        var headers = Headers.of("Content-Disposition", disposition.toString())
+                        var part = MultipartBody.Part.createFormData(key, value.name, fileBody);
+                        //multipartBuilder.addPart(MultipartBody.Part.create(headers, fileBody))
+                        multipartBuilder.addPart(part)
+                    }
                 }
 
             } catch (e: Exception) {

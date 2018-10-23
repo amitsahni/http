@@ -24,6 +24,7 @@ class WebParam : Serializable {
     var queryParam: Map<String, String> = LinkedHashMap()
     var multipartParam: Map<String, String> = LinkedHashMap()
     var multipartParamFile: Map<String, File> = LinkedHashMap()
+    var multipartParamListFile: Map<String, List<File>> = LinkedHashMap()
     var headerParam: Map<String, String> = LinkedHashMap()
     var callback: OnWebCallback? = null
     var progressListener: ProgressListener? = null
