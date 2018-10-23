@@ -118,6 +118,8 @@ Map<String, String> requestMap = new LinkedHashMap<>();
                  }).connect();
 
 ```
+If you have multiple part files against single key then use 
+.multipartParamFileList(requestFile)
 #### Following method will only allowed for POST, PUT, DELETE, PATCH
 
 - bodyParam() - Used to send data in body as raw json
