@@ -72,10 +72,9 @@ public class MainActivityModel extends AndroidViewModel {
         Map<String, String> headerMap = new LinkedHashMap<String, String>();
         headerMap.put("slug", "default");
         headerMap.put("Auth-Token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOjEwODMsImlhdCI6IjIwMTgtMDEtMTIgMDc6NTg6NTAgVVRDIn0.mXkySHf71fa3vdLwUWaIqoqd5nUR2Z3dJ1INq5t4Clo");
-        WebConnect.with(this.activity, "leases")
+        WebConnect.with(this.activity, ENDPOINT_GET)
                 .get()
                 .timeOut(100L, 50L)
-                .baseUrl("http://api.qa.leasing.clicksandbox.com/v1/app/")
                 .headerParam(headerMap)
                 .callback(new OnWebCallback() {
                     @Override
@@ -99,17 +98,17 @@ public class MainActivityModel extends AndroidViewModel {
         requestMap.put("gender", "male");
         Map<String, String> headerMap = new LinkedHashMap<String, String>();
         headerMap.put("Authorization", "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTQsIm5hbWUiOiJHdXJ1IiwiZW1haWwiOiJndXJwcmVldDJAY2xpY2thcHBzLmNvIiwibW9iaWxlIjoiODI4NzYyMTIyOCIsImltYWdlIjoiL2RlZmF1bHRfbG9nby5qcGciLCJpYXQiOjE1MjExODAwOTIsImV4cCI6MTUyMzc3MjA5Mn0.Cc4dOzVC3NipXfVOJdRE29-GrtO5H0dgC3GSABiTYTA");
-        WebConnect.with(this.activity, "profile")
+        WebConnect.with(this.activity, ENDPOINT_POST)
                 .put()
                 .multipart()
-                .baseUrl("http://api.laan.dev.clicksandbox.com:8080/v1/")
                 .multipartParam(requestMap)
+                .timeOut(100L, 50L)
                 .headerParam(headerMap)
                 .callback(new OnWebCallback() {
                     @Override
                     public <T> void onSuccess(@Nullable T object, int taskId) {
                         if (object != null) {
-                            post.setValue(object);
+                            post.postValue(object);
                         }
                     }
 

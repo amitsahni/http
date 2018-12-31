@@ -618,10 +618,17 @@ class BuilderRequest {
         }
 
         override fun connect() {
-            performMultipartRequest().subscribe(Callback.UploadRequestCallback(param))
+            call()?.enqueue(Callback.PostRequestCallbackEnqueue(param))
         }
 
         fun performMultipartRequest(): Observable<*> {
+            val call = call()
+            return RxObservable.SimpleANObservable<Any>(param, call)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+        }
+
+        fun call(): Call? {
             var baseUrl = ApiConfiguration.getBaseUrl()
             if (!TextUtils.isEmpty(param.baseUrl)) {
                 baseUrl = param.baseUrl
@@ -709,6 +716,7 @@ class BuilderRequest {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+
             when (param.httpType) {
                 WebParam.HttpType.POST -> {
                     multipartBuilder.build()?.also {
@@ -775,9 +783,7 @@ class BuilderRequest {
             val okHttpRequest = builder.build()
             val call = okHttpClient?.newCall(okHttpRequest)
             param.analyticsListener = Callback.Analytics()
-            return RxObservable.SimpleANObservable<Any>(param, call)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+            return call
         }
 
     }
