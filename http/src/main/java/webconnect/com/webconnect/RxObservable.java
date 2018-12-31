@@ -1,8 +1,7 @@
 package webconnect.com.webconnect;
 
 import android.net.TrafficStats;
-
-import com.google.gson.Gson;
+import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
 
@@ -50,10 +49,12 @@ public class RxObservable {
                             param.getAnalyticsListener().onReceived(timeTaken, param.getRequestBodyContentlength(),
                                     okHttpResponse.body().contentLength(), okHttpResponse.cacheResponse() != null);
                         }
-                        object = (T) new Gson().fromJson(okHttpResponse.body().string(), param.getModel());
+                        object = (T) ApiConfiguration.getGson().fromJson(okHttpResponse.body().string(), param.getModel());
+                        Log.d(getClass().getSimpleName(), ApiConfiguration.getGson().toJson(object));
                     } else {
                         object = (T) "";
                     }
+                    Log.d(getClass().getSimpleName(), object.toString());
                     observerModel.setModel(object);
                     observerModel.setType(1);
                     observer.onNext((T) observerModel);
@@ -63,7 +64,8 @@ public class RxObservable {
                             param.getAnalyticsListener().onReceived(timeTaken, param.getRequestBodyContentlength(),
                                     okHttpResponse.body().contentLength(), okHttpResponse.cacheResponse() != null);
                         }
-                        object = (T) new Gson().fromJson(okHttpResponse.body().string(), param.getError());
+                        object = (T) ApiConfiguration.getGson().fromJson(okHttpResponse.body().string(), param.getError());
+                        Log.e(getClass().getSimpleName(), ApiConfiguration.getGson().toJson(object));
                         observerModel.setModel(object);
                         observerModel.setType(2);
                         observer.onNext((T) observerModel);

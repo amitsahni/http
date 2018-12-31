@@ -16,11 +16,11 @@ public class ObserverModel {
         return model;
     }
 
-    public void setModel(Object model) {
+    void setModel(Object model) {
         this.model = model;
     }
 
-    public void setType(int type) {
+    void setType(int type) {
         this.type = type;
     }
 }

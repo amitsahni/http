@@ -5,7 +5,6 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.text.TextUtils
 import android.webkit.MimeTypeMap
-import com.google.gson.Gson
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -17,6 +16,8 @@ import webconnect.com.webconnect.listener.OnWebCallback
 import webconnect.com.webconnect.listener.ProgressListener
 import java.io.File
 import java.util.concurrent.TimeUnit
+import okhttp3.ResponseBody
+
 
 /**
  * Created by clickapps on 27/12/17.
@@ -78,11 +79,23 @@ class BuilderRequest {
             return this
         }
 
+        fun progressListener(callback: ProgressListener): GetRequestBuilder {
+            param.progressListener = callback
+            return this
+        }
+
         override fun connect() {
-            performGetRequest().subscribe(Callback.GetRequestCallback(param))
+            call()?.enqueue(Callback.GetRequestCallbackEnqueue(param))
         }
 
         fun performGetRequest(): Observable<*> {
+            val call = call()
+            return RxObservable.SimpleANObservable<Any>(param, call)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+        }
+
+        private fun call(): Call? {
             var baseUrl = ApiConfiguration.getBaseUrl()
             if (!TextUtils.isEmpty(param.baseUrl)) {
                 baseUrl = param.baseUrl
@@ -122,6 +135,13 @@ class BuilderRequest {
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
                         ?.readTimeout(param.readTimeOut, TimeUnit.SECONDS)
                         ?.writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        ?.addInterceptor {
+                            val originalResponse = it.proceed(it.request())
+                            val originalBody = originalResponse.body()
+                            originalResponse.newBuilder()
+                                    .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
+                                    .build()
+                        }
                         ?.build()
             }
             if (param.isCacheEnabled) {
@@ -132,9 +152,7 @@ class BuilderRequest {
             val okHttpRequest = builder.build()
             val call = okHttpClient?.newCall(okHttpRequest)
             param.analyticsListener = Callback.Analytics()
-            return RxObservable.SimpleANObservable<Any>(param, call)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+            return call
         }
     }
 
@@ -211,15 +229,27 @@ class BuilderRequest {
             return this
         }
 
+        fun progressListener(callback: ProgressListener): PostRequestBuilder {
+            param.progressListener = callback
+            return this
+        }
+
         fun multipart(): MultiPartBuilder {
             return BuilderRequest.MultiPartBuilder(param)
         }
 
         override fun connect() {
-            performPostRequest().subscribe(Callback.PostRequestCallback(param))
+            call()?.enqueue(Callback.PostRequestCallbackEnqueue(param))
         }
 
         fun performPostRequest(): Observable<*> {
+            val call = call()
+            return RxObservable.SimpleANObservable<Any>(param, call)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+        }
+
+        private fun call(): Call? {
             val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
             var FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
             var baseUrl = ApiConfiguration.getBaseUrl()
@@ -248,7 +278,7 @@ class BuilderRequest {
                     if (!param.isJson) {
                         requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
                     }
                     requestBody?.also {
                         builder = builder.post(it)
@@ -258,7 +288,7 @@ class BuilderRequest {
                     if (!param.isJson) {
                         requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
                     }
                     requestBody?.also {
                         builder = builder.put(it)
@@ -268,7 +298,7 @@ class BuilderRequest {
                     if (!param.isJson) {
                         requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
                     }
                     requestBody?.also {
                         builder = builder.delete(it)
@@ -278,7 +308,7 @@ class BuilderRequest {
                     if (!param.isJson) {
                         requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
                     }
                     requestBody?.also {
                         builder = builder.patch(it)
@@ -297,6 +327,13 @@ class BuilderRequest {
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
                         ?.readTimeout(param.readTimeOut, TimeUnit.SECONDS)
                         ?.writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        ?.addInterceptor {
+                            val originalResponse = it.proceed(it.request())
+                            val originalBody = originalResponse.body()
+                            originalResponse.newBuilder()
+                                    .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
+                                    .build()
+                        }
                         ?.build()
             }
 
@@ -308,9 +345,7 @@ class BuilderRequest {
             val okHttpRequest = builder.build()
             val call = okHttpClient?.newCall(okHttpRequest)
             param.analyticsListener = Callback.Analytics()
-            return RxObservable.SimpleANObservable<Any>(param, call)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+            return call!!
         }
     }
 
@@ -390,11 +425,18 @@ class BuilderRequest {
         }
 
         override fun connect() {
-            performDownloadRequest().subscribe(Callback.DownloadRequestCallback(param))
+            call()?.enqueue(Callback.DownloadRequestCallbackEnqueue(param))
         }
 
 
-        internal fun performDownloadRequest(): Observable<*> {
+        fun performDownloadRequest(): Observable<*> {
+            val call = call()
+            return RxObservable.DownloadANObservable<Any>(param, call)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+        }
+
+        private fun call(): Call? {
             var baseUrl = ApiConfiguration.getBaseUrl()
             if (!TextUtils.isEmpty(param.baseUrl)) {
                 baseUrl = param.baseUrl
@@ -422,7 +464,7 @@ class BuilderRequest {
                     if (!param.isJson) {
                         requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
                     }
                     requestBody?.also {
                         builder = builder.post(it)
@@ -432,7 +474,7 @@ class BuilderRequest {
                     if (!param.isJson) {
                         requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
                     }
                     requestBody?.also {
                         builder = builder.put(it)
@@ -447,6 +489,13 @@ class BuilderRequest {
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
                         ?.readTimeout(param.readTimeOut, TimeUnit.SECONDS)
                         ?.writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        ?.addInterceptor {
+                            val originalResponse = it.proceed(it.request())
+                            val originalBody = originalResponse.body()
+                            originalResponse.newBuilder()
+                                    .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
+                                    .build()
+                        }
                         ?.build()
             }
 
@@ -464,9 +513,7 @@ class BuilderRequest {
             val okHttpRequest = builder.build()
             val call = okHttpClient?.newCall(okHttpRequest)
             param.analyticsListener = Callback.Analytics()
-            return RxObservable.DownloadANObservable<Any>(param, call)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+            return call
         }
     }
 
@@ -702,6 +749,13 @@ class BuilderRequest {
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
                         ?.readTimeout(param.readTimeOut, TimeUnit.SECONDS)
                         ?.writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
+                        ?.addInterceptor {
+                            val originalResponse = it.proceed(it.request())
+                            val originalBody = originalResponse.body()
+                            originalResponse.newBuilder()
+                                    .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
+                                    .build()
+                        }
                         ?.build()
             }
             if (!param.debug) {

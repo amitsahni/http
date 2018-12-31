@@ -9,11 +9,16 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.reactivex.Observer;
+import io.reactivex.SingleObserver;
+import io.reactivex.disposables.Disposable;
+import webconnect.com.webconnect.ObserverModel;
 import webconnect.com.webconnect.WebConnect;
 import webconnect.com.webconnect.listener.OnWebCallback;
 
@@ -83,6 +88,7 @@ public class MainActivityModel extends AndroidViewModel {
 
                     }
                 }).connect();
+
     }
 
     public Map<String, String> post() {

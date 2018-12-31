@@ -21,6 +21,7 @@ public class ApiConfiguration {
     private static String sBASE_URL = "";
     private static long sCONNECT_TIMEOUT_MILLIS = 10 * 1000, sREAD_TIMEOUT_MILLIS = 20 * 1000;
     private static Gson sGSON = new GsonBuilder()
+            .setPrettyPrinting()
             .setDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'")
             .setLenient()
             .create();

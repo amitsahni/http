@@ -5,5 +5,5 @@ package webconnect.com.webconnect.listener
  */
 
 interface ProgressListener {
-    fun onProgress(bytesRead: Long, contentLength: Long)
+    fun onProgress(bytesRead: Long, contentLength: Long, progress: Float)
 }
