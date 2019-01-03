@@ -773,13 +773,6 @@ class BuilderRequest {
                         .addInterceptor(interceptor)
                         .build()
             }
-            okHttpClient = okHttpClient?.newBuilder()
-                    ?.addNetworkInterceptor { chain ->
-                        val originalResponse = chain.proceed(chain.request())
-                        originalResponse.newBuilder()
-                                .body(originalResponse.body()?.also { HTTPInternalNetworking.ProgressResponseBody(it, param) })
-                                .build()
-                    }?.build()
             val okHttpRequest = builder.build()
             val call = okHttpClient?.newCall(okHttpRequest)
             param.analyticsListener = Callback.Analytics()

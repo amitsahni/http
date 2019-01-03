@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         putBtn.setOnClickListener(this);
         deleteBtn.setOnClickListener(this);
 
-
         // Get Observer
         mainActivityModel.getGet().observe(this, object -> {
             if (object != null) {
@@ -103,4 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
+
+
+
 }
