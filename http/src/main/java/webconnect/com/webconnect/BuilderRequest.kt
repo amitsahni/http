@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.text.TextUtils
 import android.webkit.MimeTypeMap
+import com.google.common.collect.LinkedHashMultimap
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -16,7 +17,8 @@ import webconnect.com.webconnect.listener.OnWebCallback
 import webconnect.com.webconnect.listener.ProgressListener
 import java.io.File
 import java.util.concurrent.TimeUnit
-import okhttp3.ResponseBody
+import android.R.attr.keySet
+import android.util.Log
 
 
 /**
@@ -25,7 +27,6 @@ import okhttp3.ResponseBody
 class BuilderRequest {
     open class GetRequestBuilder(private val param: WebParam) : IProperties<GetRequestBuilder> {
         private var okHttpClient: OkHttpClient? = null
-
         override fun baseUrl(url: String): GetRequestBuilder {
             param.baseUrl = url
             return this
@@ -79,6 +80,12 @@ class BuilderRequest {
             return this
         }
 
+
+        override fun queryParam(requestParam: LinkedHashMultimap<String, String>): GetRequestBuilder {
+            param.queryParamMultiValue = requestParam
+            return this
+        }
+
         fun progressListener(callback: ProgressListener): GetRequestBuilder {
             param.progressListener = callback
             return this
@@ -102,11 +109,17 @@ class BuilderRequest {
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
-
-            val entries = param.queryParam.entries
-            for ((name, value1) in entries) {
-                val value = value1
-                urlBuilder?.addQueryParameter(name, value)
+            if (!param.queryParam.isEmpty()) {
+                val entries = param.queryParam.entries
+                for ((name, value) in entries) {
+                    urlBuilder?.addQueryParameter(name, value)
+                }
+            }
+            if (!param.queryParamMultiValue.isEmpty) {
+                val entry = param.queryParamMultiValue.entries()
+                for ((name, value) in entry) {
+                    urlBuilder?.addQueryParameter(name, value)
+                }
             }
             builder.url(urlBuilder?.build().toString())
 
@@ -172,6 +185,11 @@ class BuilderRequest {
 
         override fun queryParam(requestParam: Map<String, String>): PostRequestBuilder {
             param.queryParam = requestParam
+            return this
+        }
+
+        override fun queryParam(requestParam: LinkedHashMultimap<String, String>): PostRequestBuilder {
+            param.queryParamMultiValue = requestParam
             return this
         }
 
@@ -258,11 +276,17 @@ class BuilderRequest {
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + this.param.url)?.newBuilder()
-
-            val entries = param.queryParam.entries
-            for ((name, value1) in entries) {
-                val value = value1
-                urlBuilder?.addQueryParameter(name, value)
+            if (!param.queryParam.isEmpty()) {
+                val entries = param.queryParam.entries
+                for ((name, value) in entries) {
+                    urlBuilder?.addQueryParameter(name, value)
+                }
+            }
+            if (!param.queryParamMultiValue.isEmpty) {
+                val entry = param.queryParamMultiValue.entries()
+                for ((name, value) in entry) {
+                    urlBuilder?.addQueryParameter(name, value)
+                }
             }
             builder.url(urlBuilder?.build().toString())
 
@@ -414,6 +438,11 @@ class BuilderRequest {
             return this
         }
 
+        override fun queryParam(requestParam: LinkedHashMultimap<String, String>): DownloadBuilder {
+            param.queryParamMultiValue = requestParam
+            return this
+        }
+
         fun progressListener(callback: ProgressListener): DownloadBuilder {
             param.progressListener = callback
             return this
@@ -443,10 +472,17 @@ class BuilderRequest {
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
-            val entries = param.queryParam.entries
-            for ((name, value1) in entries) {
-                val value = value1
-                urlBuilder?.addQueryParameter(name, value)
+            if (!param.queryParam.isEmpty()) {
+                val entries = param.queryParam.entries
+                for ((name, value) in entries) {
+                    urlBuilder?.addQueryParameter(name, value)
+                }
+            }
+            if (!param.queryParamMultiValue.isEmpty) {
+                val entry = param.queryParamMultiValue.entries()
+                for ((name, value) in entry) {
+                    urlBuilder?.addQueryParameter(name, value)
+                }
             }
             builder.url(urlBuilder?.build().toString())
 
@@ -587,6 +623,11 @@ class BuilderRequest {
             return this
         }
 
+        override fun queryParam(requestParam: LinkedHashMultimap<String, String>): MultiPartBuilder {
+            param.queryParamMultiValue = requestParam
+            return this
+        }
+
         override fun queryParam(queryParam: Map<String, String>): MultiPartBuilder {
             param.queryParam = queryParam
             return this
@@ -636,10 +677,17 @@ class BuilderRequest {
 
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
-            val entries = param.queryParam.entries
-            for ((name, value1) in entries) {
-                val value = value1
-                urlBuilder?.addQueryParameter(name, value)
+            if (!param.queryParam.isEmpty()) {
+                val entries = param.queryParam.entries
+                for ((name, value) in entries) {
+                    urlBuilder?.addQueryParameter(name, value)
+                }
+            }
+            if (!param.queryParamMultiValue.isEmpty) {
+                val entry = param.queryParamMultiValue.entries()
+                for ((name, value) in entry) {
+                    urlBuilder?.addQueryParameter(name, value)
+                }
             }
             builder.url(urlBuilder?.build().toString())
 

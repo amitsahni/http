@@ -1,6 +1,7 @@
 package webconnect.com.webconnect.di
 
 import android.app.Dialog
+import com.google.common.collect.LinkedHashMultimap
 
 import webconnect.com.webconnect.listener.AnalyticsListener
 import webconnect.com.webconnect.listener.OnWebCallback
@@ -15,7 +16,10 @@ interface IProperties<T> {
 
     fun headerParam(headerParam: Map<String, String>): T
 
+    // @Deprecated("Will be depricated in 1.1.0")
     fun queryParam(queryParam: Map<String, String>): T
+
+    fun queryParam(queryParam: LinkedHashMultimap<String, String>): T
 
     fun callback(callback: OnWebCallback): T
 

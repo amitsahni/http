@@ -13,8 +13,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Map;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
 
 /**
  * Created by clickapps on 31/8/17.
@@ -102,7 +105,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
-
-
 
 }

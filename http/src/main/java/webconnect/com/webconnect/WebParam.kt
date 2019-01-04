@@ -2,6 +2,7 @@ package webconnect.com.webconnect
 
 import android.app.Dialog
 import android.content.Context
+import com.google.common.collect.LinkedHashMultimap
 
 import java.io.File
 import java.io.Serializable
@@ -22,6 +23,7 @@ class WebParam : Serializable {
     var httpType = HttpType.GET
     var requestParam: Map<String, Any> = LinkedHashMap<String, Any>()
     var queryParam: Map<String, String> = LinkedHashMap()
+    var queryParamMultiValue: LinkedHashMultimap<String, String> = LinkedHashMultimap.create()
     var multipartParam: Map<String, String> = LinkedHashMap()
     var multipartParamFile: Map<String, File> = LinkedHashMap()
     var multipartParamListFile: Map<String, List<File>> = LinkedHashMap()

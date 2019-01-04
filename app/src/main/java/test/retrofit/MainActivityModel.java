@@ -9,16 +9,12 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import java.io.File;
+import com.google.common.collect.LinkedHashMultimap;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import io.reactivex.Observer;
-import io.reactivex.SingleObserver;
-import io.reactivex.disposables.Disposable;
-import webconnect.com.webconnect.ObserverModel;
 import webconnect.com.webconnect.WebConnect;
 import webconnect.com.webconnect.listener.OnWebCallback;
 
@@ -69,11 +65,18 @@ public class MainActivityModel extends AndroidViewModel {
 //01-17 12:10:53.412 6765-24325/com.brickspms D/OkHttp:
 
     public void get() {
-        Map<String, String> headerMap = new LinkedHashMap<String, String>();
-        headerMap.put("slug", "default");
-        headerMap.put("Auth-Token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOjEwODMsImlhdCI6IjIwMTgtMDEtMTIgMDc6NTg6NTAgVVRDIn0.mXkySHf71fa3vdLwUWaIqoqd5nUR2Z3dJ1INq5t4Clo");
-        WebConnect.with(this.activity, ENDPOINT_GET)
+        Map<String, String> headerMap = new LinkedHashMap<>();
+//        headerMap.put("slug", "default");
+//        headerMap.put("Auth-Token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOjEwODMsImlhdCI6IjIwMTgtMDEtMTIgMDc6NTg6NTAgVVRDIn0.mXkySHf71fa3vdLwUWaIqoqd5nUR2Z3dJ1INq5t4Clo");
+        headerMap.put("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NDM3ODMsIm5hbWUiOiJjZmNnZyBHZ2dnIGNjY2MgY2NjY2MiLCJlbWFpbCI6ImFsbWFycmlAbW9oLmdvdi5zYSIsIm1vYmlsZSI6IjUzMDgwMzA5MSIsInJvbGUiOiJlbXBsb3llZSIsImFjY2VzcyI6Im1vYmlsZSIsImRvbWFpbiI6ImFsbCIsImlhdCI6MTU0NjUwMzQ2MSwiZXhwIjoxNTQ5MDk1NDYxfQ.4OhtjSj5b0u7h57t3_9DEBXgkYsqo6nVLJ5eemDYg2o");
+        LinkedHashMultimap<String, String> multimap = LinkedHashMultimap.create();
+        // map.put("status", Arrays.asList("0,1"));
+        multimap.put("status[]", "2");
+        multimap.put("status[]", "1");
+        WebConnect.with(this.activity, "requests")
                 .get()
+                .queryParam(multimap)
+                .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
                 .timeOut(100L, 50L)
                 .headerParam(headerMap)
                 .callback(new OnWebCallback() {
