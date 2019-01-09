@@ -4,7 +4,7 @@ package webconnect.com.webconnect;
  * Created by clickapps on 8/3/18.
  */
 
-public class ObserverModel {
+public final class ObserverModel {
     private Object model;
     private int type;
 

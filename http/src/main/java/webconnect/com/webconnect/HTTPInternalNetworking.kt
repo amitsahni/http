@@ -2,14 +2,9 @@ package webconnect.com.webconnect
 
 import android.util.Log
 import okhttp3.MediaType
-import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import okio.*
 import java.io.IOException
-import okio.Okio
-import okio.BufferedSink
-import webconnect.com.webconnect.Callback.ProgressCallback
-import java.io.OutputStream
 
 
 /**

@@ -2,15 +2,10 @@ package webconnect.com.webconnect
 
 import android.app.Dialog
 import android.content.Context
-import com.google.common.collect.LinkedHashMultimap
-
+import webconnect.com.webconnect.listener.*
 import java.io.File
 import java.io.Serializable
-import java.util.LinkedHashMap
-
-import webconnect.com.webconnect.listener.AnalyticsListener
-import webconnect.com.webconnect.listener.OnWebCallback
-import webconnect.com.webconnect.listener.ProgressListener
+import java.util.*
 
 
 /**
@@ -21,14 +16,16 @@ class WebParam : Serializable {
     var url: String? = null
     var baseUrl: String? = null
     var httpType = HttpType.GET
-    var requestParam: Map<String, Any> = LinkedHashMap<String, Any>()
-    var queryParam: Map<String, String> = LinkedHashMap()
-    var queryParamMultiValue: LinkedHashMultimap<String, String> = LinkedHashMultimap.create()
+    var requestParam: Map<String, Any> = LinkedHashMap()
+    var queryParam: QueryMap<String, String> = QueryMap()
     var multipartParam: Map<String, String> = LinkedHashMap()
     var multipartParamFile: Map<String, File> = LinkedHashMap()
     var multipartParamListFile: Map<String, List<File>> = LinkedHashMap()
     var headerParam: Map<String, String> = LinkedHashMap()
     var callback: OnWebCallback? = null
+    var success: OnSuccessListener<Any>? = null
+    var err: OnErrorListener<Any>? = null
+    var failure: OnFailureListener? = null
     var progressListener: ProgressListener? = null
     var analyticsListener: AnalyticsListener? = null
     var dialog: Dialog? = null

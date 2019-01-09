@@ -5,20 +5,12 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.text.TextUtils
 import android.webkit.MimeTypeMap
-import com.google.common.collect.LinkedHashMultimap
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import webconnect.com.webconnect.di.IProperties
-import webconnect.com.webconnect.listener.AnalyticsListener
-import webconnect.com.webconnect.listener.OnWebCallback
-import webconnect.com.webconnect.listener.ProgressListener
+import webconnect.com.webconnect.listener.*
 import java.io.File
 import java.util.concurrent.TimeUnit
-import android.R.attr.keySet
-import android.util.Log
 
 
 /**
@@ -54,6 +46,21 @@ class BuilderRequest {
             return this
         }
 
+        fun <T> success(onSuccessListener: OnSuccessListener<T>): GetRequestBuilder {
+            param.success = onSuccessListener as OnSuccessListener<Any>
+            return this
+        }
+
+        fun <T> error(onErrorListener: OnErrorListener<T>): GetRequestBuilder {
+            param.err = onErrorListener as OnErrorListener<Any>
+            return this
+        }
+
+        fun failure(onFailure: OnFailureListener): GetRequestBuilder {
+            param.failure = onFailure
+            return this
+        }
+
         override fun taskId(taskId: Int): GetRequestBuilder {
             param.taskId = taskId
             return this
@@ -75,31 +82,23 @@ class BuilderRequest {
             return this
         }
 
-        override fun queryParam(requestParam: Map<String, String>): GetRequestBuilder {
-            param.queryParam = requestParam
+        override fun queryParam(queryParam: QueryMap<String, String>): GetRequestBuilder {
+            param.queryParam = queryParam
             return this
         }
 
-
-        override fun queryParam(requestParam: LinkedHashMultimap<String, String>): GetRequestBuilder {
-            param.queryParamMultiValue = requestParam
-            return this
-        }
 
         fun progressListener(callback: ProgressListener): GetRequestBuilder {
             param.progressListener = callback
             return this
         }
 
-        override fun connect() {
-            call()?.enqueue(Callback.GetRequestCallbackEnqueue(param))
+        fun queue(): Call {
+            return call()!!
         }
 
-        fun performGetRequest(): Observable<*> {
-            val call = call()
-            return RxObservable.SimpleANObservable<Any>(param, call)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+        override fun connect() {
+            call()?.enqueue(Callback.GetRequestCallbackEnqueue(param))
         }
 
         private fun call(): Call? {
@@ -110,15 +109,10 @@ class BuilderRequest {
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
             if (!param.queryParam.isEmpty()) {
-                val entries = param.queryParam.entries
-                for ((name, value) in entries) {
-                    urlBuilder?.addQueryParameter(name, value)
-                }
-            }
-            if (!param.queryParamMultiValue.isEmpty) {
-                val entry = param.queryParamMultiValue.entries()
-                for ((name, value) in entry) {
-                    urlBuilder?.addQueryParameter(name, value)
+                for (i in 0 until param.queryParam.key.size()) {
+                    val key = param.queryParam.key[i]
+                    val value = param.queryParam.value[i]
+                    urlBuilder?.addQueryParameter(key, value)
                 }
             }
             builder.url(urlBuilder?.build().toString())
@@ -183,13 +177,8 @@ class BuilderRequest {
             return this
         }
 
-        override fun queryParam(requestParam: Map<String, String>): PostRequestBuilder {
-            param.queryParam = requestParam
-            return this
-        }
-
-        override fun queryParam(requestParam: LinkedHashMultimap<String, String>): PostRequestBuilder {
-            param.queryParamMultiValue = requestParam
+        override fun queryParam(queryParam: QueryMap<String, String>): PostRequestBuilder {
+            param.queryParam = queryParam
             return this
         }
 
@@ -207,6 +196,21 @@ class BuilderRequest {
             param.callback = callback
             param.model = success
             param.error = error
+            return this
+        }
+
+        fun <T> success(onSuccessListener: OnSuccessListener<T>): PostRequestBuilder {
+            param.success = onSuccessListener as OnSuccessListener<Any>
+            return this
+        }
+
+        fun <T> error(onErrorListener: OnErrorListener<T>): PostRequestBuilder {
+            param.err = onErrorListener as OnErrorListener<Any>
+            return this
+        }
+
+        fun failure(onFailure: OnFailureListener): PostRequestBuilder {
+            param.failure = onFailure
             return this
         }
 
@@ -256,15 +260,12 @@ class BuilderRequest {
             return BuilderRequest.MultiPartBuilder(param)
         }
 
-        override fun connect() {
-            call()?.enqueue(Callback.PostRequestCallbackEnqueue(param))
+        fun queue(): Call {
+            return call()!!
         }
 
-        fun performPostRequest(): Observable<*> {
-            val call = call()
-            return RxObservable.SimpleANObservable<Any>(param, call)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+        override fun connect() {
+            call()?.enqueue(Callback.PostRequestCallbackEnqueue(param))
         }
 
         private fun call(): Call? {
@@ -277,15 +278,10 @@ class BuilderRequest {
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + this.param.url)?.newBuilder()
             if (!param.queryParam.isEmpty()) {
-                val entries = param.queryParam.entries
-                for ((name, value) in entries) {
-                    urlBuilder?.addQueryParameter(name, value)
-                }
-            }
-            if (!param.queryParamMultiValue.isEmpty) {
-                val entry = param.queryParamMultiValue.entries()
-                for ((name, value) in entry) {
-                    urlBuilder?.addQueryParameter(name, value)
+                for (i in 0 until param.queryParam.key.size()) {
+                    val key = param.queryParam.key[i]
+                    val value = param.queryParam.value[i]
+                    urlBuilder?.addQueryParameter(key, value)
                 }
             }
             builder.url(urlBuilder?.build().toString())
@@ -407,6 +403,21 @@ class BuilderRequest {
             return this
         }
 
+        fun success(onSuccessListener: OnSuccessListener<File>): DownloadBuilder {
+            param.success = onSuccessListener as OnSuccessListener<Any>
+            return this
+        }
+
+        fun error(onErrorListener: OnErrorListener<String>): DownloadBuilder {
+            param.err = onErrorListener as OnErrorListener<Any>
+            return this
+        }
+
+        fun failure(onFailure: OnFailureListener): DownloadBuilder {
+            param.failure = onFailure
+            return this
+        }
+
         override fun taskId(taskId: Int): DownloadBuilder {
             param.taskId = taskId
             return this
@@ -433,13 +444,8 @@ class BuilderRequest {
             return this
         }
 
-        override fun queryParam(queryParam: Map<String, String>): DownloadBuilder {
+        override fun queryParam(queryParam: QueryMap<String, String>): DownloadBuilder {
             param.queryParam = queryParam
-            return this
-        }
-
-        override fun queryParam(requestParam: LinkedHashMultimap<String, String>): DownloadBuilder {
-            param.queryParamMultiValue = requestParam
             return this
         }
 
@@ -453,17 +459,14 @@ class BuilderRequest {
             return this
         }
 
+        fun queue(): Call {
+            return call()!!
+        }
+
         override fun connect() {
             call()?.enqueue(Callback.DownloadRequestCallbackEnqueue(param))
         }
 
-
-        fun performDownloadRequest(): Observable<*> {
-            val call = call()
-            return RxObservable.DownloadANObservable<Any>(param, call)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-        }
 
         private fun call(): Call? {
             var baseUrl = ApiConfiguration.getBaseUrl()
@@ -473,15 +476,10 @@ class BuilderRequest {
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
             if (!param.queryParam.isEmpty()) {
-                val entries = param.queryParam.entries
-                for ((name, value) in entries) {
-                    urlBuilder?.addQueryParameter(name, value)
-                }
-            }
-            if (!param.queryParamMultiValue.isEmpty) {
-                val entry = param.queryParamMultiValue.entries()
-                for ((name, value) in entry) {
-                    urlBuilder?.addQueryParameter(name, value)
+                for (i in 0 until param.queryParam.key.size()) {
+                    val key = param.queryParam.key[i]
+                    val value = param.queryParam.value[i]
+                    urlBuilder?.addQueryParameter(key, value)
                 }
             }
             builder.url(urlBuilder?.build().toString())
@@ -597,6 +595,21 @@ class BuilderRequest {
             return this
         }
 
+        fun <T> success(onSuccessListener: OnSuccessListener<T>): MultiPartBuilder {
+            param.success = onSuccessListener as OnSuccessListener<Any>
+            return this
+        }
+
+        fun <T> error(onErrorListener: OnErrorListener<T>): MultiPartBuilder {
+            param.err = onErrorListener as OnErrorListener<Any>
+            return this
+        }
+
+        fun failure(onFailure: OnFailureListener): MultiPartBuilder {
+            param.failure = onFailure
+            return this
+        }
+
         override fun taskId(taskId: Int): MultiPartBuilder {
             param.taskId = taskId
             return this
@@ -623,12 +636,7 @@ class BuilderRequest {
             return this
         }
 
-        override fun queryParam(requestParam: LinkedHashMultimap<String, String>): MultiPartBuilder {
-            param.queryParamMultiValue = requestParam
-            return this
-        }
-
-        override fun queryParam(queryParam: Map<String, String>): MultiPartBuilder {
+        override fun queryParam(queryParam: QueryMap<String, String>): MultiPartBuilder {
             param.queryParam = queryParam
             return this
         }
@@ -658,15 +666,12 @@ class BuilderRequest {
             return this
         }
 
-        override fun connect() {
-            call()?.enqueue(Callback.PostRequestCallbackEnqueue(param))
+        fun queue(): Call {
+            return call()!!
         }
 
-        fun performMultipartRequest(): Observable<*> {
-            val call = call()
-            return RxObservable.SimpleANObservable<Any>(param, call)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+        override fun connect() {
+            call()?.enqueue(Callback.PostRequestCallbackEnqueue(param))
         }
 
         fun call(): Call? {
@@ -678,15 +683,10 @@ class BuilderRequest {
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
             if (!param.queryParam.isEmpty()) {
-                val entries = param.queryParam.entries
-                for ((name, value) in entries) {
-                    urlBuilder?.addQueryParameter(name, value)
-                }
-            }
-            if (!param.queryParamMultiValue.isEmpty) {
-                val entry = param.queryParamMultiValue.entries()
-                for ((name, value) in entry) {
-                    urlBuilder?.addQueryParameter(name, value)
+                for (i in 0 until param.queryParam.key.size()) {
+                    val key = param.queryParam.key[i]
+                    val value = param.queryParam.value[i]
+                    urlBuilder?.addQueryParameter(key, value)
                 }
             }
             builder.url(urlBuilder?.build().toString())
@@ -817,9 +817,9 @@ class BuilderRequest {
             if (!param.debug) {
                 val interceptor = HttpLoggingInterceptor()
                 interceptor.level = HttpLoggingInterceptor.Level.NONE
-                okHttpClient = okHttpClient!!.newBuilder()
-                        .addInterceptor(interceptor)
-                        .build()
+                okHttpClient = okHttpClient?.newBuilder()
+                        ?.addInterceptor(interceptor)
+                        ?.build()
             }
             val okHttpRequest = builder.build()
             val call = okHttpClient?.newCall(okHttpRequest)

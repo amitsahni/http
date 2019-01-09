@@ -9,12 +9,26 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
-import com.google.common.collect.LinkedHashMultimap;
-
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.Call;
+import okhttp3.Response;
+import webconnect.com.webconnect.QueryMap;
 import webconnect.com.webconnect.WebConnect;
 import webconnect.com.webconnect.listener.OnWebCallback;
 
@@ -65,32 +79,83 @@ public class MainActivityModel extends AndroidViewModel {
 //01-17 12:10:53.412 6765-24325/com.brickspms D/OkHttp:
 
     public void get() {
-        Map<String, String> headerMap = new LinkedHashMap<>();
-//        headerMap.put("slug", "default");
-//        headerMap.put("Auth-Token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOjEwODMsImlhdCI6IjIwMTgtMDEtMTIgMDc6NTg6NTAgVVRDIn0.mXkySHf71fa3vdLwUWaIqoqd5nUR2Z3dJ1INq5t4Clo");
+        QueryMap<String, String> headerMap = new QueryMap<>();
         headerMap.put("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NDM3ODMsIm5hbWUiOiJjZmNnZyBHZ2dnIGNjY2MgY2NjY2MiLCJlbWFpbCI6ImFsbWFycmlAbW9oLmdvdi5zYSIsIm1vYmlsZSI6IjUzMDgwMzA5MSIsInJvbGUiOiJlbXBsb3llZSIsImFjY2VzcyI6Im1vYmlsZSIsImRvbWFpbiI6ImFsbCIsImlhdCI6MTU0NjUwMzQ2MSwiZXhwIjoxNTQ5MDk1NDYxfQ.4OhtjSj5b0u7h57t3_9DEBXgkYsqo6nVLJ5eemDYg2o");
-        LinkedHashMultimap<String, String> multimap = LinkedHashMultimap.create();
-        // map.put("status", Arrays.asList("0,1"));
-        multimap.put("status[]", "2");
-        multimap.put("status[]", "1");
-        WebConnect.with(this.activity, "requests")
+        headerMap.put("Authorization", "12");
+        List<Call> callList = new ArrayList<>();
+        Call call1 = WebConnect.with(this.activity, "requests")
                 .get()
-                .queryParam(multimap)
+                .queryParam(headerMap)
+                .headerParam(headerMap)
                 .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
                 .timeOut(100L, 50L)
+                .queue();
+
+        callList.add(call1);
+        headerMap.put("Authorization", "13");
+        Call call2 = WebConnect.with(this.activity, "requests1")
+                .get()
+                .queryParam(headerMap)
                 .headerParam(headerMap)
-                .callback(new OnWebCallback() {
+                .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
+                .timeOut(100L, 50L)
+                .queue();
+
+        callList.add(call2);
+
+        Observable.create((ObservableOnSubscribe<Call>) emitter -> {
+            for (Call c : callList) {
+                emitter.onNext(c);
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap((Function<Call, ObservableSource<String>>) call -> new Simple(call)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread()))
+                .subscribe(new Observer<String>() {
                     @Override
-                    public void onSuccess(@Nullable Object object, int taskId) {
+                    public void onSubscribe(Disposable d) {
 
                     }
 
                     @Override
-                    public void onError(@Nullable Object object, String error, int taskId) {
+                    public void onNext(String o) {
+                        Log.i("Main Activity Model", "response" + o);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
 
                     }
-                }).connect();
 
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    class Simple extends Observable<String> {
+        private Call call;
+
+        Simple(Call call) {
+            this.call = call;
+            Log.i(Simple.class.getSimpleName(), "Request = " + call.request().toString());
+        }
+
+        @Override
+        protected void subscribeActual(Observer<? super String> observer) {
+            try {
+                Response response = call.execute();
+                if (response.body() != null) {
+                    String res = response.body().string();
+                    observer.onNext(res);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public Map<String, String> post() {
@@ -153,19 +218,25 @@ public class MainActivityModel extends AndroidViewModel {
         requestMap.put("name", "Amit Singh");
         requestMap.put("job", "manager");
         WebConnect.with(activity, ENDPOINT_PUT)
-                .delete()
-                .bodyParam(requestMap)
+                .download(new File("/test"))
+                .get()
+                .success(file -> {
+                    Log.i(getClass().getSimpleName(), "success = " + file);
+                })
+                .error(msg -> {
+                    Log.i(getClass().getSimpleName(), "error = " + msg);
+                })
                 .callback(new OnWebCallback() {
                     @Override
                     public <T> void onSuccess(@Nullable T object, int taskId) {
                         if (object != null) {
-                            delete.setValue(object);
+                            delete.postValue(object);
                         }
                     }
 
                     @Override
                     public <T> void onError(@Nullable T object, String error, int taskId) {
-                        delete.setValue(object);
+                        delete.postValue(object);
                     }
                 }).connect();
     }

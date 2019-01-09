@@ -4,31 +4,22 @@ package webconnect.com.webconnect
  * Created by amit on 10/8/17.
  */
 
-import android.content.ContentValues.TAG
-import android.net.TrafficStats
 import android.util.Log
-import io.reactivex.Observer
-import io.reactivex.annotations.NonNull
-import io.reactivex.disposables.Disposable
 import okhttp3.Call
-import okhttp3.MediaType
 import okhttp3.Response
-import okhttp3.ResponseBody
+import org.apache.commons.io.IOUtils
 import webconnect.com.webconnect.listener.AnalyticsListener
-import webconnect.com.webconnect.listener.ProgressListener
+import webconnect.com.webconnect.observer.ErrorLiveData
+import webconnect.com.webconnect.observer.FailureLiveData
+import webconnect.com.webconnect.observer.SuccessLiveData
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.OutputStream
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.security.cert.CertificateException
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import android.provider.SyncStateContract.Helpers.update
-import okio.*
-import org.apache.commons.io.IOUtils
-import webconnect.com.webconnect.ApiConfiguration.isDebug
-import java.io.FileOutputStream
-import java.io.OutputStream
 
 
 /**
@@ -37,51 +28,6 @@ import java.io.OutputStream
  * @param <T> the type parameter
 </T> */
 class Callback<T> {
-
-    // RxAndroid
-    internal class GetRequestCallback(private val param: WebParam) : Observer<Any> {
-
-        override fun onSubscribe(@io.reactivex.annotations.NonNull d: Disposable) {
-            try {
-                param.dialog?.let {
-                    if (!param.dialog?.isShowing!!) {
-                        param.dialog?.show()
-                    }
-                }
-            } catch (e: Exception) {
-                e.stackTrace
-            }
-        }
-
-        override fun onNext(@io.reactivex.annotations.NonNull response: Any) {
-            if (response is ObserverModel) {
-                response.also {
-                    if (it.type == 1) {
-                        param.callback?.onSuccess(it.model, param.taskId)
-                    } else {
-                        param.callback?.onError(it.model, "", param.taskId)
-                    }
-                }
-            }
-        }
-
-        override fun onError(@NonNull e: Throwable) {
-            param.callback?.onError(e, getError(param, e), param.taskId)
-            onComplete()
-        }
-
-        override fun onComplete() {
-            try {
-                param.dialog?.let {
-                    if (param.dialog?.isShowing!!) {
-                        param.dialog?.dismiss()
-                    }
-                }
-            } catch (e: Exception) {
-                e.stackTrace
-            }
-        }
-    }
 
     // Enqueue
     internal class GetRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
@@ -111,6 +57,8 @@ class Callback<T> {
                 e.stackTrace
             }
             param.callback?.onError(e, getError(param, e), param.taskId)
+            param.failure?.onFailure(e, getError(param, e))
+            FailureLiveData.getInstance().postValue(getError(param, e))
         }
 
         override fun onResponse(call: Call, response: Response) {
@@ -130,59 +78,18 @@ class Callback<T> {
                     val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
                     param.callback?.onSuccess(obj, param.taskId)
+                    param.success?.onSuccess(obj)
+                    SuccessLiveData.getInstance().postValue(responseString)
                 } else {
                     val obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
                     param.callback?.onError(obj, "", param.taskId)
+                    param.err?.onError(obj)
+                    ErrorLiveData.getInstance().postValue(responseString)
                 }
             }
         }
 
-    }
-
-    // RxAndroid
-    internal open class PostRequestCallback(private val param: WebParam) : Observer<Any> {
-
-        override fun onSubscribe(@io.reactivex.annotations.NonNull d: Disposable) {
-            try {
-                param.dialog?.let {
-                    if (!param.dialog?.isShowing!!) {
-                        param.dialog?.show()
-                    }
-                }
-            } catch (e: Exception) {
-                e.stackTrace
-            }
-        }
-
-        override fun onNext(@io.reactivex.annotations.NonNull response: Any) {
-            if (response is ObserverModel) {
-                response.also {
-                    if (it.type == 1) {
-                        param.callback?.onSuccess(it.model, param.taskId)
-                    } else {
-                        param.callback?.onError(it.model, "", param.taskId)
-                    }
-                }
-            }
-        }
-
-        override fun onError(@NonNull e: Throwable) {
-            param.callback?.onError(e, getError(param, e), param.taskId)
-            onComplete()
-        }
-
-        override fun onComplete() {
-            try {
-                param.dialog?.let {
-                    if (param.dialog?.isShowing!!) {
-                        param.dialog?.dismiss()
-                    }
-                }
-            } catch (e: Exception) {
-                e.stackTrace
-            }
-        }
     }
 
     // Enqueue
@@ -213,6 +120,8 @@ class Callback<T> {
                 e.stackTrace
             }
             param.callback?.onError(e, getError(param, e), param.taskId)
+            param.failure?.onFailure(e, getError(param, e))
+            FailureLiveData.getInstance().postValue(getError(param, e))
         }
 
         override fun onResponse(call: Call, response: Response) {
@@ -232,52 +141,20 @@ class Callback<T> {
                     val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
                     param.callback?.onSuccess(obj, param.taskId)
+                    param.success?.onSuccess(obj)
+                    SuccessLiveData.getInstance().postValue(responseString)
                 } else {
                     val obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
                     param.callback?.onError(obj, "", param.taskId)
+                    param.err?.onError(obj)
+                    ErrorLiveData.getInstance().postValue(responseString)
                 }
             }
         }
 
     }
 
-    // RxAndroid
-    internal class DownloadRequestCallback(private val param: WebParam) : Observer<Any> {
-
-        override fun onSubscribe(@NonNull d: Disposable) {
-            try {
-                param.dialog?.let {
-                    if (!param.dialog?.isShowing!!) {
-                        param.dialog?.show()
-                    }
-                }
-            } catch (e: Exception) {
-                e.stackTrace
-            }
-        }
-
-        override fun onNext(@NonNull o: Any) {
-            param.callback?.onSuccess(this.param.file, this.param.taskId)
-        }
-
-        override fun onError(@NonNull e: Throwable) {
-            param.callback?.onError(e, getError(param, e), param.taskId)
-            onComplete()
-        }
-
-        override fun onComplete() {
-            try {
-                param.dialog?.let {
-                    if (param.dialog?.isShowing!!) {
-                        param.dialog?.dismiss()
-                    }
-                }
-            } catch (e: Exception) {
-                e.stackTrace
-            }
-        }
-    }
 
     // Enqueue
     internal class DownloadRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
@@ -307,6 +184,8 @@ class Callback<T> {
                 e.stackTrace
             }
             param.callback?.onError(e, getError(param, e), param.taskId)
+            param.failure?.onFailure(e, getError(param, e))
+            FailureLiveData.getInstance().postValue(getError(param, e))
         }
 
         override fun onResponse(call: Call, response: Response) {
@@ -335,12 +214,18 @@ class Callback<T> {
                     }
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
                     param.callback?.onSuccess(this.param.file, this.param.taskId)
+                    param.success?.onSuccess(this.param.file!!)
                 } else {
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
                     if (response.body() != null) {
-                        param.callback?.onError(response.body()!!.string(), "", param.taskId)
+                        val error = response.body()!!.string()
+                        param.callback?.onError(error, "", param.taskId)
+                        param.err?.onError(error)
+                        ErrorLiveData.getInstance().postValue(error)
                     } else {
                         param.callback?.onError(Throwable(""), "", param.taskId)
+                        param.err?.onError("")
+                        ErrorLiveData.getInstance().postValue("")
                     }
                 }
             }
@@ -361,22 +246,6 @@ class Callback<T> {
         }
     }
 
-
-    internal class UploadRequestCallback(param: WebParam) : PostRequestCallback(param)
-
-    internal class ProgressCallback(private val param: WebParam) : ProgressListener {
-
-        override fun onProgress(bytesDownloaded: Long, totalBytes: Long, progress: Float) {
-            param.progressListener?.onProgress(bytesDownloaded, totalBytes, progress)
-        }
-    }
-
-    internal class UploadProgressCallback(private val param: WebParam) : ProgressListener {
-
-        override fun onProgress(bytesDownloaded: Long, totalBytes: Long, progress: Float) {
-            param.progressListener?.onProgress(bytesDownloaded, totalBytes, progress)
-        }
-    }
 
     companion object {
 
