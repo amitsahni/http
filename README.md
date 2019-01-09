@@ -239,6 +239,6 @@ Add the JitPack repository to your root build.gradle:
 Add the Gradle dependency:
 ```groovy
 	dependencies {
-		compile 'com.github.amitsahni:http:1.0.6'
+		compile 'com.github.amitsahni:http:1.0.7'
 	}
 ```
