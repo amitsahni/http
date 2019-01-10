@@ -96,6 +96,11 @@ class BuilderRequest {
             return this
         }
 
+        fun loader(loaderListener: LoaderListener): GetRequestBuilder {
+            param.loaderListener = loaderListener
+            return this
+        }
+
         override fun queryParam(queryParam: QueryMap<String, String>): GetRequestBuilder {
             param.queryParam = queryParam
             return this

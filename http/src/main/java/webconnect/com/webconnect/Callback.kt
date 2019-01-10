@@ -27,7 +27,7 @@ import java.util.concurrent.TimeoutException
  *
  * @param <T> the type parameter
 </T> */
-class Callback<T> {
+class Callback {
 
     // Enqueue
     internal class GetRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
@@ -35,6 +35,7 @@ class Callback<T> {
 
         init {
             startTime = System.currentTimeMillis()
+            param.loaderListener?.loader(true)
             try {
                 param.dialog?.let {
                     if (!param.dialog?.isShowing!!) {
@@ -47,6 +48,7 @@ class Callback<T> {
         }
 
         override fun onFailure(call: Call, e: IOException) {
+            param.loaderListener?.loader(false)
             try {
                 param.dialog?.let {
                     if (param.dialog?.isShowing!!) {
@@ -63,6 +65,7 @@ class Callback<T> {
 
         override fun onResponse(call: Call, response: Response) {
             val timeTaken = System.currentTimeMillis() - startTime
+            param.loaderListener?.loader(false)
             try {
                 param.dialog?.let {
                     if (param.dialog?.isShowing!!) {
@@ -98,6 +101,7 @@ class Callback<T> {
         var startTime = 0L
 
         init {
+            param.loaderListener?.loader(true)
             startTime = System.currentTimeMillis()
             try {
                 param.dialog?.let {
@@ -111,6 +115,7 @@ class Callback<T> {
         }
 
         override fun onFailure(call: Call, e: IOException) {
+            param.loaderListener?.loader(false)
             try {
                 param.dialog?.let {
                     if (param.dialog?.isShowing!!) {
@@ -127,6 +132,7 @@ class Callback<T> {
 
         override fun onResponse(call: Call, response: Response) {
             val timeTaken = System.currentTimeMillis() - startTime
+            param.loaderListener?.loader(false)
             try {
                 param.dialog?.let {
                     if (param.dialog?.isShowing!!) {
@@ -163,6 +169,7 @@ class Callback<T> {
         var startTime = 0L
 
         init {
+            param.loaderListener?.loader(true)
             startTime = System.currentTimeMillis()
             try {
                 param.dialog?.let {
@@ -176,6 +183,7 @@ class Callback<T> {
         }
 
         override fun onFailure(call: Call, e: IOException) {
+            param.loaderListener?.loader(false)
             try {
                 param.dialog?.let {
                     if (param.dialog?.isShowing!!) {
@@ -192,6 +200,7 @@ class Callback<T> {
 
         override fun onResponse(call: Call, response: Response) {
             val timeTaken = System.currentTimeMillis() - startTime
+            param.loaderListener?.loader(false)
             try {
                 param.dialog?.let {
                     if (param.dialog?.isShowing!!) {

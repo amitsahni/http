@@ -31,6 +31,7 @@ class WebParam : Serializable {
     var responseListener: ResponseListener? = null
     var progressListener: ProgressListener? = null
     var analyticsListener: AnalyticsListener? = null
+    var loaderListener: LoaderListener? = null
     var dialog: Dialog? = null
     var model: Class<*> = Any::class.java
     var error: Class<*> = Any::class.java
