@@ -4,12 +4,16 @@ import android.app.Dialog
 import android.content.ContentResolver
 import android.net.Uri
 import android.text.TextUtils
+import android.util.Log
 import android.webkit.MimeTypeMap
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import webconnect.com.webconnect.di.IProperties
 import webconnect.com.webconnect.listener.*
+import webconnect.com.webconnect.model.ErrorModel
+import webconnect.com.webconnect.model.SuccessModel
 import java.io.File
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 
@@ -18,6 +22,7 @@ import java.util.concurrent.TimeUnit
  */
 class BuilderRequest {
     open class GetRequestBuilder(private val param: WebParam) : IProperties<GetRequestBuilder> {
+
         private var okHttpClient: OkHttpClient? = null
         override fun baseUrl(url: String): GetRequestBuilder {
             param.baseUrl = url
@@ -29,6 +34,7 @@ class BuilderRequest {
             return this
         }
 
+        @Deprecated("Going to depricate")
         override fun callback(callback: OnWebCallback): GetRequestBuilder {
             param.callback = callback
             return this
@@ -39,6 +45,7 @@ class BuilderRequest {
             return this
         }
 
+        @Deprecated("Going to depricate")
         override fun callback(callback: OnWebCallback, success: Class<*>, error: Class<*>): GetRequestBuilder {
             param.callback = callback
             param.model = success
@@ -46,18 +53,25 @@ class BuilderRequest {
             return this
         }
 
-        fun <T> success(onSuccessListener: OnSuccessListener<T>): GetRequestBuilder {
+        fun <T : SuccessModel> success(t: Class<T>, onSuccessListener: OnSuccessListener<T>): GetRequestBuilder {
+            param.model = t
             param.success = onSuccessListener as OnSuccessListener<Any>
             return this
         }
 
-        fun <T> error(onErrorListener: OnErrorListener<T>): GetRequestBuilder {
+        fun <T : ErrorModel> error(t: Class<T>, onErrorListener: OnErrorListener<T>): GetRequestBuilder {
+            param.error = t
             param.err = onErrorListener as OnErrorListener<Any>
             return this
         }
 
         fun failure(onFailure: OnFailureListener): GetRequestBuilder {
             param.failure = onFailure
+            return this
+        }
+
+        fun response(responseListener: ResponseListener): GetRequestBuilder {
+            param.responseListener = responseListener
             return this
         }
 
@@ -187,11 +201,13 @@ class BuilderRequest {
             return this
         }
 
+        @Deprecated("Going to depricate")
         override fun callback(callback: OnWebCallback): PostRequestBuilder {
             param.callback = callback
             return this
         }
 
+        @Deprecated("Going to depricate")
         override fun callback(callback: OnWebCallback, success: Class<*>, error: Class<*>): PostRequestBuilder {
             param.callback = callback
             param.model = success
@@ -199,18 +215,25 @@ class BuilderRequest {
             return this
         }
 
-        fun <T> success(onSuccessListener: OnSuccessListener<T>): PostRequestBuilder {
+        fun <T : SuccessModel> success(t: Class<T>, onSuccessListener: OnSuccessListener<T>): PostRequestBuilder {
+            param.model = t
             param.success = onSuccessListener as OnSuccessListener<Any>
             return this
         }
 
-        fun <T> error(onErrorListener: OnErrorListener<T>): PostRequestBuilder {
+        fun <T : ErrorModel> error(t: Class<T>, onErrorListener: OnErrorListener<T>): PostRequestBuilder {
+            param.error = t
             param.err = onErrorListener as OnErrorListener<Any>
             return this
         }
 
         fun failure(onFailure: OnFailureListener): PostRequestBuilder {
             param.failure = onFailure
+            return this
+        }
+
+        fun response(responseListener: ResponseListener): PostRequestBuilder {
+            param.responseListener = responseListener
             return this
         }
 
@@ -391,11 +414,13 @@ class BuilderRequest {
             return this
         }
 
+        @Deprecated("Going to depricate")
         override fun callback(callback: OnWebCallback): DownloadBuilder {
             param.callback = callback
             return this
         }
 
+        @Deprecated("Going to depricate")
         override fun callback(callback: OnWebCallback, success: Class<*>, error: Class<*>): DownloadBuilder {
             param.callback = callback
             param.model = success
@@ -408,7 +433,8 @@ class BuilderRequest {
             return this
         }
 
-        fun error(onErrorListener: OnErrorListener<String>): DownloadBuilder {
+        fun <T : ErrorModel> error(t: Class<T>, onErrorListener: OnErrorListener<T>): DownloadBuilder {
+            param.error = t
             param.err = onErrorListener as OnErrorListener<Any>
             return this
         }
@@ -583,11 +609,13 @@ class BuilderRequest {
             return this
         }
 
+        @Deprecated("Going to depricate")
         override fun callback(callback: OnWebCallback): MultiPartBuilder {
             param.callback = callback
             return this
         }
 
+        @Deprecated("Going to depricate")
         override fun callback(callback: OnWebCallback, success: Class<*>, error: Class<*>): MultiPartBuilder {
             param.callback = callback
             param.model = success
@@ -595,18 +623,25 @@ class BuilderRequest {
             return this
         }
 
-        fun <T> success(onSuccessListener: OnSuccessListener<T>): MultiPartBuilder {
+        fun <T : SuccessModel> success(t: Class<T>, onSuccessListener: OnSuccessListener<T>): MultiPartBuilder {
+            param.model = t
             param.success = onSuccessListener as OnSuccessListener<Any>
             return this
         }
 
-        fun <T> error(onErrorListener: OnErrorListener<T>): MultiPartBuilder {
+        fun <T : ErrorModel> error(t: Class<T>, onErrorListener: OnErrorListener<T>): MultiPartBuilder {
+            param.error = t
             param.err = onErrorListener as OnErrorListener<Any>
             return this
         }
 
         fun failure(onFailure: OnFailureListener): MultiPartBuilder {
             param.failure = onFailure
+            return this
+        }
+
+        fun response(responseListener: ResponseListener): MultiPartBuilder {
+            param.responseListener = responseListener
             return this
         }
 
@@ -674,7 +709,7 @@ class BuilderRequest {
             call()?.enqueue(Callback.PostRequestCallbackEnqueue(param))
         }
 
-        fun call(): Call? {
+        private fun call(): Call? {
             var baseUrl = ApiConfiguration.getBaseUrl()
             if (!TextUtils.isEmpty(param.baseUrl)) {
                 baseUrl = param.baseUrl

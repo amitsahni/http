@@ -155,7 +155,12 @@ List<Call> callList = new ArrayList<>();
                 .headerParam(headerMap)
                 .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
                 .timeOut(100L, 50L)
-                .s
+                .success(ResponseModel.class, model -> {
+                                })
+                .error(Error.class, model -> {
+                                })
+                .failure((model, msg) -> {
+                                })
                 .queue();
 
         callList.add(call1);

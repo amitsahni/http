@@ -16,10 +16,12 @@ interface IProperties<T> {
 
     fun queryParam(queryParam: QueryMap<String, String>): T
 
+    @Deprecated("Will deprecate")
     fun callback(callback: OnWebCallback): T
 
     fun analyticsListener(callback: AnalyticsListener): T
 
+    @Deprecated("Will deprecate")
     fun callback(callback: OnWebCallback,
                  success: Class<*>, error: Class<*>): T
 

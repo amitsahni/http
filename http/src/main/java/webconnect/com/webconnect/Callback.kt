@@ -74,6 +74,7 @@ class Callback<T> {
             }
             if (response.body() != null) {
                 val responseString = response.body()?.string()!!
+                param.responseListener?.response(responseString)
                 if (response.isSuccessful) {
                     val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
@@ -137,6 +138,7 @@ class Callback<T> {
             }
             if (response.body() != null) {
                 val responseString = response.body()?.string()!!
+                param.responseListener?.response(responseString)
                 if (response.isSuccessful) {
                     val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)

@@ -3,6 +3,8 @@ package webconnect.com.webconnect
 import android.app.Dialog
 import android.content.Context
 import webconnect.com.webconnect.listener.*
+import webconnect.com.webconnect.model.ErrorModel
+import webconnect.com.webconnect.model.SuccessModel
 import java.io.File
 import java.io.Serializable
 import java.util.*
@@ -26,6 +28,7 @@ class WebParam : Serializable {
     var success: OnSuccessListener<Any>? = null
     var err: OnErrorListener<Any>? = null
     var failure: OnFailureListener? = null
+    var responseListener: ResponseListener? = null
     var progressListener: ProgressListener? = null
     var analyticsListener: AnalyticsListener? = null
     var dialog: Dialog? = null

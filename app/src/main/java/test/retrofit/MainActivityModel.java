@@ -19,18 +19,13 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.Call;
 import okhttp3.Response;
 import webconnect.com.webconnect.QueryMap;
 import webconnect.com.webconnect.WebConnect;
 import webconnect.com.webconnect.listener.OnWebCallback;
+import webconnect.com.webconnect.model.SuccessModel;
 
 /**
  * Created by clickapps on 22/12/17.
@@ -83,56 +78,65 @@ public class MainActivityModel extends AndroidViewModel {
         headerMap.put("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NDM3ODMsIm5hbWUiOiJjZmNnZyBHZ2dnIGNjY2MgY2NjY2MiLCJlbWFpbCI6ImFsbWFycmlAbW9oLmdvdi5zYSIsIm1vYmlsZSI6IjUzMDgwMzA5MSIsInJvbGUiOiJlbXBsb3llZSIsImFjY2VzcyI6Im1vYmlsZSIsImRvbWFpbiI6ImFsbCIsImlhdCI6MTU0NjUwMzQ2MSwiZXhwIjoxNTQ5MDk1NDYxfQ.4OhtjSj5b0u7h57t3_9DEBXgkYsqo6nVLJ5eemDYg2o");
         headerMap.put("Authorization", "12");
         List<Call> callList = new ArrayList<>();
-        Call call1 = WebConnect.with(this.activity, "requests")
+        WebConnect.with(this.activity, "requests")
                 .get()
                 .queryParam(headerMap)
                 .headerParam(headerMap)
                 .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
                 .timeOut(100L, 50L)
-                .queue();
+                .response(msg -> {
 
-        callList.add(call1);
-        headerMap.put("Authorization", "13");
-        Call call2 = WebConnect.with(this.activity, "requests1")
-                .get()
-                .queryParam(headerMap)
-                .headerParam(headerMap)
-                .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
-                .timeOut(100L, 50L)
-                .queue();
+                })
+                .success(ResponseModel.class, model -> {
+                })
+                .error(Error.class, model -> {
+                })
+                .failure((model, msg) -> {
+                })
+                .connect();
 
-        callList.add(call2);
-
-        Observable.create((ObservableOnSubscribe<Call>) emitter -> {
-            for (Call c : callList) {
-                emitter.onNext(c);
-            }
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .flatMap((Function<Call, ObservableSource<String>>) call -> new Simple(call)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()))
-                .subscribe(new Observer<String>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(String o) {
-                        Log.i("Main Activity Model", "response" + o);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+//        callList.add(call1);
+//        headerMap.put("Authorization", "13");
+//        Call call2 = WebConnect.with(this.activity, "requests1")
+//                .get()
+//                .queryParam(headerMap)
+//                .headerParam(headerMap)
+//                .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
+//                .timeOut(100L, 50L)
+//                .queue();
+//
+//        callList.add(call2);
+//
+//        Observable.create((ObservableOnSubscribe<Call>) emitter -> {
+//            for (Call c : callList) {
+//                emitter.onNext(c);
+//            }
+//        }).subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .flatMap((Function<Call, ObservableSource<String>>) call -> new Simple(call)
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread()))
+//                .subscribe(new Observer<String>() {
+//                    @Override
+//                    public void onSubscribe(Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(String o) {
+//                        Log.i("Main Activity Model", "response" + o);
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
     }
 
     class Simple extends Observable<String> {
@@ -156,6 +160,10 @@ public class MainActivityModel extends AndroidViewModel {
                 e.printStackTrace();
             }
         }
+    }
+
+    interface set<T extends SuccessModel> {
+
     }
 
     public Map<String, String> post() {
@@ -220,12 +228,6 @@ public class MainActivityModel extends AndroidViewModel {
         WebConnect.with(activity, ENDPOINT_PUT)
                 .download(new File("/test"))
                 .get()
-                .success(file -> {
-                    Log.i(getClass().getSimpleName(), "success = " + file);
-                })
-                .error(msg -> {
-                    Log.i(getClass().getSimpleName(), "error = " + msg);
-                })
                 .callback(new OnWebCallback() {
                     @Override
                     public <T> void onSuccess(@Nullable T object, int taskId) {
