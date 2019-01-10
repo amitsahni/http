@@ -77,7 +77,6 @@ public class MainActivityModel extends AndroidViewModel {
         QueryMap<String, String> headerMap = new QueryMap<>();
         headerMap.put("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NDM3ODMsIm5hbWUiOiJjZmNnZyBHZ2dnIGNjY2MgY2NjY2MiLCJlbWFpbCI6ImFsbWFycmlAbW9oLmdvdi5zYSIsIm1vYmlsZSI6IjUzMDgwMzA5MSIsInJvbGUiOiJlbXBsb3llZSIsImFjY2VzcyI6Im1vYmlsZSIsImRvbWFpbiI6ImFsbCIsImlhdCI6MTU0NjUwMzQ2MSwiZXhwIjoxNTQ5MDk1NDYxfQ.4OhtjSj5b0u7h57t3_9DEBXgkYsqo6nVLJ5eemDYg2o");
         headerMap.put("Authorization", "12");
-        List<Call> callList = new ArrayList<>();
         WebConnect.with(this.activity, "requests")
                 .get()
                 .queryParam(headerMap)
@@ -94,75 +93,6 @@ public class MainActivityModel extends AndroidViewModel {
                 .failure((model, msg) -> {
                 })
                 .connect();
-
-//        callList.add(call1);
-//        headerMap.put("Authorization", "13");
-//        Call call2 = WebConnect.with(this.activity, "requests1")
-//                .get()
-//                .queryParam(headerMap)
-//                .headerParam(headerMap)
-//                .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
-//                .timeOut(100L, 50L)
-//                .queue();
-//
-//        callList.add(call2);
-//
-//        Observable.create((ObservableOnSubscribe<Call>) emitter -> {
-//            for (Call c : callList) {
-//                emitter.onNext(c);
-//            }
-//        }).subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .flatMap((Function<Call, ObservableSource<String>>) call -> new Simple(call)
-//                        .subscribeOn(Schedulers.io())
-//                        .observeOn(AndroidSchedulers.mainThread()))
-//                .subscribe(new Observer<String>() {
-//                    @Override
-//                    public void onSubscribe(Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(String o) {
-//                        Log.i("Main Activity Model", "response" + o);
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-    }
-
-    class Simple extends Observable<String> {
-        private Call call;
-
-        Simple(Call call) {
-            this.call = call;
-            Log.i(Simple.class.getSimpleName(), "Request = " + call.request().toString());
-        }
-
-        @Override
-        protected void subscribeActual(Observer<? super String> observer) {
-            try {
-                Response response = call.execute();
-                if (response.body() != null) {
-                    String res = response.body().string();
-                    observer.onNext(res);
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    interface set<T extends SuccessModel> {
 
     }
 

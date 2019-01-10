@@ -18,6 +18,7 @@ public class QueryMap<K, V> extends LinkedHashMap<K, V> {
     private SparseArray<V> value = new SparseArray<>();
     private AtomicInteger autoIncrement = new AtomicInteger();
 
+
     @Override
     public V put(K key, V value) {
         int auto = autoIncrement.getAndIncrement();
