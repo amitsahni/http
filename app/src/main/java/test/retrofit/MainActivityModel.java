@@ -74,7 +74,7 @@ public class MainActivityModel extends AndroidViewModel {
 //01-17 12:10:53.412 6765-24325/com.brickspms D/OkHttp:
 
     public void get() {
-        QueryMap<String, String> headerMap = new QueryMap<>();
+        Map<String, String> headerMap = new LinkedHashMap<>();
         headerMap.put("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NDM3ODMsIm5hbWUiOiJjZmNnZyBHZ2dnIGNjY2MgY2NjY2MiLCJlbWFpbCI6ImFsbWFycmlAbW9oLmdvdi5zYSIsIm1vYmlsZSI6IjUzMDgwMzA5MSIsInJvbGUiOiJlbXBsb3llZSIsImFjY2VzcyI6Im1vYmlsZSIsImRvbWFpbiI6ImFsbCIsImlhdCI6MTU0NjUwMzQ2MSwiZXhwIjoxNTQ5MDk1NDYxfQ.4OhtjSj5b0u7h57t3_9DEBXgkYsqo6nVLJ5eemDYg2o");
         headerMap.put("Authorization", "12");
         WebConnect.with(this.activity, "requests")
@@ -83,6 +83,9 @@ public class MainActivityModel extends AndroidViewModel {
                 .headerParam(headerMap)
                 .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
                 .timeOut(100L, 50L)
+                .loader(isShowing -> {
+                    Log.i(getClass().getSimpleName(), "Loader showing = " + isShowing);
+                })
                 .response(msg -> {
 
                 })
