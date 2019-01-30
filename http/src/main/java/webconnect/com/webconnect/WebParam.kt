@@ -20,6 +20,7 @@ class WebParam : Serializable {
     var httpType = HttpType.GET
     var requestParam: Map<String, Any> = LinkedHashMap()
     var queryParam: QueryMap<String, String> = QueryMap()
+    var query: Map<String, String> = LinkedHashMap()
     var multipartParam: Map<String, String> = LinkedHashMap()
     var multipartParamFile: Map<String, File> = LinkedHashMap()
     var multipartParamListFile: Map<String, List<File>> = LinkedHashMap()

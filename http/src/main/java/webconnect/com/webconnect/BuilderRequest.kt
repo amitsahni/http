@@ -106,6 +106,10 @@ class BuilderRequest {
             return this
         }
 
+        fun queryParam(queryParam: Map<String, String>): GetRequestBuilder {
+            param.query = queryParam
+            return this
+        }
 
         fun progressListener(callback: ProgressListener): GetRequestBuilder {
             param.progressListener = callback
@@ -127,6 +131,11 @@ class BuilderRequest {
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
+            if (!param.query.isEmpty()) {
+                param.query.forEach { (key, value) ->
+                    urlBuilder?.addQueryParameter(key, value)
+                }
+            }
             if (!param.queryParam.isEmpty()) {
                 for (i in 0 until param.queryParam.key.size()) {
                     val key = param.queryParam.key[i]
@@ -198,6 +207,11 @@ class BuilderRequest {
 
         override fun queryParam(queryParam: QueryMap<String, String>): PostRequestBuilder {
             param.queryParam = queryParam
+            return this
+        }
+
+        fun queryParam(queryParam: Map<String, String>): PostRequestBuilder {
+            param.query = queryParam
             return this
         }
 
@@ -305,6 +319,11 @@ class BuilderRequest {
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + this.param.url)?.newBuilder()
+            if (!param.query.isEmpty()) {
+                param.query.forEach { (key, value) ->
+                    urlBuilder?.addQueryParameter(key, value)
+                }
+            }
             if (!param.queryParam.isEmpty()) {
                 for (i in 0 until param.queryParam.key.size()) {
                     val key = param.queryParam.key[i]
@@ -480,6 +499,11 @@ class BuilderRequest {
             return this
         }
 
+        fun queryParam(queryParam: Map<String, String>): DownloadBuilder {
+            param.query = queryParam
+            return this
+        }
+
         fun progressListener(callback: ProgressListener): DownloadBuilder {
             param.progressListener = callback
             return this
@@ -506,6 +530,11 @@ class BuilderRequest {
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
+            if (!param.query.isEmpty()) {
+                param.query.forEach { (key, value) ->
+                    urlBuilder?.addQueryParameter(key, value)
+                }
+            }
             if (!param.queryParam.isEmpty()) {
                 for (i in 0 until param.queryParam.key.size()) {
                     val key = param.queryParam.key[i]
@@ -681,6 +710,11 @@ class BuilderRequest {
             return this
         }
 
+        fun queryParam(queryParam: Map<String, String>): MultiPartBuilder {
+            param.query = queryParam
+            return this
+        }
+
         fun multipartParam(multipartParam: Map<String, String>): MultiPartBuilder {
             param.multipartParam = multipartParam
             return this
@@ -722,6 +756,11 @@ class BuilderRequest {
 
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
+            if (!param.query.isEmpty()) {
+                param.query.forEach { (key, value) ->
+                    urlBuilder?.addQueryParameter(key, value)
+                }
+            }
             if (!param.queryParam.isEmpty()) {
                 for (i in 0 until param.queryParam.key.size()) {
                     val key = param.queryParam.key[i]

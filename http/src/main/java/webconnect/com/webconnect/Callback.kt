@@ -9,6 +9,7 @@ import okhttp3.Call
 import okhttp3.Response
 import org.apache.commons.io.IOUtils
 import webconnect.com.webconnect.listener.AnalyticsListener
+import webconnect.com.webconnect.model.ErrorModel
 import webconnect.com.webconnect.observer.ErrorLiveData
 import webconnect.com.webconnect.observer.FailureLiveData
 import webconnect.com.webconnect.observer.SuccessLiveData
@@ -85,11 +86,19 @@ class Callback {
                     param.success?.onSuccess(obj)
                     SuccessLiveData.getInstance().postValue(responseString)
                 } else {
-                    val obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
+                    var obj: Any? = null
+                    try {
+                        obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
+                        param.callback?.onError(obj, "", param.taskId)
+                        param.err?.onError(obj)
+                        ErrorLiveData.getInstance().postValue(responseString)
+                    } catch (e: Exception) {
+                        param.callback?.onError(obj!!, e.message, param.taskId)
+                        param.failure?.onFailure(e, getError(param, e))
+                        FailureLiveData.getInstance().postValue(getError(param, e))
+                    }
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
-                    param.callback?.onError(obj, "", param.taskId)
-                    param.err?.onError(obj)
-                    ErrorLiveData.getInstance().postValue(responseString)
+
                 }
             }
         }
@@ -152,11 +161,19 @@ class Callback {
                     param.success?.onSuccess(obj)
                     SuccessLiveData.getInstance().postValue(responseString)
                 } else {
-                    val obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
+                    var obj: Any? = null
+                    try {
+                        obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
+                        param.callback?.onError(obj, "", param.taskId)
+                        param.err?.onError(obj)
+                        ErrorLiveData.getInstance().postValue(responseString)
+                    } catch (e: Exception) {
+                        param.callback?.onError(obj!!, e.message, param.taskId)
+                        param.failure?.onFailure(e, getError(param, e))
+                        FailureLiveData.getInstance().postValue(getError(param, e))
+                    }
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
-                    param.callback?.onError(obj, "", param.taskId)
-                    param.err?.onError(obj)
-                    ErrorLiveData.getInstance().postValue(responseString)
+
                 }
             }
         }
