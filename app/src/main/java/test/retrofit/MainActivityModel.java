@@ -12,20 +12,11 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import io.reactivex.Observable;
-import io.reactivex.Observer;
-import okhttp3.Call;
-import okhttp3.Response;
-import webconnect.com.webconnect.QueryMap;
 import webconnect.com.webconnect.WebConnect;
 import webconnect.com.webconnect.listener.OnWebCallback;
-import webconnect.com.webconnect.model.SuccessModel;
 
 /**
  * Created by clickapps on 22/12/17.
@@ -90,6 +81,7 @@ public class MainActivityModel extends AndroidViewModel {
 
                 })
                 .success(ResponseModel.class, model -> {
+
                 })
                 .error(Error.class, model -> {
                 })

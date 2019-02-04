@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.ContentResolver
 import android.net.Uri
 import android.text.TextUtils
-import android.util.Log
 import android.webkit.MimeTypeMap
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -13,7 +12,6 @@ import webconnect.com.webconnect.listener.*
 import webconnect.com.webconnect.model.ErrorModel
 import webconnect.com.webconnect.model.SuccessModel
 import java.io.File
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 
@@ -59,11 +57,13 @@ class BuilderRequest {
             return this
         }
 
+
         fun <T : ErrorModel> error(t: Class<T>, onErrorListener: OnErrorListener<T>): GetRequestBuilder {
             param.error = t
             param.err = onErrorListener as OnErrorListener<Any>
             return this
         }
+
 
         fun failure(onFailure: OnFailureListener): GetRequestBuilder {
             param.failure = onFailure
@@ -113,6 +113,69 @@ class BuilderRequest {
 
         fun progressListener(callback: ProgressListener): GetRequestBuilder {
             param.progressListener = callback
+            return this
+        }
+
+        // Higher Order function
+        fun <T : SuccessModel> success(t: (T) -> Unit): GetRequestBuilder {
+            param.model = t.javaClass
+            val success = object : OnSuccessListener<T> {
+                override fun onSuccess(model: T) {
+                    t(model)
+                }
+            }
+            param.success = success as OnSuccessListener<Any>
+            return this
+        }
+
+        fun <T : ErrorModel> error(t: (T) -> Unit): GetRequestBuilder {
+            param.error = t.javaClass
+            val error = object : OnErrorListener<T> {
+                override fun onError(model: T) {
+                    t(model)
+                }
+            }
+            param.err = error as OnErrorListener<Any>
+            return this
+        }
+
+        fun failure(t: (Exception, String) -> (Unit)): GetRequestBuilder {
+            val failure = object : OnFailureListener {
+                override fun onFailure(e: Exception, msg: String) {
+                    t(e, msg)
+                }
+            }
+            param.failure = failure
+            return this
+        }
+
+        fun response(t: (String) -> String): GetRequestBuilder {
+            val response = object : ResponseListener {
+                override fun response(string: String) {
+                    t(string)
+                }
+            }
+            param.responseListener = response
+            return this
+        }
+
+        fun loader(t: (Boolean) -> Unit): GetRequestBuilder {
+            val loader = object : LoaderListener {
+                override fun loader(isShowing: Boolean) {
+                    t(isShowing)
+                }
+            }
+            param.loaderListener = loader
+            return this
+        }
+
+        fun progressListener(t: (Long, Long, Float) -> Unit): GetRequestBuilder {
+            val process = object : ProgressListener {
+                override fun onProgress(bytesRead: Long, contentLength: Long, progress: Float) {
+                    t(bytesRead, contentLength, progress)
+                }
+            }
+            param.progressListener = process
             return this
         }
 
@@ -246,6 +309,11 @@ class BuilderRequest {
             return this
         }
 
+        fun loader(loaderListener: LoaderListener): PostRequestBuilder {
+            param.loaderListener = loaderListener
+            return this
+        }
+
         fun failure(onFailure: OnFailureListener): PostRequestBuilder {
             param.failure = onFailure
             return this
@@ -300,6 +368,69 @@ class BuilderRequest {
 
         fun multipart(): MultiPartBuilder {
             return BuilderRequest.MultiPartBuilder(param)
+        }
+
+        // Higher Order function
+        fun <T : SuccessModel> success(t: (T) -> Unit): PostRequestBuilder {
+            param.model = t.javaClass
+            val success = object : OnSuccessListener<T> {
+                override fun onSuccess(model: T) {
+                    t(model)
+                }
+            }
+            param.success = success as OnSuccessListener<Any>
+            return this
+        }
+
+        fun <T : ErrorModel> error(t: (T) -> Unit): PostRequestBuilder {
+            param.error = t.javaClass
+            val error = object : OnErrorListener<T> {
+                override fun onError(model: T) {
+                    t(model)
+                }
+            }
+            param.err = error as OnErrorListener<Any>
+            return this
+        }
+
+        fun failure(t: (Exception, String) -> (Unit)): PostRequestBuilder {
+            val failure = object : OnFailureListener {
+                override fun onFailure(e: Exception, msg: String) {
+                    t(e, msg)
+                }
+            }
+            param.failure = failure
+            return this
+        }
+
+        fun response(t: (String) -> String): PostRequestBuilder {
+            val response = object : ResponseListener {
+                override fun response(string: String) {
+                    t(string)
+                }
+            }
+            param.responseListener = response
+            return this
+        }
+
+        fun loader(t: (Boolean) -> Unit): PostRequestBuilder {
+            val loader = object : LoaderListener {
+                override fun loader(isShowing: Boolean) {
+                    t(isShowing)
+                }
+            }
+            param.loaderListener = loader
+            return this
+        }
+
+        fun progressListener(t: (Long, Long, Float) -> Unit): PostRequestBuilder {
+            val process = object : ProgressListener {
+                override fun onProgress(bytesRead: Long, contentLength: Long, progress: Float) {
+                    t(bytesRead, contentLength, progress)
+                }
+            }
+            param.progressListener = process
+            return this
         }
 
         fun queue(): Call {
@@ -468,6 +599,11 @@ class BuilderRequest {
             return this
         }
 
+        fun loader(loaderListener: LoaderListener): DownloadBuilder {
+            param.loaderListener = loaderListener
+            return this
+        }
+
         override fun taskId(taskId: Int): DownloadBuilder {
             param.taskId = taskId
             return this
@@ -511,6 +647,60 @@ class BuilderRequest {
 
         fun file(file: File): DownloadBuilder {
             param.file = file
+            return this
+        }
+
+
+        // Higher Order function
+        fun success(t: (File) -> Unit): DownloadBuilder {
+            param.model = t.javaClass
+            val success = object : OnSuccessListener<File> {
+                override fun onSuccess(file: File) {
+                    t(file)
+                }
+            }
+            param.success = success as OnSuccessListener<Any>
+            return this
+        }
+
+        fun <T : ErrorModel> error(t: (T) -> Unit): DownloadBuilder {
+            param.error = t.javaClass
+            val error = object : OnErrorListener<T> {
+                override fun onError(model: T) {
+                    t(model)
+                }
+            }
+            param.err = error as OnErrorListener<Any>
+            return this
+        }
+
+        fun failure(t: (Exception, String) -> (Unit)): DownloadBuilder {
+            val failure = object : OnFailureListener {
+                override fun onFailure(e: Exception, msg: String) {
+                    t(e, msg)
+                }
+            }
+            param.failure = failure
+            return this
+        }
+
+        fun loader(t: (Boolean) -> Unit): DownloadBuilder {
+            val loader = object : LoaderListener {
+                override fun loader(isShowing: Boolean) {
+                    t(isShowing)
+                }
+            }
+            param.loaderListener = loader
+            return this
+        }
+
+        fun progressListener(t: (Long, Long, Float) -> Unit): DownloadBuilder {
+            val process = object : ProgressListener {
+                override fun onProgress(bytesRead: Long, contentLength: Long, progress: Float) {
+                    t(bytesRead, contentLength, progress)
+                }
+            }
+            param.progressListener = process
             return this
         }
 
@@ -674,6 +864,11 @@ class BuilderRequest {
             return this
         }
 
+        fun loader(loaderListener: LoaderListener): MultiPartBuilder {
+            param.loaderListener = loaderListener
+            return this
+        }
+
         fun response(responseListener: ResponseListener): MultiPartBuilder {
             param.responseListener = responseListener
             return this
@@ -737,6 +932,69 @@ class BuilderRequest {
 
         fun logging(isLog: Boolean): MultiPartBuilder {
             param.debug = isLog
+            return this
+        }
+
+        // Higher Order function
+        fun <T : SuccessModel> success(t: (T) -> Unit): MultiPartBuilder {
+            param.model = t.javaClass
+            val success = object : OnSuccessListener<T> {
+                override fun onSuccess(model: T) {
+                    t(model)
+                }
+            }
+            param.success = success as OnSuccessListener<Any>
+            return this
+        }
+
+        fun <T : ErrorModel> error(t: (T) -> Unit): MultiPartBuilder {
+            param.error = t.javaClass
+            val error = object : OnErrorListener<T> {
+                override fun onError(model: T) {
+                    t(model)
+                }
+            }
+            param.err = error as OnErrorListener<Any>
+            return this
+        }
+
+        fun failure(t: (Exception, String) -> (Unit)): MultiPartBuilder {
+            val failure = object : OnFailureListener {
+                override fun onFailure(e: Exception, msg: String) {
+                    t(e, msg)
+                }
+            }
+            param.failure = failure
+            return this
+        }
+
+        fun response(t: (String) -> String): MultiPartBuilder {
+            val response = object : ResponseListener {
+                override fun response(string: String) {
+                    t(string)
+                }
+            }
+            param.responseListener = response
+            return this
+        }
+
+        fun loader(t: (Boolean) -> Unit): MultiPartBuilder {
+            val loader = object : LoaderListener {
+                override fun loader(isShowing: Boolean) {
+                    t(isShowing)
+                }
+            }
+            param.loaderListener = loader
+            return this
+        }
+
+        fun progressListener(t: (Long, Long, Float) -> Unit): MultiPartBuilder {
+            val process = object : ProgressListener {
+                override fun onProgress(bytesRead: Long, contentLength: Long, progress: Float) {
+                    t(bytesRead, contentLength, progress)
+                }
+            }
+            param.progressListener = process
             return this
         }
 
