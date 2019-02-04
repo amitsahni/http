@@ -21,7 +21,7 @@ public class RetrofitApplication extends Application {
     public void onCreate() {
         super.onCreate();
         new ApiConfiguration.Builder(this)
-                .baseUrl(MainActivityModel.ENDPOINT_BASE)
+                .baseUrl(MainActivityModel.Companion.getENDPOINT_BASE())
                 .timeOut(1000L, 2000L)
                 .debug(true)
                 .config();
