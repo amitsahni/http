@@ -118,7 +118,7 @@ class BuilderRequest {
 
         // Higher Order function
         fun <T : SuccessModel> success(t: (T) -> Unit): GetRequestBuilder {
-            param.model = t.javaClass
+            param.model = t.javaClass.enclosingClass!!
             val success = object : OnSuccessListener<T> {
                 override fun onSuccess(model: T) {
                     t(model)
@@ -129,7 +129,7 @@ class BuilderRequest {
         }
 
         fun <T : ErrorModel> error(t: (T) -> Unit): GetRequestBuilder {
-            param.error = t.javaClass
+            param.error = t.javaClass.enclosingClass!!
             val error = object : OnErrorListener<T> {
                 override fun onError(model: T) {
                     t(model)
@@ -372,7 +372,7 @@ class BuilderRequest {
 
         // Higher Order function
         fun <T : SuccessModel> success(t: (T) -> Unit): PostRequestBuilder {
-            param.model = t.javaClass
+            param.model = t.javaClass.enclosingClass!!
             val success = object : OnSuccessListener<T> {
                 override fun onSuccess(model: T) {
                     t(model)
@@ -383,7 +383,7 @@ class BuilderRequest {
         }
 
         fun <T : ErrorModel> error(t: (T) -> Unit): PostRequestBuilder {
-            param.error = t.javaClass
+            param.error = t.javaClass.enclosingClass!!
             val error = object : OnErrorListener<T> {
                 override fun onError(model: T) {
                     t(model)
@@ -653,7 +653,7 @@ class BuilderRequest {
 
         // Higher Order function
         fun success(t: (File) -> Unit): DownloadBuilder {
-            param.model = t.javaClass
+            param.model = t.javaClass.enclosingClass!!
             val success = object : OnSuccessListener<File> {
                 override fun onSuccess(file: File) {
                     t(file)
@@ -664,7 +664,7 @@ class BuilderRequest {
         }
 
         fun <T : ErrorModel> error(t: (T) -> Unit): DownloadBuilder {
-            param.error = t.javaClass
+            param.error = t.javaClass.enclosingClass!!
             val error = object : OnErrorListener<T> {
                 override fun onError(model: T) {
                     t(model)
@@ -937,7 +937,7 @@ class BuilderRequest {
 
         // Higher Order function
         fun <T : SuccessModel> success(t: (T) -> Unit): MultiPartBuilder {
-            param.model = t.javaClass
+            param.model = t.javaClass.enclosingClass!!
             val success = object : OnSuccessListener<T> {
                 override fun onSuccess(model: T) {
                     t(model)
@@ -948,7 +948,7 @@ class BuilderRequest {
         }
 
         fun <T : ErrorModel> error(t: (T) -> Unit): MultiPartBuilder {
-            param.error = t.javaClass
+            param.error = t.javaClass.enclosingClass!!
             val error = object : OnErrorListener<T> {
                 override fun onError(model: T) {
                     t(model)
