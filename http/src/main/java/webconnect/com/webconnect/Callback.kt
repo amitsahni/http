@@ -85,10 +85,9 @@ class Callback {
                 response.body()?.let {
                     var responseString = ""
                     runOnUiThread {
-                        responseString = IOUtils.toString(it.byteStream(), Charset.defaultCharset())
-//                        responseString = it.string()
-                        param.responseListener?.response(responseString)
                         if (response.isSuccessful) {
+                            responseString = it.source().readUtf8()
+                            param.responseListener?.response(responseString)
                             val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
                             param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
                             param.callback?.onSuccess(obj, param.taskId)
@@ -97,6 +96,8 @@ class Callback {
                         } else {
                             var obj: Any? = null
                             try {
+                                responseString = it.source().readUtf8()
+                                param.responseListener?.response(responseString)
                                 obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
                                 param.callback?.onError(obj, "", param.taskId)
                                 param.err?.onError(obj)
