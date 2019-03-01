@@ -145,6 +145,91 @@ File file = new File(Environment.getExternalStorageDirectory(), "temp.jpg");
                 }).connect();
 ```
 
+#### If call multiple api in single time. While using this feature all callback will automatically removed  
+#### and have to manage by yourself
+```
+List<Call> callList = new ArrayList<>();
+        Call call1 = WebConnect.with(this.activity, "requests")
+                .get()
+                .queryParam(headerMap)
+                .headerParam(headerMap)
+                .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
+                .timeOut(100L, 50L)
+                .success(ResponseModel.class, model -> {
+                                })
+                .error(Error.class, model -> {
+                                })
+                .failure((model, msg) -> {
+                                })
+                .queue();
+
+        callList.add(call1);
+        
+        Call call2 = WebConnect.with(this.activity, "requests1")
+                .get()
+                .queryParam(headerMap)
+                .headerParam(headerMap)
+                .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
+                .timeOut(100L, 50L)
+                .queue();
+
+        callList.add(call2);
+        
+        Observable.create((ObservableOnSubscribe<Call>) emitter -> {
+                    for (Call c : callList) {
+                        emitter.onNext(c);
+                    }
+                }).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .flatMap((Function<Call, ObservableSource<String>>) call -> new Simple(call)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread()))
+                        .subscribe(new Observer<String>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+        
+                            }
+        
+                            @Override
+                            public void onNext(String o) {
+                                Log.i("Main Activity Model", "response" + o);
+                            }
+        
+                            @Override
+                            public void onError(Throwable e) {
+        
+                            }
+        
+                            @Override
+                            public void onComplete() {
+        
+                            }
+                        });
+                        
+                        
+        class Simple extends Observable<String> {
+                private Call call;
+        
+                Simple(Call call) {
+                    this.call = call;
+                    Log.i(Simple.class.getSimpleName(), "Request = " + call.request().toString());
+                }
+        
+                @Override
+                protected void subscribeActual(Observer<? super String> observer) {
+                    try {
+                        Response response = call.execute();
+                        if (response.body() != null) {
+                            String res = response.body().string();
+                            observer.onNext(res);
+                        }
+        
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }                
+```
 Download
 --------
 Add the JitPack repository to your root build.gradle:
@@ -159,6 +244,6 @@ Add the JitPack repository to your root build.gradle:
 Add the Gradle dependency:
 ```groovy
 	dependencies {
-		compile 'com.github.amitsahni:http:1.0.6'
+		compile 'com.github.amitsahni:http:1.0.7'
 	}
 ```

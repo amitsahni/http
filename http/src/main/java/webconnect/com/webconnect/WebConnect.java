@@ -40,4 +40,14 @@ public class WebConnect {
     public static Builder with(@NonNull Context context, @NonNull String url) {
         return new Builder(context, url);
     }
+
+    /**
+     * With builder.
+     *
+     * @param url     the url
+     * @return the builder
+     */
+    public static Builder with(@NonNull String url) {
+        return new Builder(null, url);
+    }
 }

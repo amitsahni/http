@@ -16,6 +16,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+
 /**
  * Created by clickapps on 31/8/17.
  */
@@ -44,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         postBtn.setOnClickListener(this);
         putBtn.setOnClickListener(this);
         deleteBtn.setOnClickListener(this);
-
 
         // Get Observer
         mainActivityModel.getGet().observe(this, object -> {
@@ -103,4 +103,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
+
 }

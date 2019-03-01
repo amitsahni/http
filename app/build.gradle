@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
@@ -7,7 +8,7 @@ android {
     defaultConfig {
         applicationId "test.retrofit"
         minSdkVersion 19
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -31,10 +32,13 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'android.arch.lifecycle:extensions:1.1.1'
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation project(':http')
+    //implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.11'
+    implementation 'com.google.code.gson:gson:2.8.5'
 }

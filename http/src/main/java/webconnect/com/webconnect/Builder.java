@@ -2,6 +2,7 @@ package webconnect.com.webconnect;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 
@@ -13,7 +14,7 @@ public class Builder {
 
     private WebParam webParam;
 
-    Builder(@NonNull Context context, @NonNull String url) {
+    Builder(@Nullable Context context, @NonNull String url) {
         webParam = new WebParam();
         webParam.setContext(context);
         webParam.setUrl(url);

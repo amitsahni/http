@@ -2,14 +2,12 @@ package webconnect.com.webconnect
 
 import android.app.Dialog
 import android.content.Context
-
+import webconnect.com.webconnect.listener.*
+import webconnect.com.webconnect.model.ErrorModel
+import webconnect.com.webconnect.model.SuccessModel
 import java.io.File
 import java.io.Serializable
-import java.util.LinkedHashMap
-
-import webconnect.com.webconnect.listener.AnalyticsListener
-import webconnect.com.webconnect.listener.OnWebCallback
-import webconnect.com.webconnect.listener.ProgressListener
+import java.util.*
 
 
 /**
@@ -20,15 +18,21 @@ class WebParam : Serializable {
     var url: String? = null
     var baseUrl: String? = null
     var httpType = HttpType.GET
-    var requestParam: Map<String, Any> = LinkedHashMap<String, Any>()
-    var queryParam: Map<String, String> = LinkedHashMap()
+    var requestParam: Map<String, Any> = LinkedHashMap()
+    var queryParam: QueryMap<String, String> = QueryMap()
+    var query: Map<String, String> = LinkedHashMap()
     var multipartParam: Map<String, String> = LinkedHashMap()
     var multipartParamFile: Map<String, File> = LinkedHashMap()
     var multipartParamListFile: Map<String, List<File>> = LinkedHashMap()
     var headerParam: Map<String, String> = LinkedHashMap()
     var callback: OnWebCallback? = null
+    var success: OnSuccessListener<Any>? = null
+    var err: OnErrorListener<Any>? = null
+    var failure: OnFailureListener? = null
+    var responseListener: ResponseListener? = null
     var progressListener: ProgressListener? = null
     var analyticsListener: AnalyticsListener? = null
+    var loaderListener: LoaderListener? = null
     var dialog: Dialog? = null
     var model: Class<*> = Any::class.java
     var error: Class<*> = Any::class.java

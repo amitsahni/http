@@ -4,147 +4,291 @@ package webconnect.com.webconnect
  * Created by amit on 10/8/17.
  */
 
+import android.content.Context
 import android.util.Log
-import io.reactivex.Observer
-import io.reactivex.annotations.NonNull
-import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import okhttp3.Call
+import okhttp3.Response
+import org.apache.commons.io.IOUtils
 import webconnect.com.webconnect.listener.AnalyticsListener
-import webconnect.com.webconnect.listener.ProgressListener
+import webconnect.com.webconnect.observer.ErrorLiveData
+import webconnect.com.webconnect.observer.FailureLiveData
+import webconnect.com.webconnect.observer.SuccessLiveData
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeoutException
 
+
 /**
  * The type Call back.
  *
  * @param <T> the type parameter
 </T> */
-class Callback<T> {
+class Callback {
 
-    internal class GetRequestCallback(private val param: WebParam) : Observer<Any> {
+    // Enqueue
+    internal class GetRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
+        var startTime = 0L
 
-        override fun onSubscribe(@io.reactivex.annotations.NonNull d: Disposable) {
-            try {
-                param.dialog?.let {
-                    if (!param.dialog?.isShowing!!) {
-                        param.dialog?.show()
+        init {
+            startTime = System.currentTimeMillis()
+            runOnUiThread {
+                param.loaderListener?.loader(true)
+                try {
+                    param.dialog?.let {
+                        if (!param.dialog?.isShowing!!) {
+                            param.dialog?.show()
+                        }
                     }
+                } catch (e: Exception) {
+                    e.stackTrace
                 }
-            } catch (e: Exception) {
-                e.stackTrace
             }
         }
 
-        override fun onNext(@io.reactivex.annotations.NonNull response: Any) {
-            if (response is ObserverModel) {
-                response.also {
-                    if (it.type == 1) {
-                        param.callback?.onSuccess(it.model, param.taskId)
+        override fun onFailure(call: Call, e: IOException) {
+            runOnUiThread {
+                param.loaderListener?.loader(false)
+                try {
+                    param.dialog?.let {
+                        if (param.dialog?.isShowing!!) {
+                            param.dialog?.dismiss()
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.stackTrace
+                }
+                param.callback?.onError(e, getError(param, e), param.taskId)
+                param.failure?.onFailure(e, getError(param, e))
+                FailureLiveData.getInstance().postValue(getError(param, e))
+            }
+        }
+
+        override fun onResponse(call: Call, response: Response) {
+            runOnUiThread {
+                val timeTaken = System.currentTimeMillis() - startTime
+                param.loaderListener?.loader(false)
+                try {
+                    param.dialog?.let {
+                        if (param.dialog?.isShowing!!) {
+                            param.dialog?.dismiss()
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.stackTrace
+                }
+                response.body()?.let {
+                    var responseString = ""
+                    runBlocking(Dispatchers.IO) {
+                        responseString = it.string()
+                    }
+                    if (response.isSuccessful) {
+                        param.responseListener?.response(responseString)
+                        val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
+                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
+                        param.callback?.onSuccess(obj, param.taskId)
+                        param.success?.onSuccess(obj)
+                        SuccessLiveData.getInstance().postValue(responseString)
                     } else {
-                        param.callback?.onError(it.model, "", param.taskId)
+                        var obj: Any? = null
+                        try {
+                            param.responseListener?.response(responseString)
+                            obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
+                            param.callback?.onError(obj, "", param.taskId)
+                            param.err?.onError(obj)
+                            ErrorLiveData.getInstance().postValue(responseString)
+                        } catch (e: Exception) {
+                            param.callback?.onError(obj!!, e.message, param.taskId)
+                            param.failure?.onFailure(e, getError(param, e))
+                            FailureLiveData.getInstance().postValue(getError(param, e))
+                        }
+                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
+
                     }
                 }
-            }
-        }
 
-        override fun onError(@NonNull e: Throwable) {
-            param.callback?.onError(e, getError(param, e), param.taskId)
-            onComplete()
-        }
-
-        override fun onComplete() {
-            try {
-                param.dialog?.let {
-                    if (param.dialog?.isShowing!!) {
-                        param.dialog?.dismiss()
-                    }
-                }
-            } catch (e: Exception) {
-                e.stackTrace
             }
         }
     }
 
-    internal open class PostRequestCallback(private val param: WebParam) : Observer<Any> {
-
-        override fun onSubscribe(@io.reactivex.annotations.NonNull d: Disposable) {
-            try {
-                param.dialog?.let {
-                    if (!param.dialog?.isShowing!!) {
-                        param.dialog?.show()
+    // Enqueue
+    internal class PostRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
+        var startTime = 0L
+        init {
+            runOnUiThread {
+                param.loaderListener?.loader(true)
+                startTime = System.currentTimeMillis()
+                try {
+                    param.dialog?.let {
+                        if (!param.dialog?.isShowing!!) {
+                            param.dialog?.show()
+                        }
                     }
+                } catch (e: Exception) {
+                    e.stackTrace
                 }
-            } catch (e: Exception) {
-                e.stackTrace
             }
         }
 
-        override fun onNext(@io.reactivex.annotations.NonNull response: Any) {
-            if (response is ObserverModel) {
-                response.also {
-                    if (it.type == 1) {
-                        param.callback?.onSuccess(it.model, param.taskId)
+        override fun onFailure(call: Call, e: IOException) {
+            runOnUiThread {
+                param.loaderListener?.loader(false)
+                try {
+                    param.dialog?.let {
+                        if (param.dialog?.isShowing!!) {
+                            param.dialog?.dismiss()
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.stackTrace
+                }
+                param.callback?.onError(e, getError(param, e), param.taskId)
+                param.failure?.onFailure(e, getError(param, e))
+                FailureLiveData.getInstance().postValue(getError(param, e))
+            }
+        }
+
+        override fun onResponse(call: Call, response: Response) {
+            runOnUiThread {
+                val timeTaken = System.currentTimeMillis() - startTime
+                param.loaderListener?.loader(false)
+                try {
+                    param.dialog?.let {
+                        if (param.dialog?.isShowing!!) {
+                            param.dialog?.dismiss()
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.stackTrace
+                }
+                response.body()?.let {
+                    var responseString = ""
+                    runBlocking(Dispatchers.IO) {
+                        responseString = it.string()
+                    }
+                    param.responseListener?.response(responseString)
+                    if (response.isSuccessful) {
+                        val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
+                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
+                        param.callback?.onSuccess(obj, param.taskId)
+                        param.success?.onSuccess(obj)
+                        SuccessLiveData.getInstance().postValue(responseString)
                     } else {
-                        param.callback?.onError(it.model, "", param.taskId)
+                        var obj: Any? = null
+                        try {
+                            obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
+                            param.callback?.onError(obj, "", param.taskId)
+                            param.err?.onError(obj)
+                            ErrorLiveData.getInstance().postValue(responseString)
+                        } catch (e: Exception) {
+                            param.callback?.onError(obj!!, e.message, param.taskId)
+                            param.failure?.onFailure(e, getError(param, e))
+                            FailureLiveData.getInstance().postValue(getError(param, e))
+                        }
+                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
+
                     }
                 }
             }
         }
 
-        override fun onError(@NonNull e: Throwable) {
-            param.callback?.onError(e, getError(param, e), param.taskId)
-            onComplete()
-        }
-
-        override fun onComplete() {
-            try {
-                param.dialog?.let {
-                    if (param.dialog?.isShowing!!) {
-                        param.dialog?.dismiss()
-                    }
-                }
-            } catch (e: Exception) {
-                e.stackTrace
-            }
-        }
     }
 
-    internal class DownloadRequestCallback(private val param: WebParam) : Observer<Any> {
 
-        override fun onSubscribe(@NonNull d: Disposable) {
-            try {
-                param.dialog?.let {
-                    if (!param.dialog?.isShowing!!) {
-                        param.dialog?.show()
+    // Enqueue
+    internal class DownloadRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
+        var startTime = 0L
+
+        init {
+            runOnUiThread {
+                param.loaderListener?.loader(true)
+                startTime = System.currentTimeMillis()
+                try {
+                    param.dialog?.let {
+                        if (!param.dialog?.isShowing!!) {
+                            param.dialog?.show()
+                        }
                     }
+                } catch (e: Exception) {
+                    e.stackTrace
                 }
-            } catch (e: Exception) {
-                e.stackTrace
             }
         }
 
-        override fun onNext(@NonNull o: Any) {
-            param.callback?.onSuccess(this.param.file, this.param.taskId)
-        }
-
-        override fun onError(@NonNull e: Throwable) {
-            param.callback?.onError(e, getError(param, e), param.taskId)
-            onComplete()
-        }
-
-        override fun onComplete() {
-            try {
-                param.dialog?.let {
-                    if (param.dialog?.isShowing!!) {
-                        param.dialog?.dismiss()
+        override fun onFailure(call: Call, e: IOException) {
+            runOnUiThread {
+                param.loaderListener?.loader(false)
+                try {
+                    param.dialog?.let {
+                        if (param.dialog?.isShowing!!) {
+                            param.dialog?.dismiss()
+                        }
                     }
+                } catch (e: Exception) {
+                    e.stackTrace
                 }
-            } catch (e: Exception) {
-                e.stackTrace
+                param.callback?.onError(e, getError(param, e), param.taskId)
+                param.failure?.onFailure(e, getError(param, e))
+                FailureLiveData.getInstance().postValue(getError(param, e))
             }
         }
+
+        override fun onResponse(call: Call, response: Response) {
+            runOnUiThread {
+                val timeTaken = System.currentTimeMillis() - startTime
+                param.loaderListener?.loader(false)
+                try {
+                    param.dialog?.let {
+                        if (param.dialog?.isShowing!!) {
+                            param.dialog?.dismiss()
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.stackTrace
+                }
+                var `object`: Any? = null
+                response.body()?.let {
+                    if (response.isSuccessful) {
+                        runBlocking(Dispatchers.IO) {
+                            val out: OutputStream?
+                            try {
+                                out = FileOutputStream(param.file!!)
+                                IOUtils.copy(it.byteStream(), out)
+
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                        `object` = param.file
+                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
+                        param.callback?.onSuccess(this.param.file, this.param.taskId)
+                        param.success?.onSuccess(this.param.file!!)
+                    } else {
+                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
+                        if (response.body() != null) {
+                            var error = ""
+                            runBlocking(Dispatchers.IO) {
+                                error = response.body()!!.string()
+                            }
+                            param.callback?.onError(error, "", param.taskId)
+                            param.err?.onError(error)
+                            ErrorLiveData.getInstance().postValue(error)
+                        } else {
+                            param.callback?.onError(Throwable(""), "", param.taskId)
+                            param.err?.onError("")
+                            ErrorLiveData.getInstance().postValue("")
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
     internal class Analytics : AnalyticsListener {
@@ -161,36 +305,25 @@ class Callback<T> {
     }
 
 
-    internal class UploadRequestCallback(param: WebParam) : PostRequestCallback(param)
-
-    internal class ProgressCallback(private val param: WebParam) : ProgressListener {
-
-        override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
-            param.progressListener?.onProgress(bytesDownloaded, totalBytes)
-        }
-    }
-
-    internal class UploadProgressCallback(private val param: WebParam) : ProgressListener {
-
-        override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
-            param.progressListener?.onProgress(bytesDownloaded, totalBytes)
-        }
-    }
-
     companion object {
 
         private fun getError(param: WebParam, t: Throwable): String {
             var errors = ""
-            if (param.context == null) return errors
+            var context: Context? = null
+            if (param.context != null) {
+                context = param.context
+            } else if (ApiConfiguration.getContext() != null) {
+                context = ApiConfiguration.getContext()!!
+            }
 
             if (t.javaClass.name.contains(UnknownHostException::class.java.name)) {
-                errors = param.context?.getString(R.string.error_internet_connection).toString()
+                errors = context?.getString(R.string.error_internet_connection).toString()
             } else if (t.javaClass.name.contains(TimeoutException::class.java.name)
                     || t.javaClass.name.contains(SocketTimeoutException::class.java.name)
                     || t.javaClass.name.contains(ConnectException::class.java.name)) {
-                errors = param.context?.getString(R.string.error_server_connection).toString()
+                errors = context?.getString(R.string.error_server_connection).toString()
             } else if (t.javaClass.name.contains(CertificateException::class.java.name)) {
-                errors = param.context?.getString(R.string.error_certificate_exception).toString()
+                errors = context?.getString(R.string.error_certificate_exception).toString()
             } else {
                 errors = t.toString()
             }
