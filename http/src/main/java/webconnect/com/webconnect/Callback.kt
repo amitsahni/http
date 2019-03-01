@@ -6,6 +6,8 @@ package webconnect.com.webconnect
 
 import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import okhttp3.Call
 import okhttp3.Response
 import org.apache.commons.io.IOUtils
@@ -84,7 +86,7 @@ class Callback {
                 }
                 response.body()?.let {
                     var responseString = ""
-                    runOnUiThread {
+                    runBlocking(Dispatchers.IO) {
                         if (response.isSuccessful) {
                             responseString = it.source().readUtf8()
                             param.responseListener?.response(responseString)
