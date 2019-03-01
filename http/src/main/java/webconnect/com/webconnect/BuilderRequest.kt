@@ -1042,24 +1042,28 @@ class BuilderRequest {
                     val disposition = StringBuilder("form-data; name=")
                     disposition.append(key)
                     var headers = Headers.of("Content-Disposition", disposition.toString())
-                    var part = MultipartBody.Part.createFormData(key, value);
+                    val part = MultipartBody.Part.createFormData(key, value);
 //                    multipartBuilder.addPart(headers, body)
                     multipartBuilder.addPart(part)
                 }
 //                val body = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.multipartParam))
 //                multipartBuilder.addPart(body)
                 for ((key, value) in param.multipartParamFile) {
-
                     val uri = Uri.fromFile(value)
-                    var mimeType: String
-                    if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
-                        val cR = param.context?.contentResolver
+                    var mimeType = "application/octet-stream"
+                    if (uri?.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
+                        var cR: ContentResolver ?= null
+                        if (param.context != null) {
+                            cR = param.context?.contentResolver
+                        } else if (ApiConfiguration.getContext() != null) {
+                            cR = ApiConfiguration.getContext()?.contentResolver
+                        }
                         mimeType = cR?.getType(uri).toString()
                     } else {
                         val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
                                 .toString())
                         mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                                fileExtension.toLowerCase())
+                                fileExtension.toLowerCase())!!
                     }
                     val fileBody = RequestBody.create(MediaType.parse(mimeType),
                             value)
@@ -1068,22 +1072,27 @@ class BuilderRequest {
                     disposition.append("; filename=")
                     disposition.append(value.name)
                     var headers = Headers.of("Content-Disposition", disposition.toString())
-                    var part = MultipartBody.Part.createFormData(key, value.name, fileBody);
+                    val part = MultipartBody.Part.createFormData(key, value.name, fileBody);
                     //multipartBuilder.addPart(MultipartBody.Part.create(headers, fileBody))
                     multipartBuilder.addPart(part)
                 }
                 for ((key, file) in param.multipartParamListFile) {
                     for (value in file) {
                         val uri = Uri.fromFile(value)
-                        var mimeType: String
-                        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
-                            val cR = param.context?.contentResolver
+                        var mimeType = "application/octet-stream"
+                        if (uri?.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
+                            var cR: ContentResolver ?= null
+                            if (param.context != null) {
+                                cR = param.context?.contentResolver
+                            } else if (ApiConfiguration.getContext() != null) {
+                                cR = ApiConfiguration.getContext()?.contentResolver
+                            }
                             mimeType = cR?.getType(uri).toString()
                         } else {
                             val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
                                     .toString())
                             mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                                    fileExtension.toLowerCase())
+                                    fileExtension.toLowerCase())!!
                         }
                         val fileBody = RequestBody.create(MediaType.parse(mimeType),
                                 value)
@@ -1092,7 +1101,7 @@ class BuilderRequest {
                         disposition.append("; filename=")
                         disposition.append(value.name)
                         var headers = Headers.of("Content-Disposition", disposition.toString())
-                        var part = MultipartBody.Part.createFormData(key, value.name, fileBody);
+                        val part = MultipartBody.Part.createFormData(key, value.name, fileBody);
                         //multipartBuilder.addPart(MultipartBody.Part.create(headers, fileBody))
                         multipartBuilder.addPart(part)
                     }
@@ -1104,25 +1113,25 @@ class BuilderRequest {
 
             when (param.httpType) {
                 WebParam.HttpType.POST -> {
-                    multipartBuilder.build()?.also {
+                    multipartBuilder.build().also {
                         builder = builder.post(it)
                         param.requestBodyContentlength = it.contentLength()
                     }
                 }
                 WebParam.HttpType.PUT -> {
-                    multipartBuilder.build()?.also {
+                    multipartBuilder.build().also {
                         builder = builder.put(it)
                         param.requestBodyContentlength = it.contentLength()
                     }
                 }
                 WebParam.HttpType.DELETE -> {
-                    multipartBuilder.build()?.also {
+                    multipartBuilder.build().also {
                         builder = builder.delete(it)
                         param.requestBodyContentlength = it.contentLength()
                     }
                 }
                 WebParam.HttpType.PATCH -> {
-                    multipartBuilder.build()?.also {
+                    multipartBuilder.build().also {
                         builder = builder.patch(it)
                         param.requestBodyContentlength = it.contentLength()
                     }

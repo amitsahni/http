@@ -1,7 +1,9 @@
 package webconnect.com.webconnect;
 
 import android.app.Application;
+import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,6 +30,12 @@ public class ApiConfiguration {
     private static boolean sIsDEBUG = true;
     private static OkHttpClient okHttpClient = new OkHttpClient();
     private static Dispatcher dispatcher = new Dispatcher();
+    private static Context context;
+
+    @Nullable
+    public static Context getContext() {
+        return context;
+    }
 
     public static OkHttpClient getOkHttpClient() {
         return okHttpClient;
@@ -61,6 +69,7 @@ public class ApiConfiguration {
 
         public Builder(Application context) {
             this.context = context;
+            ApiConfiguration.context = context;
         }
 
         public Builder baseUrl(@NonNull String baseUrl) {

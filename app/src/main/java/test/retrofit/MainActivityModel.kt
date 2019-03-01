@@ -25,6 +25,7 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
     private val post = MutableLiveData<Any>()
     private val put = MutableLiveData<Any>()
     private val delete = MutableLiveData<Any>()
+    private val error = MutableLiveData<Any>()
 
     init {
         activity = application
@@ -45,6 +46,10 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
     fun getDelete(): LiveData<Any> {
         return delete
     }
+
+    fun getError(): LiveData<Any> {
+        return error
+    }
     //    D/OkHttp: --> GET http://api.qa.leasing.clicksandbox.com/v1/app/leases
     //            01-17 12:10:53.411 6765-24325/com.brickspms D/OkHttp: slug: default
     //01-17 12:10:53.411 6765-24325/com.brickspms D/OkHttp: Auth-Token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOjEwODMsImlhdCI6IjIwMTgtMDEtMTIgMDc6NTg6NTAgVVRDIn0.mXkySHf71fa3vdLwUWaIqoqd5nUR2Z3dJ1INq5t4Clo
@@ -54,20 +59,21 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
         val headerMap = LinkedHashMap<String, String>()
         headerMap["Authorization"] = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NDM3ODMsIm5hbWUiOiJjZmNnZyBHZ2dnIGNjY2MgY2NjY2MiLCJlbWFpbCI6ImFsbWFycmlAbW9oLmdvdi5zYSIsIm1vYmlsZSI6IjUzMDgwMzA5MSIsInJvbGUiOiJlbXBsb3llZSIsImFjY2VzcyI6Im1vYmlsZSIsImRvbWFpbiI6ImFsbCIsImlhdCI6MTU0NjUwMzQ2MSwiZXhwIjoxNTQ5MDk1NDYxfQ.4OhtjSj5b0u7h57t3_9DEBXgkYsqo6nVLJ5eemDYg2o"
         headerMap["Authorization"] = "12"
-        WebConnect.with(this.activity, "requests")
+        WebConnect.with(this.activity, ENDPOINT_GET)
                 .get()
                 .queryParam(headerMap)
                 .headerParam(headerMap)
-                .baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
+                //.baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
                 .timeOut(100L, 50L)
                 .loader { isShowing -> Log.i(javaClass.simpleName, "Loader showing = $isShowing") }
                 .response { _ ->
 
                 }
                 .success(ResponseModel::class.java) {
-
+                    get.postValue(it)
                 }
                 .error(Error::class.java) {
+                    error.postValue(it)
                 }
                 .failure { model, msg -> }
                 .connect()

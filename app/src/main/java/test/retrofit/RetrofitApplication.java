@@ -23,7 +23,7 @@ public class RetrofitApplication extends Application {
         new ApiConfiguration.Builder(this)
                 .baseUrl(MainActivityModel.Companion.getENDPOINT_BASE())
                 .timeOut(1000L, 2000L)
-                .debug(true)
+                .debug(false)
                 .config();
 
         ErrorLiveData.getInstance().observeForever(s -> {

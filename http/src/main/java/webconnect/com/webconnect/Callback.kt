@@ -4,8 +4,7 @@ package webconnect.com.webconnect
  * Created by amit on 10/8/17.
  */
 
-import android.os.Handler
-import android.os.Looper
+import android.content.Context
 import android.util.Log
 import okhttp3.Call
 import okhttp3.Response
@@ -34,11 +33,10 @@ class Callback {
     // Enqueue
     internal class GetRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
         var startTime = 0L
-        val handler = Handler(Looper.getMainLooper())
 
         init {
             startTime = System.currentTimeMillis()
-            handler.post {
+            runOnUiThread {
                 param.loaderListener?.loader(true)
                 try {
                     param.dialog?.let {
@@ -53,7 +51,7 @@ class Callback {
         }
 
         override fun onFailure(call: Call, e: IOException) {
-            handler.post {
+            runOnUiThread {
                 param.loaderListener?.loader(false)
                 try {
                     param.dialog?.let {
@@ -71,7 +69,7 @@ class Callback {
         }
 
         override fun onResponse(call: Call, response: Response) {
-            handler.post {
+            runOnUiThread {
                 val timeTaken = System.currentTimeMillis() - startTime
                 param.loaderListener?.loader(false)
                 try {
@@ -83,8 +81,8 @@ class Callback {
                 } catch (e: Exception) {
                     e.stackTrace
                 }
-                if (response.body() != null) {
-                    val responseString = response.body()?.string()!!
+                response.body()?.let {
+                    val responseString = it.string()
                     param.responseListener?.response(responseString)
                     if (response.isSuccessful) {
                         val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
@@ -108,6 +106,7 @@ class Callback {
 
                     }
                 }
+
             }
         }
     }
@@ -115,9 +114,8 @@ class Callback {
     // Enqueue
     internal class PostRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
         var startTime = 0L
-        val handler = Handler(Looper.getMainLooper())
         init {
-            handler.post {
+            runOnUiThread {
                 param.loaderListener?.loader(true)
                 startTime = System.currentTimeMillis()
                 try {
@@ -133,7 +131,7 @@ class Callback {
         }
 
         override fun onFailure(call: Call, e: IOException) {
-            handler.post {
+            runOnUiThread {
                 param.loaderListener?.loader(false)
                 try {
                     param.dialog?.let {
@@ -151,7 +149,7 @@ class Callback {
         }
 
         override fun onResponse(call: Call, response: Response) {
-            handler.post {
+            runOnUiThread {
                 val timeTaken = System.currentTimeMillis() - startTime
                 param.loaderListener?.loader(false)
                 try {
@@ -163,8 +161,8 @@ class Callback {
                 } catch (e: Exception) {
                     e.stackTrace
                 }
-                if (response.body() != null) {
-                    val responseString = response.body()?.string()!!
+                response.body()?.let {
+                    val responseString = it.string()
                     param.responseListener?.response(responseString)
                     if (response.isSuccessful) {
                         val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
@@ -197,10 +195,9 @@ class Callback {
     // Enqueue
     internal class DownloadRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
         var startTime = 0L
-        val handler = Handler(Looper.getMainLooper())
 
         init {
-            handler.post {
+            runOnUiThread {
                 param.loaderListener?.loader(true)
                 startTime = System.currentTimeMillis()
                 try {
@@ -216,7 +213,7 @@ class Callback {
         }
 
         override fun onFailure(call: Call, e: IOException) {
-            handler.post {
+            runOnUiThread {
                 param.loaderListener?.loader(false)
                 try {
                     param.dialog?.let {
@@ -234,7 +231,7 @@ class Callback {
         }
 
         override fun onResponse(call: Call, response: Response) {
-            handler.post {
+            runOnUiThread {
                 val timeTaken = System.currentTimeMillis() - startTime
                 param.loaderListener?.loader(false)
                 try {
@@ -247,14 +244,12 @@ class Callback {
                     e.stackTrace
                 }
                 var `object`: Any? = null
-                if (response.body() != null) {
+                response.body()?.let {
                     if (response.isSuccessful) {
-                        val body = response.body()
                         var out: OutputStream? = null
                         try {
                             out = FileOutputStream(param.file!!)
-
-                            IOUtils.copy(body!!.byteStream(), out)
+                            IOUtils.copy(it.byteStream(), out)
                             `object` = param.file
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -299,16 +294,21 @@ class Callback {
 
         private fun getError(param: WebParam, t: Throwable): String {
             var errors = ""
-            if (param.context == null) return errors
+            var context: Context? = null
+            if (param.context != null) {
+                context = param.context
+            } else if (ApiConfiguration.getContext() != null) {
+                context = ApiConfiguration.getContext()!!
+            }
 
             if (t.javaClass.name.contains(UnknownHostException::class.java.name)) {
-                errors = param.context?.getString(R.string.error_internet_connection).toString()
+                errors = context?.getString(R.string.error_internet_connection).toString()
             } else if (t.javaClass.name.contains(TimeoutException::class.java.name)
                     || t.javaClass.name.contains(SocketTimeoutException::class.java.name)
                     || t.javaClass.name.contains(ConnectException::class.java.name)) {
-                errors = param.context?.getString(R.string.error_server_connection).toString()
+                errors = context?.getString(R.string.error_server_connection).toString()
             } else if (t.javaClass.name.contains(CertificateException::class.java.name)) {
-                errors = param.context?.getString(R.string.error_certificate_exception).toString()
+                errors = context?.getString(R.string.error_certificate_exception).toString()
             } else {
                 errors = t.toString()
             }
