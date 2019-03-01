@@ -82,28 +82,31 @@ class Callback {
                     e.stackTrace
                 }
                 response.body()?.let {
-                    val responseString = it.string()
-                    param.responseListener?.response(responseString)
-                    if (response.isSuccessful) {
-                        val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
-                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
-                        param.callback?.onSuccess(obj, param.taskId)
-                        param.success?.onSuccess(obj)
-                        SuccessLiveData.getInstance().postValue(responseString)
-                    } else {
-                        var obj: Any? = null
-                        try {
-                            obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
-                            param.callback?.onError(obj, "", param.taskId)
-                            param.err?.onError(obj)
-                            ErrorLiveData.getInstance().postValue(responseString)
-                        } catch (e: Exception) {
-                            param.callback?.onError(obj!!, e.message, param.taskId)
-                            param.failure?.onFailure(e, getError(param, e))
-                            FailureLiveData.getInstance().postValue(getError(param, e))
-                        }
-                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
+                    var responseString = ""
+                    runOnUiThread {
+                        responseString = it.string()
+                        param.responseListener?.response(responseString)
+                        if (response.isSuccessful) {
+                            val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
+                            param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
+                            param.callback?.onSuccess(obj, param.taskId)
+                            param.success?.onSuccess(obj)
+                            SuccessLiveData.getInstance().postValue(responseString)
+                        } else {
+                            var obj: Any? = null
+                            try {
+                                obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
+                                param.callback?.onError(obj, "", param.taskId)
+                                param.err?.onError(obj)
+                                ErrorLiveData.getInstance().postValue(responseString)
+                            } catch (e: Exception) {
+                                param.callback?.onError(obj!!, e.message, param.taskId)
+                                param.failure?.onFailure(e, getError(param, e))
+                                FailureLiveData.getInstance().postValue(getError(param, e))
+                            }
+                            param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
 
+                        }
                     }
                 }
 
