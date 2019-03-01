@@ -19,6 +19,7 @@ import java.io.OutputStream
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.nio.charset.Charset
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeoutException
 
@@ -84,7 +85,8 @@ class Callback {
                 response.body()?.let {
                     var responseString = ""
                     runOnUiThread {
-                        responseString = it.string()
+                        responseString = IOUtils.toString(it.byteStream(), Charset.defaultCharset())
+//                        responseString = it.string()
                         param.responseListener?.response(responseString)
                         if (response.isSuccessful) {
                             val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)

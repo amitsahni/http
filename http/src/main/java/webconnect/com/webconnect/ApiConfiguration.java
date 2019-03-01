@@ -93,7 +93,7 @@ public class ApiConfiguration {
             sCONNECT_TIMEOUT_MILLIS = connectTimeOut;
             sREAD_TIMEOUT_MILLIS = readTimeOut;
             sIsDEBUG = isDebug;
-            dispatcher.setMaxRequestsPerHost(2);
+            dispatcher.setMaxRequestsPerHost(10);
             dispatcher.setMaxRequests(10);
             okhttp3.logging.HttpLoggingInterceptor interceptor = new okhttp3.logging.HttpLoggingInterceptor();
             interceptor.setLevel(sIsDEBUG ?
