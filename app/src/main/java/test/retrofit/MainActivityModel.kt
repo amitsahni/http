@@ -5,7 +5,6 @@ import android.arch.lifecycle.*
 import android.content.Context
 import android.util.Log
 import webconnect.com.webconnect.WebConnect
-import webconnect.com.webconnect.listener.OnWebCallback
 import java.io.File
 import java.util.*
 
@@ -77,79 +76,47 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
                 }
                 .failure { model, msg -> }
                 .connect()
-
     }
 
-    fun post(): Map<String, String> {
-        val requestMap = LinkedHashMap<String, String>()
-        requestMap["locale"] = "en"
-        requestMap["name"] = "manager1"
-        requestMap["birth_date"] = "18/08/1987"
-        requestMap["gender"] = "male"
-        val headerMap = LinkedHashMap<String, String>()
-        headerMap["Authorization"] = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTQsIm5hbWUiOiJHdXJ1IiwiZW1haWwiOiJndXJwcmVldDJAY2xpY2thcHBzLmNvIiwibW9iaWxlIjoiODI4NzYyMTIyOCIsImltYWdlIjoiL2RlZmF1bHRfbG9nby5qcGciLCJpYXQiOjE1MjExODAwOTIsImV4cCI6MTUyMzc3MjA5Mn0.Cc4dOzVC3NipXfVOJdRE29-GrtO5H0dgC3GSABiTYTA"
-        WebConnect.with(this.activity, ENDPOINT_POST)
-                .put()
-                .multipart()
-                .multipartParam(requestMap)
-                .timeOut(100L, 50L)
-                .headerParam(headerMap)
-                .callback(object : OnWebCallback {
-                    override fun <T> onSuccess(`object`: T?, taskId: Int) {
-                        if (`object` != null) {
-                            post.postValue(`object`)
-                        }
-                    }
+//    fun post(): Map<String, String> {
+//        val requestMap = LinkedHashMap<String, String>()
+//        requestMap["locale"] = "en"
+//        requestMap["name"] = "manager1"
+//        requestMap["birth_date"] = "18/08/1987"
+//        requestMap["gender"] = "male"
+//        val headerMap = LinkedHashMap<String, String>()
+//        headerMap["Authorization"] = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTQsIm5hbWUiOiJHdXJ1IiwiZW1haWwiOiJndXJwcmVldDJAY2xpY2thcHBzLmNvIiwibW9iaWxlIjoiODI4NzYyMTIyOCIsImltYWdlIjoiL2RlZmF1bHRfbG9nby5qcGciLCJpYXQiOjE1MjExODAwOTIsImV4cCI6MTUyMzc3MjA5Mn0.Cc4dOzVC3NipXfVOJdRE29-GrtO5H0dgC3GSABiTYTA"
+//        WebConnect.with(this.activity, ENDPOINT_POST)
+//                .put()
+//                .multipart()
+//                .multipartParam(requestMap)
+//                .timeOut(100L, 50L)
+//                .headerParam(headerMap)
+//                .connect()
+//        return requestMap
+//    }
 
-                    override fun <T> onError(`object`: T?, error: String, taskId: Int) {
-                        post.value = `object`
-                    }
-                })
-                .connect()
-        return requestMap
-    }
-
-    fun put() {
-        val requestMap = LinkedHashMap<String, String>()
-        requestMap["locale"] = "Amit Singh"
-        requestMap["name"] = "manager"
-        requestMap["birth_date"] = "18/08/1987"
-        requestMap["gender"] = "male"
-        WebConnect.with(activity, ENDPOINT_PUT)
-                .put()
-                .formDataParam(requestMap)
-                .callback(object : OnWebCallback {
-                    override fun <T> onSuccess(`object`: T?, taskId: Int) {
-                        if (`object` != null) {
-                            put.value = `object`
-                        }
-                    }
-
-                    override fun <T> onError(`object`: T?, error: String, taskId: Int) {
-                        put.value = `object`
-                    }
-                }).connect()
-    }
-
-    fun delete() {
-        val requestMap = LinkedHashMap<String, String>()
-        requestMap["name"] = "Amit Singh"
-        requestMap["job"] = "manager"
-        WebConnect.with(activity, ENDPOINT_PUT)
-                .download(File("/test"))
-                .get()
-                .callback(object : OnWebCallback {
-                    override fun <T> onSuccess(`object`: T?, taskId: Int) {
-                        if (`object` != null) {
-                            delete.postValue(`object`)
-                        }
-                    }
-
-                    override fun <T> onError(`object`: T?, error: String, taskId: Int) {
-                        delete.postValue(`object`)
-                    }
-                }).connect()
-    }
+//    fun put() {
+//        val requestMap = LinkedHashMap<String, String>()
+//        requestMap["locale"] = "Amit Singh"
+//        requestMap["name"] = "manager"
+//        requestMap["birth_date"] = "18/08/1987"
+//        requestMap["gender"] = "male"
+//        WebConnect.with(activity, ENDPOINT_PUT)
+//                .put()
+//                .formDataParam(requestMap)
+//                .connect()
+//    }
+//
+//    fun delete() {
+//        val requestMap = LinkedHashMap<String, String>()
+//        requestMap["name"] = "Amit Singh"
+//        requestMap["job"] = "manager"
+//        WebConnect.with(activity, ENDPOINT_PUT)
+//                .download(File("/test"))
+//                .get()
+//                .connect()
+//    }
 
 
     class MainActivityModelFactory(private val activity: Application) : ViewModelProvider.Factory {

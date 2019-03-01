@@ -38,36 +38,13 @@ class Callback {
 
         init {
             startTime = System.currentTimeMillis()
-            runOnUiThread {
-                param.loaderListener?.loader(true)
-                try {
-                    param.dialog?.let {
-                        if (!param.dialog?.isShowing!!) {
-                            param.dialog?.show()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.stackTrace
-                }
-            }
+            param.loaderListener?.loader(true)
         }
 
         override fun onFailure(call: Call, e: IOException) {
-            runOnUiThread {
-                param.loaderListener?.loader(false)
-                try {
-                    param.dialog?.let {
-                        if (param.dialog?.isShowing!!) {
-                            param.dialog?.dismiss()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.stackTrace
-                }
-                param.callback?.onError(e, getError(param, e), param.taskId)
-                param.failure?.onFailure(e, getError(param, e))
-                FailureLiveData.getInstance().postValue(getError(param, e))
-            }
+            param.loaderListener?.loader(false)
+            param.failure?.onFailure(e, getError(param, e))
+            FailureLiveData.failure.postValue(getError(param, e))
         }
 
         override fun onResponse(call: Call, response: Response) {
@@ -90,23 +67,20 @@ class Callback {
                     }
                     if (response.isSuccessful) {
                         param.responseListener?.response(responseString)
-                        val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
+                        val obj = responseString.fromJson(param.model)
                         param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
-                        param.callback?.onSuccess(obj, param.taskId)
                         param.success?.onSuccess(obj)
-                        SuccessLiveData.getInstance().postValue(responseString)
+                        SuccessLiveData.success.postValue(responseString)
                     } else {
                         var obj: Any? = null
                         try {
                             param.responseListener?.response(responseString)
-                            obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
-                            param.callback?.onError(obj, "", param.taskId)
+                            obj = responseString.fromJson(param.error)
                             param.err?.onError(obj)
-                            ErrorLiveData.getInstance().postValue(responseString)
+                            ErrorLiveData.error.postValue(responseString)
                         } catch (e: Exception) {
-                            param.callback?.onError(obj!!, e.message, param.taskId)
                             param.failure?.onFailure(e, getError(param, e))
-                            FailureLiveData.getInstance().postValue(getError(param, e))
+                            FailureLiveData.failure.postValue(getError(param, e))
                         }
                         param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
 
@@ -121,37 +95,14 @@ class Callback {
     internal class PostRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
         var startTime = 0L
         init {
-            runOnUiThread {
-                param.loaderListener?.loader(true)
-                startTime = System.currentTimeMillis()
-                try {
-                    param.dialog?.let {
-                        if (!param.dialog?.isShowing!!) {
-                            param.dialog?.show()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.stackTrace
-                }
-            }
+            startTime = System.currentTimeMillis()
+            param.loaderListener?.loader(true)
         }
 
         override fun onFailure(call: Call, e: IOException) {
-            runOnUiThread {
-                param.loaderListener?.loader(false)
-                try {
-                    param.dialog?.let {
-                        if (param.dialog?.isShowing!!) {
-                            param.dialog?.dismiss()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.stackTrace
-                }
-                param.callback?.onError(e, getError(param, e), param.taskId)
-                param.failure?.onFailure(e, getError(param, e))
-                FailureLiveData.getInstance().postValue(getError(param, e))
-            }
+            param.loaderListener?.loader(false)
+            param.failure?.onFailure(e, getError(param, e))
+            FailureLiveData.failure.postValue(getError(param, e))
         }
 
         override fun onResponse(call: Call, response: Response) {
@@ -174,22 +125,19 @@ class Callback {
                     }
                     param.responseListener?.response(responseString)
                     if (response.isSuccessful) {
-                        val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
+                        val obj = responseString.fromJson(param.model)
                         param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
-                        param.callback?.onSuccess(obj, param.taskId)
                         param.success?.onSuccess(obj)
-                        SuccessLiveData.getInstance().postValue(responseString)
+                        SuccessLiveData.success.postValue(responseString)
                     } else {
                         var obj: Any? = null
                         try {
-                            obj = ApiConfiguration.getGson().fromJson(responseString, param.error)
-                            param.callback?.onError(obj, "", param.taskId)
+                            obj = responseString.fromJson(param.error)
                             param.err?.onError(obj)
-                            ErrorLiveData.getInstance().postValue(responseString)
+                            ErrorLiveData.error.postValue(responseString)
                         } catch (e: Exception) {
-                            param.callback?.onError(obj!!, e.message, param.taskId)
                             param.failure?.onFailure(e, getError(param, e))
-                            FailureLiveData.getInstance().postValue(getError(param, e))
+                            FailureLiveData.failure.postValue(getError(param, e))
                         }
                         param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
 
@@ -206,37 +154,14 @@ class Callback {
         var startTime = 0L
 
         init {
-            runOnUiThread {
-                param.loaderListener?.loader(true)
-                startTime = System.currentTimeMillis()
-                try {
-                    param.dialog?.let {
-                        if (!param.dialog?.isShowing!!) {
-                            param.dialog?.show()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.stackTrace
-                }
-            }
+            startTime = System.currentTimeMillis()
+            param.loaderListener?.loader(true)
         }
 
         override fun onFailure(call: Call, e: IOException) {
-            runOnUiThread {
-                param.loaderListener?.loader(false)
-                try {
-                    param.dialog?.let {
-                        if (param.dialog?.isShowing!!) {
-                            param.dialog?.dismiss()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.stackTrace
-                }
-                param.callback?.onError(e, getError(param, e), param.taskId)
-                param.failure?.onFailure(e, getError(param, e))
-                FailureLiveData.getInstance().postValue(getError(param, e))
-            }
+            param.loaderListener?.loader(false)
+            param.failure?.onFailure(e, getError(param, e))
+            FailureLiveData.failure.postValue(getError(param, e))
         }
 
         override fun onResponse(call: Call, response: Response) {
@@ -267,7 +192,6 @@ class Callback {
                         }
                         `object` = param.file
                         param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
-                        param.callback?.onSuccess(this.param.file, this.param.taskId)
                         param.success?.onSuccess(this.param.file!!)
                     } else {
                         param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
@@ -276,13 +200,11 @@ class Callback {
                             runBlocking(Dispatchers.IO) {
                                 error = response.body()!!.string()
                             }
-                            param.callback?.onError(error, "", param.taskId)
                             param.err?.onError(error)
-                            ErrorLiveData.getInstance().postValue(error)
+                            ErrorLiveData.error.postValue(error)
                         } else {
-                            param.callback?.onError(Throwable(""), "", param.taskId)
                             param.err?.onError("")
-                            ErrorLiveData.getInstance().postValue("")
+                            ErrorLiveData.error.postValue("")
                         }
                     }
                 }
@@ -295,7 +217,7 @@ class Callback {
         var TAG = "Analytics"
 
         override fun onReceived(timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) {
-            if (ApiConfiguration.isDebug()) {
+            if (ApiConfiguration.isDebug) {
                 Log.d(TAG, " timeTakenInMillis : " + timeTakenInMillis)
                 Log.d(TAG, " bytesSent : " + bytesSent)
                 Log.d(TAG, " bytesReceived : " + bytesReceived)
@@ -312,8 +234,8 @@ class Callback {
             var context: Context? = null
             if (param.context != null) {
                 context = param.context
-            } else if (ApiConfiguration.getContext() != null) {
-                context = ApiConfiguration.getContext()!!
+            } else {
+
             }
 
             if (t.javaClass.name.contains(UnknownHostException::class.java.name)) {

@@ -25,7 +25,6 @@ class WebParam : Serializable {
     var multipartParamFile: Map<String, File> = LinkedHashMap()
     var multipartParamListFile: Map<String, List<File>> = LinkedHashMap()
     var headerParam: Map<String, String> = LinkedHashMap()
-    var callback: OnWebCallback? = null
     var success: OnSuccessListener<Any>? = null
     var err: OnErrorListener<Any>? = null
     var failure: OnFailureListener? = null

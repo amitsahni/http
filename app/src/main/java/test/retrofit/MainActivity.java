@@ -15,6 +15,9 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import kotlin.Unit;
+import webconnect.com.webconnect.WebConnect1;
+import webconnect.com.webconnect.model.SuccessModel;
 
 
 /**
@@ -32,6 +35,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button deleteBtn;
 
     MainActivityModel mainActivityModel;
+
+    private static Unit invoke(SuccessModel s) {
+
+        return Unit.INSTANCE;
+    }
 
 
     @Override
@@ -58,6 +66,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (o == null) return;
             Toast.makeText(MainActivity.this, o.toString(), Toast.LENGTH_LONG).show();
         });
+        WebConnect1.INSTANCE.with(MainActivityModel.Companion.getENDPOINT_GET())
+                .get()
+                .success(ResponseModel.class, model -> {
+                    Log.d("TAG", "Model = " + model.toString());
+                    return Unit.INSTANCE;
+                })
+                .connect();
     }
 
     @Override
@@ -92,11 +107,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // http://api.staging.moh.clicksandbox1.com:8080/upload/magazins/8/original/624996-pixelponew.jpg?1505885452
             mainActivityModel.get();
         } else if (id == R.id.button1) {
-            mainActivityModel.post();
+//            mainActivityModel.post();
         } else if (id == R.id.button2) {
-            mainActivityModel.put();
+//            mainActivityModel.put();
         } else if (id == R.id.button3) {
-            mainActivityModel.delete();
+//            mainActivityModel.delete();
         } else {
             Log.i(getLocalClassName(), "No clickHandled");
         }

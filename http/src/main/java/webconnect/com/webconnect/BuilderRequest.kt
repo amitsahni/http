@@ -1,6 +1,5 @@
 package webconnect.com.webconnect
 
-import android.app.Dialog
 import android.content.ContentResolver
 import android.net.Uri
 import android.text.TextUtils
@@ -19,89 +18,37 @@ import java.util.concurrent.TimeUnit
  * Created by clickapps on 27/12/17.
  */
 class BuilderRequest {
-    open class GetRequestBuilder(private val param: WebParam) : IProperties<GetRequestBuilder> {
 
-        private var okHttpClient: OkHttpClient? = null
-        override fun baseUrl(url: String): GetRequestBuilder {
+    open class GetRequestBuilder(private val param: WebParam) {
+
+        private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
+        fun baseUrl(url: String): GetRequestBuilder {
             param.baseUrl = url
             return this
         }
 
-        override fun headerParam(headerParam: Map<String, String>): GetRequestBuilder {
+        fun headerParam(headerParam: Map<String, String>): GetRequestBuilder {
             param.headerParam = headerParam
             return this
         }
 
-        @Deprecated("Going to depricate")
-        override fun callback(callback: OnWebCallback): GetRequestBuilder {
-            param.callback = callback
-            return this
-        }
-
-        override fun analyticsListener(callback: AnalyticsListener): GetRequestBuilder {
+        fun analyticsListener(callback: AnalyticsListener): GetRequestBuilder {
             param.analyticsListener = callback
             return this
         }
 
-        @Deprecated("Going to depricate")
-        override fun callback(callback: OnWebCallback, success: Class<*>, error: Class<*>): GetRequestBuilder {
-            param.callback = callback
-            param.model = success
-            param.error = error
-            return this
-        }
-
-        fun <T : SuccessModel> success(t: Class<T>, onSuccessListener: OnSuccessListener<T>): GetRequestBuilder {
-            param.model = t
-            param.success = onSuccessListener as OnSuccessListener<Any>
-            return this
-        }
-
-
-        fun <T : ErrorModel> error(t: Class<T>, onErrorListener: OnErrorListener<T>): GetRequestBuilder {
-            param.error = t
-            param.err = onErrorListener as OnErrorListener<Any>
-            return this
-        }
-
-
-        fun failure(onFailure: OnFailureListener): GetRequestBuilder {
-            param.failure = onFailure
-            return this
-        }
-
-        fun response(responseListener: ResponseListener): GetRequestBuilder {
-            param.responseListener = responseListener
-            return this
-        }
-
-        override fun taskId(taskId: Int): GetRequestBuilder {
-            param.taskId = taskId
-            return this
-        }
-
-        override fun timeOut(connectTimeOut: Long, readTimeOut: Long): GetRequestBuilder {
+        fun timeOut(connectTimeOut: Long, readTimeOut: Long): GetRequestBuilder {
             param.connectTimeOut = connectTimeOut
             param.readTimeOut = readTimeOut
             return this
         }
 
-        override fun progressDialog(dialog: Dialog): GetRequestBuilder {
-            param.dialog = dialog
-            return this
-        }
-
-        override fun cache(isCache: Boolean): GetRequestBuilder {
+        fun cache(isCache: Boolean): GetRequestBuilder {
             param.isCacheEnabled = isCache
             return this
         }
 
-        fun loader(loaderListener: LoaderListener): GetRequestBuilder {
-            param.loaderListener = loaderListener
-            return this
-        }
-
-        override fun queryParam(queryParam: QueryMap<String, String>): GetRequestBuilder {
+        fun queryParam(queryParam: QueryMap<String, String>): GetRequestBuilder {
             param.queryParam = queryParam
             return this
         }
@@ -111,12 +58,7 @@ class BuilderRequest {
             return this
         }
 
-        fun progressListener(callback: ProgressListener): GetRequestBuilder {
-            param.progressListener = callback
-            return this
-        }
-
-        // Higher Order function
+        @Suppress("UNCHECKED_CAST")
         fun <T : SuccessModel> success(model: Class<T>, t: (T) -> Unit): GetRequestBuilder {
             param.model = model
             val success = object : OnSuccessListener<T> {
@@ -128,6 +70,7 @@ class BuilderRequest {
             return this
         }
 
+        @Suppress("UNCHECKED_CAST")
         fun <T : ErrorModel> error(model: Class<T>, t: (T) -> Unit): GetRequestBuilder {
             param.error = model
             val error = object : OnErrorListener<T> {
@@ -183,14 +126,14 @@ class BuilderRequest {
             return call()!!
         }
 
-        override fun connect() {
+        fun connect() {
             call()?.enqueue(Callback.GetRequestCallbackEnqueue(param))
         }
 
         private fun call(): Call? {
-            var baseUrl = ApiConfiguration.getBaseUrl()
+            var baseUrl = ApiConfiguration.baseUrl
             if (!TextUtils.isEmpty(param.baseUrl)) {
-                baseUrl = param.baseUrl
+                baseUrl = param.baseUrl.toString()
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
@@ -227,7 +170,6 @@ class BuilderRequest {
                 else -> {
                 }
             }
-            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param)
             if (param.connectTimeOut != 0L && param.readTimeOut != 0L) {
                 okHttpClient = okHttpClient?.newBuilder()
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
@@ -261,7 +203,7 @@ class BuilderRequest {
     /******************************************************************************************/
 
     open class PostRequestBuilder(private val param: WebParam) : IProperties<PostRequestBuilder> {
-        private var okHttpClient: OkHttpClient? = null
+        private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
 
         override fun baseUrl(url: String): PostRequestBuilder {
             param.baseUrl = url
@@ -280,20 +222,6 @@ class BuilderRequest {
 
         override fun headerParam(headerParam: Map<String, String>): PostRequestBuilder {
             param.headerParam = headerParam
-            return this
-        }
-
-        @Deprecated("Going to depricate")
-        override fun callback(callback: OnWebCallback): PostRequestBuilder {
-            param.callback = callback
-            return this
-        }
-
-        @Deprecated("Going to depricate")
-        override fun callback(callback: OnWebCallback, success: Class<*>, error: Class<*>): PostRequestBuilder {
-            param.callback = callback
-            param.model = success
-            param.error = error
             return this
         }
 
@@ -332,11 +260,6 @@ class BuilderRequest {
         override fun timeOut(connectTimeOut: Long, readTimeOut: Long): PostRequestBuilder {
             param.connectTimeOut = connectTimeOut
             param.readTimeOut = readTimeOut
-            return this
-        }
-
-        override fun progressDialog(dialog: Dialog): PostRequestBuilder {
-            param.dialog = dialog
             return this
         }
 
@@ -443,10 +366,10 @@ class BuilderRequest {
 
         private fun call(): Call? {
             val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
-            var FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
-            var baseUrl = ApiConfiguration.getBaseUrl()
+            val FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
+            var baseUrl = ApiConfiguration.baseUrl
             if (!TextUtils.isEmpty(param.baseUrl)) {
-                baseUrl = param.baseUrl
+                baseUrl = param.baseUrl.toString()
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + this.param.url)?.newBuilder()
@@ -474,9 +397,9 @@ class BuilderRequest {
             when (param.httpType) {
                 WebParam.HttpType.POST -> {
                     if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
                     requestBody?.also {
                         builder = builder.post(it)
@@ -484,9 +407,9 @@ class BuilderRequest {
                 }
                 WebParam.HttpType.PUT -> {
                     if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
                     requestBody?.also {
                         builder = builder.put(it)
@@ -494,9 +417,9 @@ class BuilderRequest {
                 }
                 WebParam.HttpType.DELETE -> {
                     if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
                     requestBody?.also {
                         builder = builder.delete(it)
@@ -504,9 +427,9 @@ class BuilderRequest {
                 }
                 WebParam.HttpType.PATCH -> {
                     if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
                     requestBody?.also {
                         builder = builder.patch(it)
@@ -519,7 +442,6 @@ class BuilderRequest {
                 param.requestBodyContentlength = it.contentLength()
             }
 
-            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(this.param)
             if (param.connectTimeOut != 0L && param.readTimeOut != 0L) {
                 okHttpClient = okHttpClient?.newBuilder()
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
@@ -556,7 +478,7 @@ class BuilderRequest {
     /******************************************************************************************/
 
     open class DownloadBuilder(val param: WebParam) : IProperties<DownloadBuilder> {
-        private var okHttpClient: OkHttpClient? = null
+        private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
         private val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
         private var FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
         override fun baseUrl(url: String): DownloadBuilder {
@@ -569,19 +491,6 @@ class BuilderRequest {
             return this
         }
 
-        @Deprecated("Going to depricate")
-        override fun callback(callback: OnWebCallback): DownloadBuilder {
-            param.callback = callback
-            return this
-        }
-
-        @Deprecated("Going to depricate")
-        override fun callback(callback: OnWebCallback, success: Class<*>, error: Class<*>): DownloadBuilder {
-            param.callback = callback
-            param.model = success
-            param.error = error
-            return this
-        }
 
         fun success(onSuccessListener: OnSuccessListener<File>): DownloadBuilder {
             param.success = onSuccessListener as OnSuccessListener<Any>
@@ -612,11 +521,6 @@ class BuilderRequest {
         override fun timeOut(connectTimeOut: Long, readTimeOut: Long): DownloadBuilder {
             param.connectTimeOut = connectTimeOut
             param.readTimeOut = readTimeOut
-            return this
-        }
-
-        override fun progressDialog(dialog: Dialog): DownloadBuilder {
-            param.dialog = dialog
             return this
         }
 
@@ -714,9 +618,9 @@ class BuilderRequest {
 
 
         private fun call(): Call? {
-            var baseUrl = ApiConfiguration.getBaseUrl()
+            var baseUrl = ApiConfiguration.baseUrl
             if (!TextUtils.isEmpty(param.baseUrl)) {
-                baseUrl = param.baseUrl
+                baseUrl = param.baseUrl.toString()
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
@@ -746,9 +650,9 @@ class BuilderRequest {
                 }
                 WebParam.HttpType.POST -> {
                     if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
                     requestBody?.also {
                         builder = builder.post(it)
@@ -756,9 +660,9 @@ class BuilderRequest {
                 }
                 WebParam.HttpType.PUT -> {
                     if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, HTTPManager.get().convertFormData(param.requestParam as MutableMap<String, String>))
+                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, ApiConfiguration.getGson().toJson(param.requestParam))
+                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
                     requestBody?.also {
                         builder = builder.put(it)
@@ -767,7 +671,6 @@ class BuilderRequest {
                 else -> {
                 }
             }
-            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param)
             if (param.connectTimeOut != 0L && param.readTimeOut != 0L) {
                 okHttpClient = okHttpClient?.newBuilder()
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
@@ -821,7 +724,7 @@ class BuilderRequest {
     /******************************************************************************************/
 
     class MultiPartBuilder(private val param: WebParam) : IProperties<MultiPartBuilder> {
-        private var okHttpClient: OkHttpClient? = null
+        private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
 
         override fun baseUrl(url: String): MultiPartBuilder {
             param.baseUrl = url
@@ -830,20 +733,6 @@ class BuilderRequest {
 
         override fun headerParam(headerParam: Map<String, String>): MultiPartBuilder {
             param.headerParam = headerParam
-            return this
-        }
-
-        @Deprecated("Going to depricate")
-        override fun callback(callback: OnWebCallback): MultiPartBuilder {
-            param.callback = callback
-            return this
-        }
-
-        @Deprecated("Going to depricate")
-        override fun callback(callback: OnWebCallback, success: Class<*>, error: Class<*>): MultiPartBuilder {
-            param.callback = callback
-            param.model = success
-            param.error = error
             return this
         }
 
@@ -882,11 +771,6 @@ class BuilderRequest {
         override fun timeOut(connectTimeOut: Long, readTimeOut: Long): MultiPartBuilder {
             param.connectTimeOut = connectTimeOut
             param.readTimeOut = readTimeOut
-            return this
-        }
-
-        override fun progressDialog(dialog: Dialog): MultiPartBuilder {
-            param.dialog = dialog
             return this
         }
 
@@ -1007,9 +891,9 @@ class BuilderRequest {
         }
 
         private fun call(): Call? {
-            var baseUrl = ApiConfiguration.getBaseUrl()
+            var baseUrl = ApiConfiguration.baseUrl
             if (!TextUtils.isEmpty(param.baseUrl)) {
-                baseUrl = param.baseUrl
+                baseUrl = param.baseUrl.toString()
             }
 
             var builder = okhttp3.Request.Builder()
@@ -1052,13 +936,14 @@ class BuilderRequest {
                     val uri = Uri.fromFile(value)
                     var mimeType = "application/octet-stream"
                     if (uri?.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-                        var cR: ContentResolver ?= null
-                        if (param.context != null) {
-                            cR = param.context?.contentResolver
-                        } else if (ApiConfiguration.getContext() != null) {
-                            cR = ApiConfiguration.getContext()?.contentResolver
-                        }
-                        mimeType = cR?.getType(uri).toString()
+//                        var cR: ContentResolver ?= null
+//                        if (param.context != null) {
+//                            cR = param.context?.contentResolver
+//                        } else if (ApiConfiguration.context != null) {
+//                            cR = ApiConfiguration.context?.contentResolver
+//                        }
+//                        MimeTypeMap.getFileExtensionFromUrl()
+//                        mimeType = cR?.getType(uri).toString()
                     } else {
                         val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
                                 .toString())
@@ -1081,13 +966,13 @@ class BuilderRequest {
                         val uri = Uri.fromFile(value)
                         var mimeType = "application/octet-stream"
                         if (uri?.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-                            var cR: ContentResolver ?= null
-                            if (param.context != null) {
-                                cR = param.context?.contentResolver
-                            } else if (ApiConfiguration.getContext() != null) {
-                                cR = ApiConfiguration.getContext()?.contentResolver
-                            }
-                            mimeType = cR?.getType(uri).toString()
+//                            var cR: ContentResolver ?= null
+//                            if (param.context != null) {
+//                                cR = param.context?.contentResolver
+//                            } else if (ApiConfiguration.context != null) {
+//                                cR = ApiConfiguration.context?.contentResolver
+//                            }
+//                            mimeType = cR?.getType(uri).toString()
                         } else {
                             val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
                                     .toString())
@@ -1145,7 +1030,6 @@ class BuilderRequest {
             } else {
                 builder.cacheControl(CacheControl.FORCE_NETWORK)
             }
-            okHttpClient = HTTPManager.get().getDefaultOkHttpClient(param)
             if (param.connectTimeOut != 0L && param.readTimeOut != 0L) {
                 okHttpClient = okHttpClient?.newBuilder()
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
