@@ -168,7 +168,10 @@ class Callback {
                     e.stackTrace
                 }
                 response.body()?.let {
-                    val responseString = it.string()
+                    var responseString = ""
+                    runBlocking(Dispatchers.IO) {
+                        responseString = it.string()
+                    }
                     param.responseListener?.response(responseString)
                     if (response.isSuccessful) {
                         val obj = ApiConfiguration.getGson().fromJson(responseString, param.model)
@@ -252,21 +255,27 @@ class Callback {
                 var `object`: Any? = null
                 response.body()?.let {
                     if (response.isSuccessful) {
-                        var out: OutputStream? = null
-                        try {
-                            out = FileOutputStream(param.file!!)
-                            IOUtils.copy(it.byteStream(), out)
-                            `object` = param.file
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                        runBlocking(Dispatchers.IO) {
+                            val out: OutputStream?
+                            try {
+                                out = FileOutputStream(param.file!!)
+                                IOUtils.copy(it.byteStream(), out)
+
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
+                        `object` = param.file
                         param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
                         param.callback?.onSuccess(this.param.file, this.param.taskId)
                         param.success?.onSuccess(this.param.file!!)
                     } else {
                         param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
                         if (response.body() != null) {
-                            val error = response.body()!!.string()
+                            var error = ""
+                            runBlocking(Dispatchers.IO) {
+                                error = response.body()!!.string()
+                            }
                             param.callback?.onError(error, "", param.taskId)
                             param.err?.onError(error)
                             ErrorLiveData.getInstance().postValue(error)
