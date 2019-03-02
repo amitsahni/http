@@ -108,16 +108,6 @@ class BuilderRequest {
             return this
         }
 
-        fun progressListener(f: (Long, Long, Float) -> Unit): GetRequestBuilder {
-            val process = object : ProgressListener {
-                override fun onProgress(bytesRead: Long, contentLength: Long, progress: Float) {
-                    f(bytesRead, contentLength, progress)
-                }
-            }
-            param.progressListener = process
-            return this
-        }
-
         fun failure(f: (Exception, String) -> Unit): GetRequestBuilder {
             val failure = object : OnFailureListener {
                 override fun onFailure(e: Exception, msg: String) {
@@ -138,22 +128,18 @@ class BuilderRequest {
 
         private fun call(): Call? {
             var baseUrl = ApiConfiguration.baseUrl
-            if (!param.baseUrl.isNotBlank()) {
+            if (!param.baseUrl.isEmpty()) {
                 baseUrl = param.baseUrl
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl.plus(param.url))?.newBuilder()
-            if (!param.query.isEmpty()) {
-                param.query.forEach { (key, value) ->
-                    urlBuilder?.addQueryParameter(key, value)
-                }
+            param.query.forEach { (key, value) ->
+                urlBuilder?.addQueryParameter(key, value)
             }
-            if (!param.queryParam.isEmpty()) {
-                for (i in 0 until param.queryParam.key.size()) {
-                    val key = param.queryParam.key[i]
-                    val value = param.queryParam.value[i]
-                    urlBuilder?.addQueryParameter(key, value)
-                }
+            for (i in 0 until param.queryParam.key.size()) {
+                val key = param.queryParam.key[i]
+                val value = param.queryParam.value[i]
+                urlBuilder?.addQueryParameter(key, value)
             }
             builder.url(urlBuilder?.build().toString())
 
@@ -163,18 +149,18 @@ class BuilderRequest {
             }
             builder.headers(headerBuilder.build())
 
-            when (param.httpType) {
+            builder = when (param.httpType) {
                 WebParam.HttpType.GET -> {
-                    builder = builder.get()
+                    builder.get()
                 }
                 WebParam.HttpType.HEAD -> {
-                    builder = builder.head()
+                    builder.head()
                 }
                 WebParam.HttpType.OPTIONS -> {
-                    builder = builder.method("OPTIONS", null)
+                    builder.method("OPTIONS", null)
                 }
                 else -> {
-                    builder = builder.get()
+                    builder.get()
                 }
             }
             if (param.connectTimeOut != 0L && param.readTimeOut != 0L) {
@@ -182,13 +168,6 @@ class BuilderRequest {
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
                         ?.readTimeout(param.readTimeOut, TimeUnit.SECONDS)
                         ?.writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        ?.addInterceptor {
-                            val originalResponse = it.proceed(it.request())
-                            val originalBody = originalResponse.body()
-                            originalResponse.newBuilder()
-                                    .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
-                                    .build()
-                        }
                         ?.build()
             }
             if (param.isCacheEnabled) {
@@ -196,10 +175,7 @@ class BuilderRequest {
             } else {
                 builder.cacheControl(CacheControl.FORCE_NETWORK)
             }
-            val okHttpRequest = builder.build()
-            val call = okHttpClient?.newCall(okHttpRequest)
-            param.analyticsListener = Callback.Analytics()
-            return call
+            return okHttpClient?.newCall(builder.build())
         }
     }
 
@@ -209,15 +185,19 @@ class BuilderRequest {
 
     /******************************************************************************************/
 
-    open class PostRequestBuilder(private val param: WebParam) : IProperties<PostRequestBuilder> {
+    open class PostRequestBuilder(private val param: WebParam) {
         private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
 
-        override fun baseUrl(url: String): PostRequestBuilder {
+        fun multipart(): MultiPartBuilder {
+            return BuilderRequest.MultiPartBuilder(param)
+        }
+
+        fun baseUrl(url: String): PostRequestBuilder {
             param.baseUrl = url
             return this
         }
 
-        override fun queryParam(queryParam: QueryMap<String, String>): PostRequestBuilder {
+        fun queryParam(queryParam: QueryMap<String, String>): PostRequestBuilder {
             param.queryParam = queryParam
             return this
         }
@@ -227,56 +207,14 @@ class BuilderRequest {
             return this
         }
 
-        override fun headerParam(headerParam: Map<String, String>): PostRequestBuilder {
+        fun headerParam(headerParam: Map<String, String>): PostRequestBuilder {
             param.headerParam = headerParam
             return this
         }
 
-        fun <T : SuccessModel> success(t: Class<T>, onSuccessListener: OnSuccessListener<T>): PostRequestBuilder {
-            param.model = t
-            param.success = onSuccessListener as OnSuccessListener<Any>
-            return this
-        }
-
-        fun <T : ErrorModel> error(t: Class<T>, onErrorListener: OnErrorListener<T>): PostRequestBuilder {
-            param.error = t
-            param.err = onErrorListener as OnErrorListener<Any>
-            return this
-        }
-
-        fun loader(loaderListener: LoaderListener): PostRequestBuilder {
-            param.loaderListener = loaderListener
-            return this
-        }
-
-        fun failure(onFailure: OnFailureListener): PostRequestBuilder {
-            param.failure = onFailure
-            return this
-        }
-
-        fun response(responseListener: ResponseListener): PostRequestBuilder {
-            param.responseListener = responseListener
-            return this
-        }
-
-        override fun taskId(taskId: Int): PostRequestBuilder {
-            param.taskId = taskId
-            return this
-        }
-
-        override fun timeOut(connectTimeOut: Long, readTimeOut: Long): PostRequestBuilder {
+        fun timeOut(connectTimeOut: Long, readTimeOut: Long): PostRequestBuilder {
             param.connectTimeOut = connectTimeOut
             param.readTimeOut = readTimeOut
-            return this
-        }
-
-        override fun cache(isCache: Boolean): PostRequestBuilder {
-            param.isCacheEnabled = isCache
-            return this
-        }
-
-        override fun analyticsListener(callback: AnalyticsListener): PostRequestBuilder {
-            param.analyticsListener = callback
             return this
         }
 
@@ -288,86 +226,89 @@ class BuilderRequest {
 
         fun formDataParam(requestParam: Map<String, String>): PostRequestBuilder {
             param.requestParam = requestParam
+            param.isJson = false
             return this
         }
 
-        fun progressListener(callback: ProgressListener): PostRequestBuilder {
-            param.progressListener = callback
-            return this
-        }
-
-        fun multipart(): MultiPartBuilder {
-            return BuilderRequest.MultiPartBuilder(param)
-        }
-
-        // Higher Order function
-        fun <T : SuccessModel> success(model: Class<T>, t: (T) -> Unit): PostRequestBuilder {
+        @Suppress("UNCHECKED_CAST")
+        fun <T : SuccessModel> success(model: Class<T>, f: T.() -> Unit): PostRequestBuilder {
             param.model = model
             val success = object : OnSuccessListener<T> {
                 override fun onSuccess(model: T) {
-                    t(model)
+                    f(model)
                 }
             }
             param.success = success as OnSuccessListener<Any>
             return this
         }
 
-        fun <T : ErrorModel> error(model: Class<T>, t: (T) -> Unit): PostRequestBuilder {
+        @Suppress("UNCHECKED_CAST")
+        fun <T : ErrorModel> error(model: Class<T>, f: T.() -> Unit): PostRequestBuilder {
             param.error = model
             val error = object : OnErrorListener<T> {
                 override fun onError(model: T) {
-                    t(model)
+                    f(model)
                 }
             }
             param.err = error as OnErrorListener<Any>
             return this
         }
 
-        fun failure(t: (Exception, String) -> Unit): PostRequestBuilder {
-            val failure = object : OnFailureListener {
-                override fun onFailure(e: Exception, msg: String) {
-                    t(e, msg)
+        fun analyticsListener(f: (timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) -> Unit): PostRequestBuilder {
+            val analyticsListener = object : AnalyticsListener {
+                override fun onReceived(timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) {
+                    f(timeTakenInMillis, bytesSent, bytesReceived, isFromCache)
                 }
             }
-            param.failure = failure
+            param.analyticsListener = analyticsListener
             return this
         }
 
-        fun response(t: (String) -> Unit): PostRequestBuilder {
+        fun response(f: String.() -> Unit): PostRequestBuilder {
             val response = object : ResponseListener {
                 override fun response(string: String) {
-                    t(string)
+                    f(string)
                 }
             }
             param.responseListener = response
             return this
         }
 
-        fun loader(t: (Boolean) -> Unit): PostRequestBuilder {
+        fun loader(f: Boolean.() -> Unit): PostRequestBuilder {
             val loader = object : LoaderListener {
                 override fun loader(isShowing: Boolean) {
-                    t(isShowing)
+                    f(isShowing)
                 }
             }
             param.loaderListener = loader
             return this
         }
 
-        fun progressListener(t: (Long, Long, Float) -> Unit): PostRequestBuilder {
+        fun progressListener(f: (Long, Long, Float) -> Unit): PostRequestBuilder {
             val process = object : ProgressListener {
                 override fun onProgress(bytesRead: Long, contentLength: Long, progress: Float) {
-                    t(bytesRead, contentLength, progress)
+                    f(bytesRead, contentLength, progress)
                 }
             }
             param.progressListener = process
             return this
         }
 
-        fun queue(): Call {
-            return call()!!
+        fun failure(f: (Exception, String) -> Unit): PostRequestBuilder {
+            val failure = object : OnFailureListener {
+                override fun onFailure(e: Exception, msg: String) {
+                    f(e, msg)
+                }
+            }
+            param.failure = failure
+            return this
         }
 
-        override fun connect() {
+        fun queue(): Call? {
+            return call()
+        }
+
+        fun connect() {
             call()?.enqueue(Callback.PostRequestCallbackEnqueue(param))
         }
 
@@ -375,77 +316,81 @@ class BuilderRequest {
             val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
             val FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
             var baseUrl = ApiConfiguration.baseUrl
-            if (!TextUtils.isEmpty(param.baseUrl)) {
-                baseUrl = param.baseUrl.toString()
+            if (!param.baseUrl.isEmpty()) {
+                baseUrl = param.baseUrl
             }
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + this.param.url)?.newBuilder()
-            if (!param.query.isEmpty()) {
-                param.query.forEach { (key, value) ->
-                    urlBuilder?.addQueryParameter(key, value)
-                }
+            param.query.forEach { (key, value) ->
+                urlBuilder?.addQueryParameter(key, value)
             }
-            if (!param.queryParam.isEmpty()) {
-                for (i in 0 until param.queryParam.key.size()) {
-                    val key = param.queryParam.key[i]
-                    val value = param.queryParam.value[i]
-                    urlBuilder?.addQueryParameter(key, value)
-                }
+            for (i in 0 until param.queryParam.key.size()) {
+                val key = param.queryParam.key[i]
+                val value = param.queryParam.value[i]
+                urlBuilder?.addQueryParameter(key, value)
             }
             builder.url(urlBuilder?.build().toString())
 
             val headerBuilder = Headers.Builder()
-            for ((key, value) in param.headerParam) {
+            param.headerParam.forEach { (key, value) ->
                 headerBuilder.add(key, value)
             }
             builder.headers(headerBuilder.build())
 
-            var requestBody: RequestBody? = null
+            val requestBody: RequestBody
             when (param.httpType) {
                 WebParam.HttpType.POST -> {
-                    if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                    requestBody = if (!param.isJson) {
+                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
-                    requestBody?.also {
+                    requestBody?.let {
                         builder = builder.post(it)
                     }
                 }
                 WebParam.HttpType.PUT -> {
-                    if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                    requestBody = if (!param.isJson) {
+                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
-                    requestBody?.also {
+                    requestBody?.let {
                         builder = builder.put(it)
                     }
                 }
                 WebParam.HttpType.DELETE -> {
-                    if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                    requestBody = if (!param.isJson) {
+                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
-                    requestBody?.also {
+                    requestBody?.let {
                         builder = builder.delete(it)
                     }
                 }
                 WebParam.HttpType.PATCH -> {
-                    if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                    requestBody = if (!param.isJson) {
+                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
-                    requestBody?.also {
+                    requestBody?.let {
                         builder = builder.patch(it)
                     }
                 }
                 else -> {
+                    requestBody = if (!param.isJson) {
+                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                    } else {
+                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                    }
+                    requestBody?.let {
+                        builder = builder.post(it)
+                    }
                 }
             }
-            requestBody?.also {
+            requestBody?.let {
                 param.requestBodyContentlength = it.contentLength()
             }
 
@@ -454,25 +399,18 @@ class BuilderRequest {
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
                         ?.readTimeout(param.readTimeOut, TimeUnit.SECONDS)
                         ?.writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        ?.addInterceptor {
-                            val originalResponse = it.proceed(it.request())
-                            val originalBody = originalResponse.body()
-                            originalResponse.newBuilder()
-                                    .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
-                                    .build()
-                        }
                         ?.build()
             }
-
-            if (param.isCacheEnabled) {
-                builder.cacheControl(CacheControl.FORCE_CACHE)
-            } else {
-                builder.cacheControl(CacheControl.FORCE_NETWORK)
+            param.progressListener?.let {
+                okHttpClient = okHttpClient?.newBuilder()?.addInterceptor {
+                    val originalResponse = it.proceed(it.request())
+                    val originalBody = originalResponse.body()
+                    originalResponse.newBuilder()
+                            .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
+                            .build()
+                }?.build()
             }
-            val okHttpRequest = builder.build()
-            val call = okHttpClient?.newCall(okHttpRequest)
-            param.analyticsListener = Callback.Analytics()
-            return call!!
+            return okHttpClient?.newCall(builder.build())
         }
     }
 
@@ -484,64 +422,28 @@ class BuilderRequest {
 
     /******************************************************************************************/
 
-    open class DownloadBuilder(val param: WebParam) : IProperties<DownloadBuilder> {
+    open class DownloadBuilder(val param: WebParam) {
         private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
         private val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
         private var FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
-        override fun baseUrl(url: String): DownloadBuilder {
+
+        fun baseUrl(url: String): DownloadBuilder {
             param.baseUrl = url
             return this
         }
 
-        override fun headerParam(headerParam: Map<String, String>): DownloadBuilder {
+        fun headerParam(headerParam: Map<String, String>): DownloadBuilder {
             param.headerParam = headerParam
             return this
         }
 
-
-        fun success(onSuccessListener: OnSuccessListener<File>): DownloadBuilder {
-            param.success = onSuccessListener as OnSuccessListener<Any>
-            return this
-        }
-
-        fun <T : ErrorModel> error(t: Class<T>, onErrorListener: OnErrorListener<T>): DownloadBuilder {
-            param.error = t
-            param.err = onErrorListener as OnErrorListener<Any>
-            return this
-        }
-
-        fun failure(onFailure: OnFailureListener): DownloadBuilder {
-            param.failure = onFailure
-            return this
-        }
-
-        fun loader(loaderListener: LoaderListener): DownloadBuilder {
-            param.loaderListener = loaderListener
-            return this
-        }
-
-        override fun taskId(taskId: Int): DownloadBuilder {
-            param.taskId = taskId
-            return this
-        }
-
-        override fun timeOut(connectTimeOut: Long, readTimeOut: Long): DownloadBuilder {
+        fun timeOut(connectTimeOut: Long, readTimeOut: Long): DownloadBuilder {
             param.connectTimeOut = connectTimeOut
             param.readTimeOut = readTimeOut
             return this
         }
 
-        override fun cache(isCache: Boolean): DownloadBuilder {
-            param.isCacheEnabled = isCache
-            return this
-        }
-
-        override fun analyticsListener(callback: AnalyticsListener): DownloadBuilder {
-            param.analyticsListener = callback
-            return this
-        }
-
-        override fun queryParam(queryParam: QueryMap<String, String>): DownloadBuilder {
+        fun queryParam(queryParam: QueryMap<String, String>): DownloadBuilder {
             param.queryParam = queryParam
             return this
         }
@@ -551,19 +453,13 @@ class BuilderRequest {
             return this
         }
 
-        fun progressListener(callback: ProgressListener): DownloadBuilder {
-            param.progressListener = callback
-            return this
-        }
-
         fun file(file: File): DownloadBuilder {
             param.file = file
             return this
         }
 
-
-        // Higher Order function
-        fun success(t: (File) -> Unit): DownloadBuilder {
+        @Suppress("UNCHECKED_CAST")
+        fun success(t: File.() -> Unit): DownloadBuilder {
             param.model = t.javaClass.enclosingClass!!
             val success = object : OnSuccessListener<File> {
                 override fun onSuccess(file: File) {
@@ -574,7 +470,8 @@ class BuilderRequest {
             return this
         }
 
-        fun <T : ErrorModel> error(model: Class<T>, t: (T) -> Unit): DownloadBuilder {
+        @Suppress("UNCHECKED_CAST")
+        fun <T : ErrorModel> error(model: Class<T>, t: T.() -> Unit): DownloadBuilder {
             param.error = model
             val error = object : OnErrorListener<T> {
                 override fun onError(model: T) {
@@ -582,26 +479,6 @@ class BuilderRequest {
                 }
             }
             param.err = error as OnErrorListener<Any>
-            return this
-        }
-
-        fun failure(t: (Exception, String) -> Unit): DownloadBuilder {
-            val failure = object : OnFailureListener {
-                override fun onFailure(e: Exception, msg: String) {
-                    t(e, msg)
-                }
-            }
-            param.failure = failure
-            return this
-        }
-
-        fun loader(t: (Boolean) -> Unit): DownloadBuilder {
-            val loader = object : LoaderListener {
-                override fun loader(isShowing: Boolean) {
-                    t(isShowing)
-                }
-            }
-            param.loaderListener = loader
             return this
         }
 
@@ -615,67 +492,96 @@ class BuilderRequest {
             return this
         }
 
-        fun queue(): Call {
-            return call()!!
+
+        fun analyticsListener(f: (timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) -> Unit): DownloadBuilder {
+            val analyticsListener = object : AnalyticsListener {
+                override fun onReceived(timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) {
+                    f(timeTakenInMillis, bytesSent, bytesReceived, isFromCache)
+                }
+            }
+            param.analyticsListener = analyticsListener
+            return this
         }
 
-        override fun connect() {
+        fun loader(f: Boolean.() -> Unit): DownloadBuilder {
+            val loader = object : LoaderListener {
+                override fun loader(isShowing: Boolean) {
+                    f(isShowing)
+                }
+            }
+            param.loaderListener = loader
+            return this
+        }
+
+        fun failure(f: (Exception, String) -> Unit): DownloadBuilder {
+            val failure = object : OnFailureListener {
+                override fun onFailure(e: Exception, msg: String) {
+                    f(e, msg)
+                }
+            }
+            param.failure = failure
+            return this
+        }
+
+        fun queue(): Call? {
+            return call()
+        }
+
+        fun connect() {
             call()?.enqueue(Callback.DownloadRequestCallbackEnqueue(param))
         }
 
 
         private fun call(): Call? {
             var baseUrl = ApiConfiguration.baseUrl
-            if (!TextUtils.isEmpty(param.baseUrl)) {
-                baseUrl = param.baseUrl.toString()
+            if (!param.baseUrl.isEmpty()) {
+                baseUrl = param.baseUrl
             }
             var builder = okhttp3.Request.Builder()
-            val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
-            if (!param.query.isEmpty()) {
-                param.query.forEach { (key, value) ->
-                    urlBuilder?.addQueryParameter(key, value)
-                }
+            val urlBuilder = HttpUrl.parse(baseUrl.plus(param.url))?.newBuilder()
+            param.query.forEach { (key, value) ->
+                urlBuilder?.addQueryParameter(key, value)
             }
-            if (!param.queryParam.isEmpty()) {
-                for (i in 0 until param.queryParam.key.size()) {
-                    val key = param.queryParam.key[i]
-                    val value = param.queryParam.value[i]
-                    urlBuilder?.addQueryParameter(key, value)
-                }
+            for (i in 0 until param.queryParam.key.size()) {
+                val key = param.queryParam.key[i]
+                val value = param.queryParam.value[i]
+                urlBuilder?.addQueryParameter(key, value)
             }
             builder.url(urlBuilder?.build().toString())
 
             val headerBuilder = Headers.Builder()
-            for ((key, value) in param.headerParam) {
+            param.headerParam.forEach { (key, value) ->
                 headerBuilder.add(key, value)
             }
             builder.headers(headerBuilder.build())
-            var requestBody: RequestBody? = null
+
+            val requestBody: RequestBody
             when (param.httpType) {
                 WebParam.HttpType.GET -> {
                     builder = builder.get()
                 }
                 WebParam.HttpType.POST -> {
-                    if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                    requestBody = if (!param.isJson) {
+                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
                     requestBody?.also {
                         builder = builder.post(it)
                     }
                 }
                 WebParam.HttpType.PUT -> {
-                    if (!param.isJson) {
-                        requestBody = RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                    requestBody = if (!param.isJson) {
+                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
                     } else {
-                        requestBody = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
                     }
                     requestBody?.also {
                         builder = builder.put(it)
                     }
                 }
                 else -> {
+                    builder = builder.get()
                 }
             }
             if (param.connectTimeOut != 0L && param.readTimeOut != 0L) {
@@ -683,31 +589,18 @@ class BuilderRequest {
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
                         ?.readTimeout(param.readTimeOut, TimeUnit.SECONDS)
                         ?.writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        ?.addInterceptor {
-                            val originalResponse = it.proceed(it.request())
-                            val originalBody = originalResponse.body()
-                            originalResponse.newBuilder()
-                                    .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
-                                    .build()
-                        }
                         ?.build()
             }
-
-            if (param.isCacheEnabled) {
-                builder.cacheControl(CacheControl.FORCE_CACHE)
-            } else {
-                builder.cacheControl(CacheControl.FORCE_NETWORK)
+            param.progressListener?.let {
+                okHttpClient = okHttpClient?.newBuilder()?.addInterceptor {
+                    val originalResponse = it.proceed(it.request())
+                    val originalBody = originalResponse.body()
+                    originalResponse.newBuilder()
+                            .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
+                            .build()
+                }?.build()
             }
-            okHttpClient = okHttpClient?.newBuilder()?.addNetworkInterceptor { chain ->
-                val originalResponse = chain.proceed(chain.request())
-                originalResponse.newBuilder()
-                        .body(originalResponse.body()?.let { HTTPInternalNetworking.ProgressResponseBody(it, param) })
-                        .build()
-            }?.build()
-            val okHttpRequest = builder.build()
-            val call = okHttpClient?.newCall(okHttpRequest)
-            param.analyticsListener = Callback.Analytics()
-            return call
+            return okHttpClient?.newCall(builder.build())
         }
     }
 
@@ -721,6 +614,7 @@ class BuilderRequest {
 
         fun formDataParam(requestParam: Map<String, String>): DownloadBuilderPost {
             param.requestParam = requestParam
+            param.isJson = false
             return this
         }
     }

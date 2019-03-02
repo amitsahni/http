@@ -20,4 +20,5 @@ public class ResponseModel extends SuccessModel {
     public boolean isSuccess() {
         return success;
     }
+
 }

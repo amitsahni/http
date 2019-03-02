@@ -5,6 +5,8 @@ import android.arch.lifecycle.*
 import android.content.Context
 import android.util.Log
 import webconnect.com.webconnect.WebConnect
+import webconnect.com.webconnect.model.SuccessModel
+import webconnect.com.webconnect.toJson
 import java.io.File
 import java.util.*
 
@@ -56,8 +58,6 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
 
     fun get() {
         val headerMap = LinkedHashMap<String, String>()
-        headerMap["Authorization"] = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NDM3ODMsIm5hbWUiOiJjZmNnZyBHZ2dnIGNjY2MgY2NjY2MiLCJlbWFpbCI6ImFsbWFycmlAbW9oLmdvdi5zYSIsIm1vYmlsZSI6IjUzMDgwMzA5MSIsInJvbGUiOiJlbXBsb3llZSIsImFjY2VzcyI6Im1vYmlsZSIsImRvbWFpbiI6ImFsbCIsImlhdCI6MTU0NjUwMzQ2MSwiZXhwIjoxNTQ5MDk1NDYxfQ.4OhtjSj5b0u7h57t3_9DEBXgkYsqo6nVLJ5eemDYg2o"
-        headerMap["Authorization"] = "12"
         WebConnect.with(ENDPOINT_GET)
                 .get()
                 .queryParam(headerMap)
@@ -66,36 +66,40 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
                 .loader {
                     Log.i(javaClass.simpleName, "Loader showing = $this")
                 }
-                .response {
-
-                }
                 .success(ResponseModel::class.java) {
+                    Log.d(javaClass.simpleName, this.toJson())
                     get.postValue(this)
                 }
                 .error(Error::class.java) {
                     error.postValue(this)
                 }
+                .progressListener { time, b, bi ->
+                    Log.d(javaClass.simpleName, "Time = $time, b = $b , b1 = $bi")
+                }
                 .failure { model, msg -> }
                 .connect()
     }
 
-//    fun post(): Map<String, String> {
-//        val requestMap = LinkedHashMap<String, String>()
-//        requestMap["locale"] = "en"
-//        requestMap["name"] = "manager1"
-//        requestMap["birth_date"] = "18/08/1987"
-//        requestMap["gender"] = "male"
-//        val headerMap = LinkedHashMap<String, String>()
-//        headerMap["Authorization"] = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTQsIm5hbWUiOiJHdXJ1IiwiZW1haWwiOiJndXJwcmVldDJAY2xpY2thcHBzLmNvIiwibW9iaWxlIjoiODI4NzYyMTIyOCIsImltYWdlIjoiL2RlZmF1bHRfbG9nby5qcGciLCJpYXQiOjE1MjExODAwOTIsImV4cCI6MTUyMzc3MjA5Mn0.Cc4dOzVC3NipXfVOJdRE29-GrtO5H0dgC3GSABiTYTA"
-//        WebConnect.with(this.activity, ENDPOINT_POST)
-//                .put()
-//                .multipart()
-//                .multipartParam(requestMap)
-//                .timeOut(100L, 50L)
-//                .headerParam(headerMap)
-//                .connect()
-//        return requestMap
-//    }
+    fun post(): Map<String, String> {
+        val requestMap = LinkedHashMap<String, String>()
+        requestMap["locale"] = "en"
+        requestMap["name"] = "manager1"
+        requestMap["birth_date"] = "18/08/1987"
+        requestMap["gender"] = "male"
+        val headerMap = LinkedHashMap<String, String>()
+        headerMap["Authorization"] = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTQsIm5hbWUiOiJHdXJ1IiwiZW1haWwiOiJndXJwcmVldDJAY2xpY2thcHBzLmNvIiwibW9iaWxlIjoiODI4NzYyMTIyOCIsImltYWdlIjoiL2RlZmF1bHRfbG9nby5qcGciLCJpYXQiOjE1MjExODAwOTIsImV4cCI6MTUyMzc3MjA5Mn0.Cc4dOzVC3NipXfVOJdRE29-GrtO5H0dgC3GSABiTYTA"
+        WebConnect.with(ENDPOINT_POST)
+                .post()
+                .bodyParam(requestMap)
+                .formDataParam(requestMap)
+                .timeOut(100L, 50L)
+                .headerParam(headerMap)
+                .progressListener { time, b, bi ->
+                    Log.d(javaClass.simpleName, "Time = $time, b = $b , b1 = $bi")
+                }
+                .connect()
+        return requestMap
+    }
 
 //    fun put() {
 //        val requestMap = LinkedHashMap<String, String>()
@@ -133,5 +137,4 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
         val ENDPOINT_PUT = "users/740"
         val ENDPOINT_BASE = "https://reqres.in/api/"
     }
-
 }

@@ -47,13 +47,23 @@ fun String.fromJson(model: Class<*>): Any {
         gson().fromJson(this, model)
     } catch (e: JsonSyntaxException) {
         e.printStackTrace()
+        Any()
+    }
+}
+
+fun String.formatJson(): String {
+    return try {
+        gson().fromJson(this, Any::class.java).toString()
+    } catch (e: JsonSyntaxException) {
+        e.printStackTrace()
+        ""
     }
 }
 
 fun Map<String, Any>.convertFormData(): String {
     val sb = StringBuilder()
     for ((key, value) in this) {
-        if (!sb.isNotEmpty()) {
+        if (!sb.isEmpty()) {
             sb.append("&")
         }
         sb.append(String.format("%s=%s", key, value.toString()))

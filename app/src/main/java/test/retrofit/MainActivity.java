@@ -77,6 +77,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d("TAG", "time = " + time);
                     return Unit.INSTANCE;
                 })
+                .response(s -> {
+                    Log.d(getLocalClassName(), "Response = " + s);
+                    return Unit.INSTANCE;
+                })
                 .connect();
     }
 
@@ -112,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // http://api.staging.moh.clicksandbox1.com:8080/upload/magazins/8/original/624996-pixelponew.jpg?1505885452
             mainActivityModel.get();
         } else if (id == R.id.button1) {
-//            mainActivityModel.post();
+            mainActivityModel.post();
         } else if (id == R.id.button2) {
 //            mainActivityModel.put();
         } else if (id == R.id.button3) {

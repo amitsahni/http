@@ -21,7 +21,7 @@ public class RetrofitApplication extends Application {
         ApiConfiguration.INSTANCE
                 .baseUrl(MainActivityModel.Companion.getENDPOINT_BASE())
                 .timeOut(1000L, 2000L)
-                .logging(false)
+                .logging(true)
                 .config();
 
         SuccessLiveData.INSTANCE.getSuccessLiveData().observeForever(s -> {

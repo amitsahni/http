@@ -23,6 +23,11 @@ public class Builder(context: Context?, url: String) {
         return BuilderRequest.GetRequestBuilder(webParam)
     }
 
+
+    fun post(): BuilderRequest.PostRequestBuilder {
+        return BuilderRequest.PostRequestBuilder(webParam)
+    }
+
 //    public BuilderRequest.HeadRequestBuilder head() {
 //        webParam.setHttpType(WebParam.HttpType.HEAD);
 //        return new BuilderRequest.HeadRequestBuilder(webParam);

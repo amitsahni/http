@@ -12,6 +12,8 @@ import okhttp3.Call
 import okhttp3.Response
 import org.apache.commons.io.IOUtils
 import webconnect.com.webconnect.listener.AnalyticsListener
+import webconnect.com.webconnect.listener.OnSuccessListener
+import webconnect.com.webconnect.model.SuccessModel
 import webconnect.com.webconnect.observer.ErrorLiveData
 import webconnect.com.webconnect.observer.FailureLiveData
 import webconnect.com.webconnect.observer.SuccessLiveData
@@ -53,7 +55,7 @@ class Callback {
                 var responseString = ""
                 runBlocking(Dispatchers.IO) {
                     responseString = it.string()
-                    param.responseListener?.response(responseString)
+                    param.responseListener?.response(responseString.formatJson().toString())
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, it.contentLength(), response.cacheResponse() != null)
                 }
                 if (response.isSuccessful) {
@@ -204,6 +206,7 @@ class Callback {
             }
         }
     }
+
 
 
     companion object {
