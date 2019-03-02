@@ -10,19 +10,17 @@ import java.io.File;
  * Created by amit on 23/9/17.
  */
 
-public class Builder {
+public class Builder(context: Context?, url: String) {
 
-    private WebParam webParam;
+    val webParam: WebParam = WebParam()
 
-    Builder(@Nullable Context context, @NonNull String url) {
-        webParam = new WebParam();
-        webParam.setContext(context);
-        webParam.setUrl(url);
+    init {
+        webParam.context = context
+        webParam.url = url
     }
 
-    public BuilderRequest.GetRequestBuilder get() {
-        webParam.setHttpType(WebParam.HttpType.GET);
-        return new BuilderRequest.GetRequestBuilder(webParam);
+    fun get(): BuilderRequest.GetRequestBuilder {
+        return BuilderRequest.GetRequestBuilder(webParam)
     }
 
 //    public BuilderRequest.HeadRequestBuilder head() {

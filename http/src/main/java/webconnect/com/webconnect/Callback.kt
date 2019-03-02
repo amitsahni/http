@@ -34,10 +34,9 @@ class Callback {
 
     // Enqueue
     internal class GetRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
-        var startTime = 0L
+        val startTime: Long = System.currentTimeMillis()
 
         init {
-            startTime = System.currentTimeMillis()
             param.loaderListener?.loader(true)
         }
 
@@ -48,45 +47,24 @@ class Callback {
         }
 
         override fun onResponse(call: Call, response: Response) {
-            runOnUiThread {
-                val timeTaken = System.currentTimeMillis() - startTime
-                param.loaderListener?.loader(false)
-                try {
-                    param.dialog?.let {
-                        if (param.dialog?.isShowing!!) {
-                            param.dialog?.dismiss()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.stackTrace
+            val timeTaken = System.currentTimeMillis() - startTime
+            param.loaderListener?.loader(false)
+            response.body()?.let {
+                var responseString = ""
+                runBlocking(Dispatchers.IO) {
+                    responseString = it.string()
+                    param.responseListener?.response(responseString)
+                    param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, it.contentLength(), response.cacheResponse() != null)
                 }
-                response.body()?.let {
-                    var responseString = ""
-                    runBlocking(Dispatchers.IO) {
-                        responseString = it.string()
-                    }
-                    if (response.isSuccessful) {
-                        param.responseListener?.response(responseString)
-                        val obj = responseString.fromJson(param.model)
-                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
-                        param.success?.onSuccess(obj)
-                        SuccessLiveData.success.postValue(responseString)
-                    } else {
-                        var obj: Any? = null
-                        try {
-                            param.responseListener?.response(responseString)
-                            obj = responseString.fromJson(param.error)
-                            param.err?.onError(obj)
-                            ErrorLiveData.error.postValue(responseString)
-                        } catch (e: Exception) {
-                            param.failure?.onFailure(e, getError(param, e))
-                            FailureLiveData.failure.postValue(getError(param, e))
-                        }
-                        param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, response.body()?.contentLength()!!, response.cacheResponse() != null)
-
-                    }
+                if (response.isSuccessful) {
+                    val obj = responseString.fromJson(param.model)
+                    param.success?.onSuccess(obj)
+                    SuccessLiveData.success.postValue(responseString)
+                } else {
+                    val obj = responseString.fromJson(param.error)
+                    param.err?.onError(obj)
+                    ErrorLiveData.error.postValue(responseString)
                 }
-
             }
         }
     }
@@ -94,6 +72,7 @@ class Callback {
     // Enqueue
     internal class PostRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
         var startTime = 0L
+
         init {
             startTime = System.currentTimeMillis()
             param.loaderListener?.loader(true)

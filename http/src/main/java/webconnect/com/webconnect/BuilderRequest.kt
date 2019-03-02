@@ -22,6 +22,7 @@ class BuilderRequest {
     open class GetRequestBuilder(private val param: WebParam) {
 
         private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
+
         fun baseUrl(url: String): GetRequestBuilder {
             param.baseUrl = url
             return this
@@ -29,11 +30,6 @@ class BuilderRequest {
 
         fun headerParam(headerParam: Map<String, String>): GetRequestBuilder {
             param.headerParam = headerParam
-            return this
-        }
-
-        fun analyticsListener(callback: AnalyticsListener): GetRequestBuilder {
-            param.analyticsListener = callback
             return this
         }
 
@@ -59,11 +55,11 @@ class BuilderRequest {
         }
 
         @Suppress("UNCHECKED_CAST")
-        fun <T : SuccessModel> success(model: Class<T>, t: (T) -> Unit): GetRequestBuilder {
+        fun <T : SuccessModel> success(model: Class<T>, f: T.() -> Unit): GetRequestBuilder {
             param.model = model
             val success = object : OnSuccessListener<T> {
                 override fun onSuccess(model: T) {
-                    t(model)
+                    f(model)
                 }
             }
             param.success = success as OnSuccessListener<Any>
@@ -71,59 +67,69 @@ class BuilderRequest {
         }
 
         @Suppress("UNCHECKED_CAST")
-        fun <T : ErrorModel> error(model: Class<T>, t: (T) -> Unit): GetRequestBuilder {
+        fun <T : ErrorModel> error(model: Class<T>, f: T.() -> Unit): GetRequestBuilder {
             param.error = model
             val error = object : OnErrorListener<T> {
                 override fun onError(model: T) {
-                    t(model)
+                    f(model)
                 }
             }
             param.err = error as OnErrorListener<Any>
             return this
         }
 
-        fun failure(t: (Exception, String) -> Unit): GetRequestBuilder {
-            val failure = object : OnFailureListener {
-                override fun onFailure(e: Exception, msg: String) {
-                    t(e, msg)
+        fun analyticsListener(f: (timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) -> Unit): GetRequestBuilder {
+            val analyticsListener = object : AnalyticsListener {
+                override fun onReceived(timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) {
+                    f(timeTakenInMillis, bytesSent, bytesReceived, isFromCache)
                 }
             }
-            param.failure = failure
+            param.analyticsListener = analyticsListener
             return this
         }
 
-        fun response(t: (String) -> Unit): GetRequestBuilder {
+        fun response(f: String.() -> Unit): GetRequestBuilder {
             val response = object : ResponseListener {
                 override fun response(string: String) {
-                    t(string)
+                    f(string)
                 }
             }
             param.responseListener = response
             return this
         }
 
-        fun loader(t: (Boolean) -> Unit): GetRequestBuilder {
+        fun loader(f: Boolean.() -> Unit): GetRequestBuilder {
             val loader = object : LoaderListener {
                 override fun loader(isShowing: Boolean) {
-                    t(isShowing)
+                    f(isShowing)
                 }
             }
             param.loaderListener = loader
             return this
         }
 
-        fun progressListener(t: (Long, Long, Float) -> Unit): GetRequestBuilder {
+        fun progressListener(f: (Long, Long, Float) -> Unit): GetRequestBuilder {
             val process = object : ProgressListener {
                 override fun onProgress(bytesRead: Long, contentLength: Long, progress: Float) {
-                    t(bytesRead, contentLength, progress)
+                    f(bytesRead, contentLength, progress)
                 }
             }
             param.progressListener = process
             return this
         }
 
-        fun queue(): Call {
-            return call()!!
+        fun failure(f: (Exception, String) -> Unit): GetRequestBuilder {
+            val failure = object : OnFailureListener {
+                override fun onFailure(e: Exception, msg: String) {
+                    f(e, msg)
+                }
+            }
+            param.failure = failure
+            return this
+        }
+
+        fun queue(): Call? {
+            return call()
         }
 
         fun connect() {
@@ -132,11 +138,11 @@ class BuilderRequest {
 
         private fun call(): Call? {
             var baseUrl = ApiConfiguration.baseUrl
-            if (!TextUtils.isEmpty(param.baseUrl)) {
-                baseUrl = param.baseUrl.toString()
+            if (!param.baseUrl.isNotBlank()) {
+                baseUrl = param.baseUrl
             }
             var builder = okhttp3.Request.Builder()
-            val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
+            val urlBuilder = HttpUrl.parse(baseUrl.plus(param.url))?.newBuilder()
             if (!param.query.isEmpty()) {
                 param.query.forEach { (key, value) ->
                     urlBuilder?.addQueryParameter(key, value)
@@ -152,7 +158,7 @@ class BuilderRequest {
             builder.url(urlBuilder?.build().toString())
 
             val headerBuilder = Headers.Builder()
-            for ((key, value) in param.headerParam) {
+            param.headerParam.forEach { (key, value) ->
                 headerBuilder.add(key, value)
             }
             builder.headers(headerBuilder.build())
@@ -168,6 +174,7 @@ class BuilderRequest {
                     builder = builder.method("OPTIONS", null)
                 }
                 else -> {
+                    builder = builder.get()
                 }
             }
             if (param.connectTimeOut != 0L && param.readTimeOut != 0L) {

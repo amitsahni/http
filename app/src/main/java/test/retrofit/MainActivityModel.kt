@@ -58,21 +58,22 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
         val headerMap = LinkedHashMap<String, String>()
         headerMap["Authorization"] = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NDM3ODMsIm5hbWUiOiJjZmNnZyBHZ2dnIGNjY2MgY2NjY2MiLCJlbWFpbCI6ImFsbWFycmlAbW9oLmdvdi5zYSIsIm1vYmlsZSI6IjUzMDgwMzA5MSIsInJvbGUiOiJlbXBsb3llZSIsImFjY2VzcyI6Im1vYmlsZSIsImRvbWFpbiI6ImFsbCIsImlhdCI6MTU0NjUwMzQ2MSwiZXhwIjoxNTQ5MDk1NDYxfQ.4OhtjSj5b0u7h57t3_9DEBXgkYsqo6nVLJ5eemDYg2o"
         headerMap["Authorization"] = "12"
-        WebConnect.with(this.activity, ENDPOINT_GET)
+        WebConnect.with(ENDPOINT_GET)
                 .get()
                 .queryParam(headerMap)
                 .headerParam(headerMap)
-                //.baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
                 .timeOut(100L, 50L)
-                .loader { isShowing -> Log.i(javaClass.simpleName, "Loader showing = $isShowing") }
-                .response { _ ->
+                .loader {
+                    Log.i(javaClass.simpleName, "Loader showing = $this")
+                }
+                .response {
 
                 }
                 .success(ResponseModel::class.java) {
-                    get.postValue(it)
+                    get.postValue(this)
                 }
                 .error(Error::class.java) {
-                    error.postValue(it)
+                    error.postValue(this)
                 }
                 .failure { model, msg -> }
                 .connect()
