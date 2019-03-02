@@ -20,6 +20,8 @@ object ApiConfiguration {
     var okHttpClient = OkHttpClient()
         private set
 
+
+
     fun baseUrl(baseUrl: String): ApiConfiguration {
         this.baseUrl = baseUrl
         return this
