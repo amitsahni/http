@@ -5,6 +5,7 @@ import android.arch.lifecycle.*
 import android.content.Context
 import android.util.Log
 import webconnect.com.webconnect.WebConnect
+import webconnect.com.webconnect.getHTTPError
 import webconnect.com.webconnect.model.SuccessModel
 import webconnect.com.webconnect.toJson
 import java.io.File
@@ -73,10 +74,9 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
                 .error(Error::class.java) {
                     error.postValue(this)
                 }
-                .progressListener { time, b, bi ->
-                    Log.d(javaClass.simpleName, "Time = $time, b = $b , b1 = $bi")
+                .failure { model, msg ->
+
                 }
-                .failure { model, msg -> }
                 .connect()
     }
 
@@ -101,27 +101,33 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
         return requestMap
     }
 
-//    fun put() {
-//        val requestMap = LinkedHashMap<String, String>()
-//        requestMap["locale"] = "Amit Singh"
-//        requestMap["name"] = "manager"
-//        requestMap["birth_date"] = "18/08/1987"
-//        requestMap["gender"] = "male"
-//        WebConnect.with(activity, ENDPOINT_PUT)
-//                .put()
-//                .formDataParam(requestMap)
-//                .connect()
-//    }
-//
-//    fun delete() {
-//        val requestMap = LinkedHashMap<String, String>()
-//        requestMap["name"] = "Amit Singh"
-//        requestMap["job"] = "manager"
-//        WebConnect.with(activity, ENDPOINT_PUT)
-//                .download(File("/test"))
-//                .get()
-//                .connect()
-//    }
+    fun put() {
+        val requestMap = LinkedHashMap<String, String>()
+        requestMap["locale"] = "Amit Singh"
+        requestMap["name"] = "manager"
+        requestMap["birth_date"] = "18/08/1987"
+        requestMap["gender"] = "male"
+        WebConnect.with(ENDPOINT_PUT)
+                .put()
+                .formDataParam(requestMap)
+                .connect()
+        WebConnect.with(ENDPOINT_GET)
+                .multipart()
+                .post()
+                .success(ResponseModel::class.java) {
+
+                }
+    }
+
+    fun delete() {
+        val requestMap = LinkedHashMap<String, String>()
+        requestMap["name"] = "Amit Singh"
+        requestMap["job"] = "manager"
+        WebConnect.with(ENDPOINT_GET)
+                .download(File("/test"))
+                .get()
+                .connect()
+    }
 
 
     class MainActivityModelFactory(private val activity: Application) : ViewModelProvider.Factory {

@@ -10,123 +10,99 @@ import java.io.File;
  * Created by amit on 23/9/17.
  */
 
-public class Builder(context: Context?, url: String) {
+public class Builder(url: String) {
 
-    val webParam: WebParam = WebParam()
+    private val webParam: WebParam = WebParam()
 
     init {
-        webParam.context = context
         webParam.url = url
     }
 
     fun get(): BuilderRequest.GetRequestBuilder {
+        webParam.httpType = WebParam.HttpType.GET
         return BuilderRequest.GetRequestBuilder(webParam)
     }
 
+    fun head(): BuilderRequest.GetRequestBuilder {
+        webParam.httpType = WebParam.HttpType.HEAD
+        return BuilderRequest.GetRequestBuilder(webParam)
+    }
+
+    fun options(): BuilderRequest.GetRequestBuilder {
+        webParam.httpType = WebParam.HttpType.OPTIONS
+        return BuilderRequest.GetRequestBuilder(webParam)
+    }
 
     fun post(): BuilderRequest.PostRequestBuilder {
+        webParam.httpType = WebParam.HttpType.POST
         return BuilderRequest.PostRequestBuilder(webParam)
     }
 
-//    public BuilderRequest.HeadRequestBuilder head() {
-//        webParam.setHttpType(WebParam.HttpType.HEAD);
-//        return new BuilderRequest.HeadRequestBuilder(webParam);
-//    }
-//
-//    public BuilderRequest.OptionsRequestBuilder options() {
-//        webParam.setHttpType(WebParam.HttpType.OPTIONS);
-//        return new BuilderRequest.OptionsRequestBuilder(webParam);
-//    }
-//
-//    public BuilderRequest.PostRequestBuilder post() {
-//        webParam.setHttpType(WebParam.HttpType.POST);
-//        return new BuilderRequest.PostRequestBuilder(webParam);
-//    }
-//
-//    public BuilderRequest.PutRequestBuilder put() {
-//        webParam.setHttpType(WebParam.HttpType.PUT);
-//        return new BuilderRequest.PutRequestBuilder(webParam);
-//    }
-//
-//    public BuilderRequest.DeleteRequestBuilder delete() {
-//        webParam.setHttpType(WebParam.HttpType.DELETE);
-//        return new BuilderRequest.DeleteRequestBuilder(webParam);
-//    }
-//
-//    public MultiPartBuilder multipart() {
-//        return new MultiPartBuilder(webParam);
-//    }
-//
-//    public BuilderRequest.PatchRequestBuilder patch() {
-//        webParam.setHttpType(WebParam.HttpType.PATCH);
-//        return new BuilderRequest.PatchRequestBuilder(webParam);
-//    }
-//
-//    public DownloaderBuilder download(File file) {
-//        webParam.setHttpType(WebParam.HttpType.DOWNLOAD);
-//        webParam.setFile(file);
-//        return new DownloaderBuilder(webParam);
-//    }
-//
-//    /*
-//     * Download Builder
-//     */
-//    private class DownloaderBuilder {
-//
-//        private WebParam webParam;
-//
-//        DownloaderBuilder(WebParam webParam) {
-//            this.webParam = webParam;
-//        }
-//
-//        public BuilderRequest.DownloadBuilder get() {
-//            webParam.setHttpType(WebParam.HttpType.GET);
-//            return new BuilderRequest.DownloadBuilder(webParam);
-//        }
-//
-//        public BuilderRequest.DownloadBuilderPost post() {
-//            webParam.setHttpType(WebParam.HttpType.POST);
-//            return new BuilderRequest.DownloadBuilderPost(webParam);
-//        }
-//
-//        public BuilderRequest.DownloadBuilderPut put() {
-//            webParam.setHttpType(WebParam.HttpType.PUT);
-//            return new BuilderRequest.DownloadBuilderPut(webParam);
-//        }
-//
-//    }
-//
-//    /*
-//     * Multipart Builder
-//     */
-//    private class MultiPartBuilder {
-//
-//        private WebParam webParam;
-//
-//        MultiPartBuilder(WebParam webParam) {
-//            this.webParam = webParam;
-//        }
-//
-//        public BuilderRequest.MultiPartBuilder post() {
-//            webParam.setHttpType(WebParam.HttpType.POST);
-//            return new BuilderRequest.MultiPartBuilder(webParam);
-//        }
-//
-//        public BuilderRequest.MultiPartBuilder put() {
-//            webParam.setHttpType(WebParam.HttpType.POST);
-//            return new BuilderRequest.MultiPartBuilder(webParam);
-//        }
-//
-//        public BuilderRequest.MultiPartBuilder delete() {
-//            webParam.setHttpType(WebParam.HttpType.DELETE);
-//            return new BuilderRequest.MultiPartBuilder(webParam);
-//        }
-//
-//        public BuilderRequest.MultiPartBuilder patch() {
-//            webParam.setHttpType(WebParam.HttpType.PATCH);
-//            return new BuilderRequest.MultiPartBuilder(webParam);
-//        }
-//
-//    }
+    fun put(): BuilderRequest.PutRequestBuilder {
+        webParam.httpType = WebParam.HttpType.PUT
+        return BuilderRequest.PutRequestBuilder(webParam)
+    }
+
+    fun delete(): BuilderRequest.DeleteRequestBuilder {
+        webParam.httpType = WebParam.HttpType.DELETE
+        return BuilderRequest.DeleteRequestBuilder(webParam)
+    }
+
+    fun patch(): BuilderRequest.PatchRequestBuilder {
+        webParam.httpType = WebParam.HttpType.PATCH
+        return BuilderRequest.PatchRequestBuilder(webParam)
+    }
+
+    fun multipart(): MultiPartBuilder {
+        return MultiPartBuilder(webParam)
+    }
+
+    fun download(file: File): DownloaderBuilder {
+        webParam.file = file
+        return DownloaderBuilder(webParam);
+    }
+
+    class MultiPartBuilder(private val webParam: WebParam) {
+
+
+        fun post(): BuilderRequest.MultiPartBuilder {
+            webParam.httpType = WebParam.HttpType.POST
+            return BuilderRequest.MultiPartBuilder(webParam)
+        }
+
+        fun put(): BuilderRequest.MultiPartBuilder {
+            webParam.httpType = WebParam.HttpType.PUT
+            return BuilderRequest.MultiPartBuilder(webParam)
+        }
+
+        fun delete(): BuilderRequest.MultiPartBuilder {
+            webParam.httpType = WebParam.HttpType.DELETE
+            return BuilderRequest.MultiPartBuilder(webParam)
+        }
+
+        fun patch(): BuilderRequest.MultiPartBuilder {
+            webParam.httpType = WebParam.HttpType.PATCH
+            return BuilderRequest.MultiPartBuilder(webParam)
+        }
+
+    }
+
+    class DownloaderBuilder(private val webParam: WebParam) {
+
+        fun get(): BuilderRequest.DownloadBuilder {
+            webParam.httpType = WebParam.HttpType.GET
+            return BuilderRequest.DownloadBuilder(webParam);
+        }
+
+        fun post(): BuilderRequest.DownloadBuilderPost {
+            webParam.httpType = WebParam.HttpType.POST
+            return BuilderRequest.DownloadBuilderPost(webParam)
+        }
+
+        fun put(): BuilderRequest.DownloadBuilderPut {
+            webParam.httpType = WebParam.HttpType.PUT
+            return BuilderRequest.DownloadBuilderPut(webParam)
+        }
+    }
 
 }

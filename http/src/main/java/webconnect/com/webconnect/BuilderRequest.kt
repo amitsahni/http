@@ -1,6 +1,7 @@
 package webconnect.com.webconnect
 
 import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import android.text.TextUtils
 import android.webkit.MimeTypeMap
@@ -188,9 +189,9 @@ class BuilderRequest {
     open class PostRequestBuilder(private val param: WebParam) {
         private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
 
-        fun multipart(): MultiPartBuilder {
-            return BuilderRequest.MultiPartBuilder(param)
-        }
+//        fun multipart(): MultiPartBuilder {
+//            return BuilderRequest.MultiPartBuilder(param)
+//        }
 
         fun baseUrl(url: String): PostRequestBuilder {
             param.baseUrl = url
@@ -624,68 +625,31 @@ class BuilderRequest {
 
     /******************************************************************************************/
 
-    class MultiPartBuilder(private val param: WebParam) : IProperties<MultiPartBuilder> {
+    class MultiPartBuilder(private val param: WebParam) {
         private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
 
-        override fun baseUrl(url: String): MultiPartBuilder {
+        fun baseUrl(url: String): MultiPartBuilder {
             param.baseUrl = url
             return this
         }
 
-        override fun headerParam(headerParam: Map<String, String>): MultiPartBuilder {
+        fun headerParam(headerParam: Map<String, String>): MultiPartBuilder {
             param.headerParam = headerParam
             return this
         }
 
-        fun <T : SuccessModel> success(t: Class<T>, onSuccessListener: OnSuccessListener<T>): MultiPartBuilder {
-            param.model = t
-            param.success = onSuccessListener as OnSuccessListener<Any>
-            return this
-        }
-
-        fun <T : ErrorModel> error(t: Class<T>, onErrorListener: OnErrorListener<T>): MultiPartBuilder {
-            param.error = t
-            param.err = onErrorListener as OnErrorListener<Any>
-            return this
-        }
-
-        fun failure(onFailure: OnFailureListener): MultiPartBuilder {
-            param.failure = onFailure
-            return this
-        }
-
-        fun loader(loaderListener: LoaderListener): MultiPartBuilder {
-            param.loaderListener = loaderListener
-            return this
-        }
-
-        fun response(responseListener: ResponseListener): MultiPartBuilder {
-            param.responseListener = responseListener
-            return this
-        }
-
-        override fun taskId(taskId: Int): MultiPartBuilder {
-            param.taskId = taskId
-            return this
-        }
-
-        override fun timeOut(connectTimeOut: Long, readTimeOut: Long): MultiPartBuilder {
+        fun timeOut(connectTimeOut: Long, readTimeOut: Long): MultiPartBuilder {
             param.connectTimeOut = connectTimeOut
             param.readTimeOut = readTimeOut
             return this
         }
 
-        override fun cache(isCache: Boolean): MultiPartBuilder {
-            param.isCacheEnabled = isCache
-            return this
-        }
-
-        override fun analyticsListener(callback: AnalyticsListener): MultiPartBuilder {
+        fun analyticsListener(callback: AnalyticsListener): MultiPartBuilder {
             param.analyticsListener = callback
             return this
         }
 
-        override fun queryParam(queryParam: QueryMap<String, String>): MultiPartBuilder {
+        fun queryParam(queryParam: QueryMap<String, String>): MultiPartBuilder {
             param.queryParam = queryParam
             return this
         }
@@ -696,22 +660,26 @@ class BuilderRequest {
         }
 
         fun multipartParam(multipartParam: Map<String, String>): MultiPartBuilder {
-            param.multipartParam = multipartParam
+            param.requestParam = multipartParam
+            param.isJson = false
             return this
         }
 
-        fun multipartParamFile(multipartFile: Map<String, File>): MultiPartBuilder {
+        fun multipartBodyParam(multipartParam: Map<String, Any>): MultiPartBuilder {
+            param.requestParam = multipartParam
+            param.isJson = true
+            return this
+        }
+
+        fun multipartParamFile(multipartFile: Map<String, File>, context: Context): MultiPartBuilder {
             param.multipartParamFile = multipartFile
+            param.context = context
             return this
         }
 
-        fun multipartParamListFile(multipartFile: Map<String, List<File>>): MultiPartBuilder {
+        fun multipartParamListFile(multipartFile: Map<String, List<File>>, context: Context): MultiPartBuilder {
             param.multipartParamListFile = multipartFile
-            return this
-        }
-
-        fun progressListener(callback: ProgressListener): MultiPartBuilder {
-            param.progressListener = callback
+            param.context = context
             return this
         }
 
@@ -721,7 +689,8 @@ class BuilderRequest {
         }
 
         // Higher Order function
-        fun <T : SuccessModel> success(model: Class<T>, t: (T) -> Unit): MultiPartBuilder {
+        @Suppress("UNCHECKED_CAST")
+        fun <T : SuccessModel> success(model: Class<T>, t: T.() -> Unit): MultiPartBuilder {
             param.model = model
             val success = object : OnSuccessListener<T> {
                 override fun onSuccess(model: T) {
@@ -732,7 +701,8 @@ class BuilderRequest {
             return this
         }
 
-        fun <T : ErrorModel> error(model: Class<T>, t: (T) -> Unit): MultiPartBuilder {
+        @Suppress("UNCHECKED_CAST")
+        fun <T : ErrorModel> error(model: Class<T>, t: T.() -> Unit): MultiPartBuilder {
             param.error = model
             val error = object : OnErrorListener<T> {
                 override fun onError(model: T) {
@@ -753,7 +723,7 @@ class BuilderRequest {
             return this
         }
 
-        fun response(t: (String) -> Unit): MultiPartBuilder {
+        fun response(t: String.() -> Unit): MultiPartBuilder {
             val response = object : ResponseListener {
                 override fun response(string: String) {
                     t(string)
@@ -763,7 +733,7 @@ class BuilderRequest {
             return this
         }
 
-        fun loader(t: (Boolean) -> Unit): MultiPartBuilder {
+        fun loader(t: Boolean.() -> Unit): MultiPartBuilder {
             val loader = object : LoaderListener {
                 override fun loader(isShowing: Boolean) {
                     t(isShowing)
@@ -783,119 +753,104 @@ class BuilderRequest {
             return this
         }
 
-        fun queue(): Call {
-            return call()!!
+        fun analyticsListener(f: (timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) -> Unit): MultiPartBuilder {
+            val analyticsListener = object : AnalyticsListener {
+                override fun onReceived(timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) {
+                    f(timeTakenInMillis, bytesSent, bytesReceived, isFromCache)
+                }
+            }
+            param.analyticsListener = analyticsListener
+            return this
         }
 
-        override fun connect() {
+
+        fun queue(): Call? {
+            return call()
+        }
+
+        fun connect() {
             call()?.enqueue(Callback.PostRequestCallbackEnqueue(param))
         }
 
         private fun call(): Call? {
             var baseUrl = ApiConfiguration.baseUrl
-            if (!TextUtils.isEmpty(param.baseUrl)) {
-                baseUrl = param.baseUrl.toString()
+            if (!param.baseUrl.isEmpty()) {
+                baseUrl = param.baseUrl
             }
 
             var builder = okhttp3.Request.Builder()
             val urlBuilder = HttpUrl.parse(baseUrl + param.url)?.newBuilder()
-            if (!param.query.isEmpty()) {
-                param.query.forEach { (key, value) ->
-                    urlBuilder?.addQueryParameter(key, value)
-                }
+
+            param.query.forEach { (key, value) ->
+                urlBuilder?.addQueryParameter(key, value)
             }
-            if (!param.queryParam.isEmpty()) {
-                for (i in 0 until param.queryParam.key.size()) {
-                    val key = param.queryParam.key[i]
-                    val value = param.queryParam.value[i]
-                    urlBuilder?.addQueryParameter(key, value)
-                }
+
+            for (i in 0 until param.queryParam.key.size()) {
+                val key = param.queryParam.key[i]
+                val value = param.queryParam.value[i]
+                urlBuilder?.addQueryParameter(key, value)
             }
             builder.url(urlBuilder?.build().toString())
 
             val headerBuilder = Headers.Builder()
-            for ((key, value) in param.headerParam) {
+            param.headerParam.forEach { (key, value) ->
                 headerBuilder.add(key, value)
             }
             builder.headers(headerBuilder.build())
+
             val multipartBuilder = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
             val JSON_MEDIA_TYPE = MediaType.parse("multipart/form-data")
-            try {
-                for ((key, value) in param.multipartParam) {
-                    val body = RequestBody.create(JSON_MEDIA_TYPE, value)
-                    val disposition = StringBuilder("form-data; name=")
-                    disposition.append(key)
-                    var headers = Headers.of("Content-Disposition", disposition.toString())
-                    val part = MultipartBody.Part.createFormData(key, value);
-//                    multipartBuilder.addPart(headers, body)
+            if (!param.isJson) {
+                param.requestParam.forEach { (key, value) ->
+                    val part = MultipartBody.Part.createFormData(key, value as String);
                     multipartBuilder.addPart(part)
                 }
-//                val body = RequestBody.create(JSON_MEDIA_TYPE, Gson().toJson(param.multipartParam))
-//                multipartBuilder.addPart(body)
-                for ((key, value) in param.multipartParamFile) {
-                    val uri = Uri.fromFile(value)
+            } else {
+                val body = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                multipartBuilder.addPart(body)
+            }
+
+            param.multipartParamFile.forEach { (key, value) ->
+                val uri = Uri.fromFile(value)
+                var mimeType = "application/octet-stream"
+                mimeType = if (uri?.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
+                    param.context?.let {
+                        it.contentResolver?.getType(uri).toString()
+                    }!!
+                } else {
+                    val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                            .toString())
+                    MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                            fileExtension.toLowerCase())!!
+                }
+                val fileBody = RequestBody.create(MediaType.parse(mimeType),
+                        value)
+                val part = MultipartBody.Part.createFormData(key, value.name, fileBody);
+                multipartBuilder.addPart(part)
+            }
+
+            param.multipartParamListFile.forEach { (key: String, file: List<File>) ->
+                file.forEach {
+                    val uri = Uri.fromFile(it)
                     var mimeType = "application/octet-stream"
-                    if (uri?.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-//                        var cR: ContentResolver ?= null
-//                        if (param.context != null) {
-//                            cR = param.context?.contentResolver
-//                        } else if (ApiConfiguration.context != null) {
-//                            cR = ApiConfiguration.context?.contentResolver
-//                        }
-//                        MimeTypeMap.getFileExtensionFromUrl()
-//                        mimeType = cR?.getType(uri).toString()
+                    mimeType = if (uri?.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
+                        param.context?.let {
+                            param.context?.contentResolver?.getType(uri).toString()
+                        }!!
                     } else {
                         val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
                                 .toString())
-                        mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                                 fileExtension.toLowerCase())!!
                     }
                     val fileBody = RequestBody.create(MediaType.parse(mimeType),
-                            value)
-                    val disposition = StringBuilder("form-data; name=")
-                    disposition.append(key)
-                    disposition.append("; filename=")
-                    disposition.append(value.name)
-                    var headers = Headers.of("Content-Disposition", disposition.toString())
-                    val part = MultipartBody.Part.createFormData(key, value.name, fileBody);
-                    //multipartBuilder.addPart(MultipartBody.Part.create(headers, fileBody))
+                            it)
+                    val part = MultipartBody.Part.createFormData(key, it.name, fileBody);
                     multipartBuilder.addPart(part)
                 }
-                for ((key, file) in param.multipartParamListFile) {
-                    for (value in file) {
-                        val uri = Uri.fromFile(value)
-                        var mimeType = "application/octet-stream"
-                        if (uri?.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-//                            var cR: ContentResolver ?= null
-//                            if (param.context != null) {
-//                                cR = param.context?.contentResolver
-//                            } else if (ApiConfiguration.context != null) {
-//                                cR = ApiConfiguration.context?.contentResolver
-//                            }
-//                            mimeType = cR?.getType(uri).toString()
-                        } else {
-                            val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
-                                    .toString())
-                            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                                    fileExtension.toLowerCase())!!
-                        }
-                        val fileBody = RequestBody.create(MediaType.parse(mimeType),
-                                value)
-                        val disposition = StringBuilder("form-data; name=")
-                        disposition.append(key)
-                        disposition.append("; filename=")
-                        disposition.append(value.name)
-                        var headers = Headers.of("Content-Disposition", disposition.toString())
-                        val part = MultipartBody.Part.createFormData(key, value.name, fileBody);
-                        //multipartBuilder.addPart(MultipartBody.Part.create(headers, fileBody))
-                        multipartBuilder.addPart(part)
-                    }
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
+
 
             when (param.httpType) {
                 WebParam.HttpType.POST -> {
@@ -923,26 +878,18 @@ class BuilderRequest {
                     }
                 }
                 else -> {
+                    multipartBuilder.build().also {
+                        builder = builder.post(it)
+                        param.requestBodyContentlength = it.contentLength()
+                    }
                 }
             }
 
-            if (param.isCacheEnabled) {
-                builder.cacheControl(CacheControl.FORCE_CACHE)
-            } else {
-                builder.cacheControl(CacheControl.FORCE_NETWORK)
-            }
             if (param.connectTimeOut != 0L && param.readTimeOut != 0L) {
                 okHttpClient = okHttpClient?.newBuilder()
                         ?.connectTimeout(param.connectTimeOut, TimeUnit.SECONDS)
                         ?.readTimeout(param.readTimeOut, TimeUnit.SECONDS)
                         ?.writeTimeout(param.connectTimeOut, TimeUnit.SECONDS)
-                        ?.addInterceptor {
-                            val originalResponse = it.proceed(it.request())
-                            val originalBody = originalResponse.body()
-                            originalResponse.newBuilder()
-                                    .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
-                                    .build()
-                        }
                         ?.build()
             }
             if (!param.debug) {
@@ -952,10 +899,16 @@ class BuilderRequest {
                         ?.addInterceptor(interceptor)
                         ?.build()
             }
-            val okHttpRequest = builder.build()
-            val call = okHttpClient?.newCall(okHttpRequest)
-            param.analyticsListener = Callback.Analytics()
-            return call
+            param.progressListener?.let {
+                okHttpClient = okHttpClient?.newBuilder()?.addInterceptor {
+                    val originalResponse = it.proceed(it.request())
+                    val originalBody = originalResponse.body()
+                    originalResponse.newBuilder()
+                            .body(HTTPInternalNetworking.ProgressResponseBody(originalBody!!, param))
+                            .build()
+                }?.build()
+            }
+            return okHttpClient?.newCall(builder.build())
         }
 
     }

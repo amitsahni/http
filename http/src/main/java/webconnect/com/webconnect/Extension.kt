@@ -1,10 +1,17 @@
 package webconnect.com.webconnect
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import webconnect.com.webconnect.model.ErrorModel
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.security.cert.CertificateException
+import java.util.concurrent.TimeoutException
 
 fun runOnUiThread(f: () -> Unit) {
     val handler = Handler(Looper.getMainLooper())
@@ -69,4 +76,18 @@ fun Map<String, Any>.convertFormData(): String {
         sb.append(String.format("%s=%s", key, value.toString()))
     }
     return sb.toString()
+}
+
+fun Context.getHTTPError(t: Throwable): String {
+    return if (t.javaClass.name.contains(UnknownHostException::class.java.name)) {
+        getString(R.string.error_internet_connection).toString()
+    } else if (t.javaClass.name.contains(TimeoutException::class.java.name)
+            || t.javaClass.name.contains(SocketTimeoutException::class.java.name)
+            || t.javaClass.name.contains(ConnectException::class.java.name)) {
+        getString(R.string.error_server_connection).toString()
+    } else if (t.javaClass.name.contains(CertificateException::class.java.name)) {
+        getString(R.string.error_certificate_exception).toString()
+    } else {
+        t.toString()
+    }
 }

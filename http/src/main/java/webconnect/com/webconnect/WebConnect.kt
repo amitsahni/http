@@ -16,6 +16,6 @@ object WebConnect {
      * @return the builder
      */
     fun with(url: String): Builder {
-        return Builder(null, url)
+        return Builder(url)
     }
 }
