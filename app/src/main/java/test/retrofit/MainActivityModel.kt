@@ -6,8 +6,6 @@ import android.content.Context
 import android.util.Log
 import webconnect.com.webconnect.WebConnect
 import webconnect.com.webconnect.getHTTPError
-import webconnect.com.webconnect.model.SuccessModel
-import webconnect.com.webconnect.toJson
 import java.io.File
 import java.util.*
 
@@ -68,14 +66,14 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
                     Log.i(javaClass.simpleName, "Loader showing = $this")
                 }
                 .success(ResponseModel::class.java) {
-                    Log.d(javaClass.simpleName, this.toJson())
+                    Log.d(javaClass.simpleName, this.toString())
                     get.postValue(this)
                 }
                 .error(Error::class.java) {
                     error.postValue(this)
                 }
                 .failure { model, msg ->
-
+                    activity.getHTTPError(model)
                 }
                 .connect()
     }
@@ -111,12 +109,6 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
                 .put()
                 .formDataParam(requestMap)
                 .connect()
-        WebConnect.with(ENDPOINT_GET)
-                .multipart()
-                .post()
-                .success(ResponseModel::class.java) {
-
-                }
     }
 
     fun delete() {

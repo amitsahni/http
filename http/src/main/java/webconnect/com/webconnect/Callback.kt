@@ -36,7 +36,7 @@ class Callback {
 
     // Enqueue
     internal class GetRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
-        val startTime: Long = System.currentTimeMillis()
+        private val startTime: Long = System.currentTimeMillis()
 
         init {
             param.loaderListener?.loader(true)
@@ -73,7 +73,7 @@ class Callback {
 
     // Enqueue
     internal class PostRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
-        val startTime: Long = System.currentTimeMillis()
+        private val startTime: Long = System.currentTimeMillis()
 
         init {
             param.loaderListener?.loader(true)
@@ -111,7 +111,7 @@ class Callback {
 
     // Enqueue
     internal class DownloadRequestCallbackEnqueue(private val param: WebParam) : okhttp3.Callback {
-        var startTime = System.currentTimeMillis()
+        private val startTime = System.currentTimeMillis()
 
         init {
             param.loaderListener?.loader(true)
@@ -146,19 +146,6 @@ class Callback {
                     param.err?.onError(error)
                     ErrorLiveData.error.postValue(error)
                 }
-            }
-        }
-    }
-
-    internal class Analytics : AnalyticsListener {
-        var TAG = "Analytics"
-
-        override fun onReceived(timeTakenInMillis: Long, bytesSent: Long, bytesReceived: Long, isFromCache: Boolean) {
-            if (ApiConfiguration.isDebug) {
-                Log.d(TAG, " timeTakenInMillis : " + timeTakenInMillis)
-                Log.d(TAG, " bytesSent : " + bytesSent)
-                Log.d(TAG, " bytesReceived : " + bytesReceived)
-                Log.d(TAG, " isFromCache : " + isFromCache)
             }
         }
     }

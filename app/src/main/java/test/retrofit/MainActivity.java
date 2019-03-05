@@ -17,7 +17,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import kotlin.Unit;
 import webconnect.com.webconnect.WebConnect;
-import webconnect.com.webconnect.WebParam;
 import webconnect.com.webconnect.model.SuccessModel;
 
 

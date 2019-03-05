@@ -11,13 +11,13 @@ import java.util.concurrent.TimeUnit
 
 object ApiConfiguration {
     private var cacheSize = 10 * 1024 * 1024
-    var baseUrl = ""
+    internal var baseUrl = ""
         private set
     private var connectTimeOut = (10 * 1000).toLong()
     private var readTimeOut = (20 * 1000).toLong()
-    var isDebug = true
+    internal var isDebug = true
         private set
-    var okHttpClient = OkHttpClient()
+    internal var okHttpClient = OkHttpClient()
         private set
 
     fun baseUrl(baseUrl: String): ApiConfiguration {

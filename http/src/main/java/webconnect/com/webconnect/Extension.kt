@@ -6,14 +6,13 @@ import android.os.Looper
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
-import webconnect.com.webconnect.model.ErrorModel
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeoutException
 
-fun runOnUiThread(f: () -> Unit) {
+internal fun runOnUiThread(f: () -> Unit) {
     val handler = Handler(Looper.getMainLooper())
     handler.post {
         f()
@@ -28,11 +27,11 @@ object G {
             .create()
 }
 
-fun gson(): Gson {
+internal fun gson(): Gson {
     return G.gson
 }
 
-fun Any.toJson(): String {
+internal fun Any.toJson(): String {
     return try {
         gson().toJson(this)
     } catch (e: Exception) {
@@ -41,7 +40,7 @@ fun Any.toJson(): String {
     }
 }
 
-inline fun <reified T> String.fromJson() {
+internal inline fun <reified T> String.fromJson() {
     try {
         gson().fromJson<T>(this, T::class.java)
     } catch (e: JsonSyntaxException) {
@@ -49,7 +48,7 @@ inline fun <reified T> String.fromJson() {
     }
 }
 
-fun String.fromJson(model: Class<*>): Any {
+internal fun String.fromJson(model: Class<*>): Any {
     return try {
         gson().fromJson(this, model)
     } catch (e: JsonSyntaxException) {
@@ -58,7 +57,7 @@ fun String.fromJson(model: Class<*>): Any {
     }
 }
 
-fun String.formatJson(): String {
+internal fun String.formatJson(): String {
     return try {
         gson().fromJson(this, Any::class.java).toString()
     } catch (e: JsonSyntaxException) {
@@ -67,7 +66,7 @@ fun String.formatJson(): String {
     }
 }
 
-fun Map<String, Any>.convertFormData(): String {
+internal fun Map<String, Any>.convertFormData(): String {
     val sb = StringBuilder()
     for ((key, value) in this) {
         if (!sb.isEmpty()) {

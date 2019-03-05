@@ -3,11 +3,9 @@ package webconnect.com.webconnect
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import android.text.TextUtils
 import android.webkit.MimeTypeMap
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
-import webconnect.com.webconnect.di.IProperties
 import webconnect.com.webconnect.listener.*
 import webconnect.com.webconnect.model.ErrorModel
 import webconnect.com.webconnect.model.SuccessModel
@@ -188,10 +186,6 @@ class BuilderRequest {
 
     open class PostRequestBuilder(private val param: WebParam) {
         private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
-
-//        fun multipart(): MultiPartBuilder {
-//            return BuilderRequest.MultiPartBuilder(param)
-//        }
 
         fun baseUrl(url: String): PostRequestBuilder {
             param.baseUrl = url
