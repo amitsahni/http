@@ -1,6 +1,28 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'com.github.dcendents.android-maven'
+
+ext {
+    bintrayRepo = 'Library'
+    bintrayName = 'http'
+    libraryName = 'http-http'
+    libraryDescription = 'OkHttp wrapper'
+
+    siteUrl = 'https://github.com/amitsahni/http'
+    gitUrl = 'https://github.com/amitsahni/http.git'
+    issueUrl = 'https://github.com/amitsahni/http/issues'
+
+    publishedGroupId = 'com.amitsahni'
+    artifact = 'http'
+    libraryVersion = '2.0.0-alpha'
+
+    developerId = 'amitsahni'
+    developerName = 'Amit Singh'
+    developerEmail = 'sahni1987@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
 
 android {
     compileSdkVersion 28
@@ -32,27 +54,7 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.1'
 }
 
-// build a jar with source files
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    failOnError false
-    source = android.sourceSets.main.java.sourceFiles
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += configurations.compile
-}
-
-// build a jar with javadoc
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
+if (project.rootProject.file('local.properties').exists()) {
+    apply from: 'https://raw.githubusercontent.com/amitsahni/JCenter/master/deploy.gradle'
 }
 
