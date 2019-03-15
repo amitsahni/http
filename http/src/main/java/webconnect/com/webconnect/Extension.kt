@@ -42,7 +42,7 @@ internal fun Any.toJson(): String {
 
 internal inline fun <reified T> String.fromJson() {
     try {
-        gson().fromJson<T>(this, T::class.java)
+        gson().fromJson(this, T::class.java)
     } catch (e: JsonSyntaxException) {
         e.printStackTrace()
     }
@@ -59,7 +59,8 @@ internal fun String.fromJson(model: Class<*>): Any {
 
 internal fun String.formatJson(): String {
     return try {
-        gson().fromJson(this, Any::class.java).toString()
+        val json = fromJson(Any::class.java)
+        json.toJson()
     } catch (e: JsonSyntaxException) {
         e.printStackTrace()
         ""

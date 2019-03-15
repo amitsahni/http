@@ -793,8 +793,7 @@ class BuilderRequest {
             builder.headers(headerBuilder.build())
 
             val multipartBuilder = MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-            val JSON_MEDIA_TYPE = MediaType.parse("multipart/form-data")
+            val JSON_MEDIA_TYPE = MediaType.parse("application/json")
             if (!param.isJson) {
                 param.requestParam.forEach { (key, value) ->
                     val part = MultipartBody.Part.createFormData(key, value as String);
@@ -802,7 +801,9 @@ class BuilderRequest {
                 }
             } else {
                 val body = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
-                multipartBuilder.addPart(body)
+                //multipartBuilder.addPart(body)
+                val part = MultipartBody.Part.create(body)
+                multipartBuilder.addPart(part)
             }
 
             param.multipartParamFile.forEach { (key, value) ->
@@ -818,7 +819,7 @@ class BuilderRequest {
                     MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                             fileExtension.toLowerCase())!!
                 }
-                val fileBody = RequestBody.create(MediaType.parse(mimeType),
+                val fileBody = RequestBody.create(MediaType.parse("application/octet-stream"),
                         value)
                 val part = MultipartBody.Part.createFormData(key, value.name, fileBody);
                 multipartBuilder.addPart(part)

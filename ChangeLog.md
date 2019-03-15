@@ -11,3 +11,6 @@
   1. SuccessLiveData
   2. ErrorLiveData
   3. FailureLiveData
+  
+#2.0.0
+* Remove context

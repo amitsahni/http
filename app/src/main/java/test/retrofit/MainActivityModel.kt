@@ -3,11 +3,13 @@ package test.retrofit
 import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
+import android.os.Environment
 import android.util.Log
 import webconnect.com.webconnect.WebConnect
 import webconnect.com.webconnect.getHTTPError
 import java.io.File
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Created by clickapps on 22/12/17.
@@ -95,6 +97,9 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
                 .progressListener { time, b, bi ->
                     Log.d(javaClass.simpleName, "Time = $time, b = $b , b1 = $bi")
                 }
+                .response {
+
+                }
                 .connect()
         return requestMap
     }
@@ -118,6 +123,30 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
         WebConnect.with(ENDPOINT_GET)
                 .download(File("/test"))
                 .get()
+                .connect()
+    }
+
+    fun upload() {
+        val map = HashMap<String, Any>()
+        val temp = HashMap<String, String>()
+        temp["code_country"] = "00966"
+        temp["mobile"] = "566566563"
+        map["mobile_number_attributes"] = temp
+        map["name"] = "Hello"
+        val header = HashMap<String, String>()
+        val image = HashMap<String, File>()
+        image["avatar"] = File(Environment.getExternalStorageDirectory(), "temp2.jpg")
+        header["Authorization"] = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NywibmFtZSI6IkFiYyIsImVtYWlsIjoiYWJjQGdtYWlsLmNvbSIsImlhdCI6MTU1MjY0ODM2NCwiZXhwIjoxNTU1MjQwMzY0fQ.0Kb8YjJdCcGGNAJLWJoktXpInoXDjEuUneGx2opMqfI"
+        WebConnect.with("v1/customer_profiles")
+                .multipart()
+                .put()
+                .baseUrl("http://api.iw.dev.clicksandbox.com/")
+                .headerParam(header)
+                .multipartBodyParam(map)
+                //.multipartParamFile(image, getApplication())
+                .response {
+                    Log.i(javaClass.simpleName, this)
+                }
                 .connect()
     }
 

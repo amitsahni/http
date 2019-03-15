@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (id == R.id.button1) {
             mainActivityModel.post();
         } else if (id == R.id.button2) {
-//            mainActivityModel.put();
+            mainActivityModel.upload();
         } else if (id == R.id.button3) {
 //            mainActivityModel.delete();
         } else {
