@@ -1,13 +1,5 @@
 ### Global Configuration
-Java
-```
-        ApiConfiguration.INSTANCE
-                        .baseUrl(MainActivityModel.Companion.getENDPOINT_BASE())
-                        .timeOut(1000L, 2000L)
-                        .logging(true)
-                        .config();
-```
-Kotlin
+
 ```kotlin
 ApiConfiguration
                 .baseUrl("baseurl")
@@ -21,7 +13,7 @@ ApiConfiguration
 ### Api calling using Webconnect
 Java
 ```
-       WebConnect.INSTANCE.with(MainActivityModel.Companion.getENDPOINT_GET())
+       WebConnect.with(MainActivityModel.getENDPOINT_GET())
                        .get()
                        .success(ResponseModel.class, model -> {
                            Log.d("TAG", "Model = " + model.toString());

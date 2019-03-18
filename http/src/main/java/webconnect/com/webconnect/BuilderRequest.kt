@@ -308,8 +308,8 @@ class BuilderRequest {
         }
 
         private fun call(): Call? {
-            val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
-            val FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
+            val mediaTypeJson = MediaType.parse("application/json; charset=utf-8")
+            val mediaTypeFormEncoded = MediaType.parse("application/x-www-form-urlencoded")
             var baseUrl = ApiConfiguration.baseUrl
             if (!param.baseUrl.isEmpty()) {
                 baseUrl = param.baseUrl
@@ -336,9 +336,9 @@ class BuilderRequest {
             when (param.httpType) {
                 WebParam.HttpType.POST -> {
                     requestBody = if (!param.isJson) {
-                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                        RequestBody.create(mediaTypeFormEncoded, param.requestParam.convertFormData())
                     } else {
-                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(mediaTypeJson, param.requestParam.toJson())
                     }
                     requestBody?.let {
                         builder = builder.post(it)
@@ -346,9 +346,9 @@ class BuilderRequest {
                 }
                 WebParam.HttpType.PUT -> {
                     requestBody = if (!param.isJson) {
-                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                        RequestBody.create(mediaTypeFormEncoded, param.requestParam.convertFormData())
                     } else {
-                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(mediaTypeJson, param.requestParam.toJson())
                     }
                     requestBody?.let {
                         builder = builder.put(it)
@@ -356,9 +356,9 @@ class BuilderRequest {
                 }
                 WebParam.HttpType.DELETE -> {
                     requestBody = if (!param.isJson) {
-                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                        RequestBody.create(mediaTypeFormEncoded, param.requestParam.convertFormData())
                     } else {
-                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(mediaTypeJson, param.requestParam.toJson())
                     }
                     requestBody?.let {
                         builder = builder.delete(it)
@@ -366,9 +366,9 @@ class BuilderRequest {
                 }
                 WebParam.HttpType.PATCH -> {
                     requestBody = if (!param.isJson) {
-                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                        RequestBody.create(mediaTypeFormEncoded, param.requestParam.convertFormData())
                     } else {
-                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(mediaTypeJson, param.requestParam.toJson())
                     }
                     requestBody?.let {
                         builder = builder.patch(it)
@@ -376,9 +376,9 @@ class BuilderRequest {
                 }
                 else -> {
                     requestBody = if (!param.isJson) {
-                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                        RequestBody.create(mediaTypeFormEncoded, param.requestParam.convertFormData())
                     } else {
-                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(mediaTypeJson, param.requestParam.toJson())
                     }
                     requestBody?.let {
                         builder = builder.post(it)
@@ -419,8 +419,8 @@ class BuilderRequest {
 
     open class DownloadBuilder(val param: WebParam) {
         private var okHttpClient: OkHttpClient? = ApiConfiguration.okHttpClient
-        private val JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8")
-        private var FORM_ENCODED_TYPE = MediaType.parse("application/x-www-form-urlencoded")
+        private val mediaTypeJson = MediaType.parse("application/json; charset=utf-8")
+        private var mediaTypeFormEncoded = MediaType.parse("application/x-www-form-urlencoded")
 
         fun baseUrl(url: String): DownloadBuilder {
             param.baseUrl = url
@@ -557,21 +557,21 @@ class BuilderRequest {
                 }
                 WebParam.HttpType.POST -> {
                     requestBody = if (!param.isJson) {
-                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                        RequestBody.create(mediaTypeFormEncoded, param.requestParam.convertFormData())
                     } else {
-                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(mediaTypeJson, param.requestParam.toJson())
                     }
-                    requestBody?.also {
+                    requestBody?.let {
                         builder = builder.post(it)
                     }
                 }
                 WebParam.HttpType.PUT -> {
                     requestBody = if (!param.isJson) {
-                        RequestBody.create(FORM_ENCODED_TYPE, param.requestParam.convertFormData())
+                        RequestBody.create(mediaTypeFormEncoded, param.requestParam.convertFormData())
                     } else {
-                        RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
+                        RequestBody.create(mediaTypeJson, param.requestParam.toJson())
                     }
-                    requestBody?.also {
+                    requestBody?.let {
                         builder = builder.put(it)
                     }
                 }
@@ -793,17 +793,15 @@ class BuilderRequest {
             builder.headers(headerBuilder.build())
 
             val multipartBuilder = MultipartBody.Builder()
-            val JSON_MEDIA_TYPE = MediaType.parse("application/json")
+            val mediaType = MediaType.parse("application/json")
             if (!param.isJson) {
                 param.requestParam.forEach { (key, value) ->
                     val part = MultipartBody.Part.createFormData(key, value as String);
                     multipartBuilder.addPart(part)
                 }
             } else {
-                val body = RequestBody.create(JSON_MEDIA_TYPE, param.requestParam.toJson())
-                //multipartBuilder.addPart(body)
-                val part = MultipartBody.Part.create(body)
-                multipartBuilder.addPart(part)
+                val body = RequestBody.create(mediaType, param.requestParam.toJson())
+                multipartBuilder.addPart(body)
             }
 
             param.multipartParamFile.forEach { (key, value) ->
@@ -819,7 +817,7 @@ class BuilderRequest {
                     MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                             fileExtension.toLowerCase())!!
                 }
-                val fileBody = RequestBody.create(MediaType.parse("application/octet-stream"),
+                val fileBody = RequestBody.create(MediaType.parse(mimeType),
                         value)
                 val part = MultipartBody.Part.createFormData(key, value.name, fileBody);
                 multipartBuilder.addPart(part)
@@ -849,31 +847,31 @@ class BuilderRequest {
 
             when (param.httpType) {
                 WebParam.HttpType.POST -> {
-                    multipartBuilder.build().also {
+                    multipartBuilder.build().let {
                         builder = builder.post(it)
                         param.requestBodyContentlength = it.contentLength()
                     }
                 }
                 WebParam.HttpType.PUT -> {
-                    multipartBuilder.build().also {
+                    multipartBuilder.build().let {
                         builder = builder.put(it)
                         param.requestBodyContentlength = it.contentLength()
                     }
                 }
                 WebParam.HttpType.DELETE -> {
-                    multipartBuilder.build().also {
+                    multipartBuilder.build().let {
                         builder = builder.delete(it)
                         param.requestBodyContentlength = it.contentLength()
                     }
                 }
                 WebParam.HttpType.PATCH -> {
-                    multipartBuilder.build().also {
+                    multipartBuilder.build().let {
                         builder = builder.patch(it)
                         param.requestBodyContentlength = it.contentLength()
                     }
                 }
                 else -> {
-                    multipartBuilder.build().also {
+                    multipartBuilder.build().let {
                         builder = builder.post(it)
                         param.requestBodyContentlength = it.contentLength()
                     }
