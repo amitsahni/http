@@ -4,27 +4,16 @@ package webconnect.com.webconnect
  * Created by amit on 10/8/17.
  */
 
-import android.content.Context
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import okhttp3.Call
 import okhttp3.Response
 import org.apache.commons.io.IOUtils
-import webconnect.com.webconnect.listener.AnalyticsListener
-import webconnect.com.webconnect.listener.OnSuccessListener
-import webconnect.com.webconnect.model.SuccessModel
 import webconnect.com.webconnect.observer.ErrorLiveData
 import webconnect.com.webconnect.observer.FailureLiveData
 import webconnect.com.webconnect.observer.SuccessLiveData
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.OutputStream
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-import java.security.cert.CertificateException
-import java.util.concurrent.TimeoutException
 
 
 /**
@@ -55,16 +44,20 @@ class Callback {
                 var responseString = ""
                 runBlocking(Dispatchers.IO) {
                     responseString = it.string()
-                    param.responseListener?.response(responseString.formatJson())
+                    responseString.formatJson()?.let {
+                        param.responseListener?.response(it)
+                    }
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, it.contentLength(), response.cacheResponse() != null)
                 }
                 if (response.isSuccessful) {
-                    val obj = responseString.fromJson(param.model)
-                    param.success?.onSuccess(obj)
+                    responseString.fromJson(param.model)?.let {
+                        param.success?.onSuccess(it)
+                    }
                     SuccessLiveData.success.postValue(responseString)
                 } else {
-                    val obj = responseString.fromJson(param.error)
-                    param.err?.onError(obj)
+                    responseString.fromJson(param.error)?.let {
+                        param.err?.onError(it)
+                    }
                     ErrorLiveData.error.postValue(responseString)
                 }
             }
@@ -92,16 +85,20 @@ class Callback {
                 var responseString = ""
                 runBlocking(Dispatchers.IO) {
                     responseString = it.string()
-                    param.responseListener?.response(responseString.formatJson())
+                    responseString.formatJson()?.let {
+                        param.responseListener?.response(it)
+                    }
                     param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, it.contentLength(), response.cacheResponse() != null)
                 }
                 if (response.isSuccessful) {
-                    val obj = responseString.fromJson(param.model)
-                    param.success?.onSuccess(obj)
+                    responseString.fromJson(param.model)?.let {
+                        param.success?.onSuccess(it)
+                    }
                     SuccessLiveData.success.postValue(responseString)
                 } else {
-                    val obj = responseString.fromJson(param.error)
-                    param.err?.onError(obj)
+                    responseString.fromJson(param.error)?.let {
+                        param.err?.onError(it)
+                    }
                     ErrorLiveData.error.postValue(responseString)
                 }
             }

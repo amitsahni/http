@@ -159,6 +159,7 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
     }
 
     companion object {
+        @JvmStatic
         val ENDPOINT_GET = "offers"
         val ENDPOINT_POST = "users"
         val ENDPOINT_PUT = "users/740"

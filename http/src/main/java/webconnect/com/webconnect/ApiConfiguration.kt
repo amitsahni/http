@@ -20,6 +20,7 @@ object ApiConfiguration {
     internal var okHttpClient = OkHttpClient()
         private set
 
+    @JvmStatic
     fun baseUrl(baseUrl: String): ApiConfiguration {
         this.baseUrl = baseUrl
         return this

@@ -16,8 +16,10 @@ import org.greenrobot.eventbus.ThreadMode;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import kotlin.Unit;
+import webconnect.com.webconnect.HTTPUtils;
 import webconnect.com.webconnect.WebConnect;
 import webconnect.com.webconnect.model.SuccessModel;
+import webconnect.com.webconnect.observer.ErrorLiveData;
 
 
 /**
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (o == null) return;
             Toast.makeText(MainActivity.this, o.toString(), Toast.LENGTH_LONG).show();
         });
-        WebConnect.INSTANCE.with(MainActivityModel.Companion.getENDPOINT_GET())
+        WebConnect.with(MainActivityModel.getENDPOINT_GET())
                 .get()
                 .success(ResponseModel.class, model -> {
                     Log.d("TAG", "Model = " + model.toString());

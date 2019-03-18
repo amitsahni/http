@@ -1,16 +1,18 @@
+@file:JvmName("HTTPUtils")
 package webconnect.com.webconnect
-
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeoutException
+
 
 internal fun runOnUiThread(f: () -> Unit) {
     val handler = Handler(Looper.getMainLooper())
@@ -19,7 +21,7 @@ internal fun runOnUiThread(f: () -> Unit) {
     }
 }
 
-object G {
+private object G {
     val gson = GsonBuilder()
             .setPrettyPrinting()
             .setDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'")
@@ -40,27 +42,30 @@ internal fun Any.toJson(): String {
     }
 }
 
-internal inline fun <reified T> String.fromJson() {
-    try {
-        gson().fromJson(this, T::class.java)
+private inline fun <reified T> Gson.fromJson(json: String) = fromJson<T>(json, object : TypeToken<T>() {}.type)
+
+
+internal inline fun <reified T> String.fromJson(): T? {
+    return try {
+        gson().fromJson<T>(this)
     } catch (e: JsonSyntaxException) {
         e.printStackTrace()
+        null
     }
 }
 
-internal fun String.fromJson(model: Class<*>): Any {
+internal fun String.fromJson(model: Class<*>): Any? {
     return try {
         gson().fromJson(this, model)
     } catch (e: JsonSyntaxException) {
         e.printStackTrace()
-        Any()
+        null
     }
 }
 
-internal fun String.formatJson(): String {
+internal fun String.formatJson(): String? {
     return try {
-        val json = fromJson(Any::class.java)
-        json.toJson()
+        gson().toJson(gson().fromJson<Any>(this))
     } catch (e: JsonSyntaxException) {
         e.printStackTrace()
         ""

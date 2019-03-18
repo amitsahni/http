@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
  * The type Web connect.
  */
 object WebConnect {
-
+    @JvmStatic
     /**
      * With builder.
      *

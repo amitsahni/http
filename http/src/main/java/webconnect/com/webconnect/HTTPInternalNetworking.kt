@@ -47,9 +47,9 @@ class HTTPInternalNetworking {
                     var progress = 0.0f
                     try {
                         progress = (100 * totalBytesRead / length).toFloat()
-                        Log.d(HTTPInternalNetworking::class.java.simpleName, "progress = " + progress)
+                        Log.d(HTTPInternalNetworking::class.java.simpleName, "progress = $progress")
                     } catch (e: Exception) {
-                        Log.e(HTTPInternalNetworking::class.java.simpleName, "Exception = " + e.message)
+                        Log.e(HTTPInternalNetworking::class.java.simpleName, "Exception = ${e.message}")
                     }
                     if (webParam.progressListener != null)
                         webParam.progressListener!!.onProgress(totalBytesRead, responseBody.contentLength(), progress)
