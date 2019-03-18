@@ -1,3 +1,5 @@
+[ ![Download](https://api.bintray.com/packages/amitsahni/Library/http/images/download.svg) ](https://bintray.com/amitsahni/Library/http/_latestVersion)
+
 ### Global Configuration
 
 ```kotlin
