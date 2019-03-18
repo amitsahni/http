@@ -103,15 +103,13 @@ Download
 Add the JitPack repository to your root build.gradle:
 
 ```groovy
-	allprojects {
-		repositories {
-			maven { url "https://jitpack.io" }
-		}
+	repositories {
+			maven {url  "https://dl.bintray.com/amitsahni/Library"}
 	}
 ```
 Add the Gradle dependency:
 ```groovy
 	dependencies {
-		compile 'com.github.amitsahni:http:2.0.0'
+		compile 'com.amitsahni:http:2.0.0'
 	}
 ```
