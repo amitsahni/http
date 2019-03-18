@@ -3,10 +3,13 @@ package test.retrofit
 import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
+import android.os.Environment
 import android.util.Log
 import webconnect.com.webconnect.WebConnect
+import webconnect.com.webconnect.getHTTPError
 import java.io.File
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Created by clickapps on 22/12/17.
@@ -56,67 +59,96 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
 
     fun get() {
         val headerMap = LinkedHashMap<String, String>()
-        headerMap["Authorization"] = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NDM3ODMsIm5hbWUiOiJjZmNnZyBHZ2dnIGNjY2MgY2NjY2MiLCJlbWFpbCI6ImFsbWFycmlAbW9oLmdvdi5zYSIsIm1vYmlsZSI6IjUzMDgwMzA5MSIsInJvbGUiOiJlbXBsb3llZSIsImFjY2VzcyI6Im1vYmlsZSIsImRvbWFpbiI6ImFsbCIsImlhdCI6MTU0NjUwMzQ2MSwiZXhwIjoxNTQ5MDk1NDYxfQ.4OhtjSj5b0u7h57t3_9DEBXgkYsqo6nVLJ5eemDYg2o"
-        headerMap["Authorization"] = "12"
-        WebConnect.with(this.activity, ENDPOINT_GET)
+        WebConnect.with(ENDPOINT_GET)
                 .get()
                 .queryParam(headerMap)
                 .headerParam(headerMap)
-                //.baseUrl("https://api.hrs.staging.clicksandbox.com/v1/")
                 .timeOut(100L, 50L)
-                .loader { isShowing -> Log.i(javaClass.simpleName, "Loader showing = $isShowing") }
-                .response { _ ->
-
+                .loader {
+                    Log.i(javaClass.simpleName, "Loader showing = $this")
                 }
                 .success(ResponseModel::class.java) {
-                    get.postValue(it)
+                    Log.d(javaClass.simpleName, this.toString())
+                    get.postValue(this)
                 }
                 .error(Error::class.java) {
-                    error.postValue(it)
+                    error.postValue(this)
                 }
-                .failure { model, msg -> }
+                .failure { model, msg ->
+                    activity.getHTTPError(model)
+                }
                 .connect()
     }
 
-//    fun post(): Map<String, String> {
-//        val requestMap = LinkedHashMap<String, String>()
-//        requestMap["locale"] = "en"
-//        requestMap["name"] = "manager1"
-//        requestMap["birth_date"] = "18/08/1987"
-//        requestMap["gender"] = "male"
-//        val headerMap = LinkedHashMap<String, String>()
-//        headerMap["Authorization"] = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTQsIm5hbWUiOiJHdXJ1IiwiZW1haWwiOiJndXJwcmVldDJAY2xpY2thcHBzLmNvIiwibW9iaWxlIjoiODI4NzYyMTIyOCIsImltYWdlIjoiL2RlZmF1bHRfbG9nby5qcGciLCJpYXQiOjE1MjExODAwOTIsImV4cCI6MTUyMzc3MjA5Mn0.Cc4dOzVC3NipXfVOJdRE29-GrtO5H0dgC3GSABiTYTA"
-//        WebConnect.with(this.activity, ENDPOINT_POST)
-//                .put()
-//                .multipart()
-//                .multipartParam(requestMap)
-//                .timeOut(100L, 50L)
-//                .headerParam(headerMap)
-//                .connect()
-//        return requestMap
-//    }
+    fun post(): Map<String, String> {
+        val requestMap = LinkedHashMap<String, String>()
+        requestMap["locale"] = "en"
+        requestMap["name"] = "manager1"
+        requestMap["birth_date"] = "18/08/1987"
+        requestMap["gender"] = "male"
+        val headerMap = LinkedHashMap<String, String>()
+        headerMap["Authorization"] = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTQsIm5hbWUiOiJHdXJ1IiwiZW1haWwiOiJndXJwcmVldDJAY2xpY2thcHBzLmNvIiwibW9iaWxlIjoiODI4NzYyMTIyOCIsImltYWdlIjoiL2RlZmF1bHRfbG9nby5qcGciLCJpYXQiOjE1MjExODAwOTIsImV4cCI6MTUyMzc3MjA5Mn0.Cc4dOzVC3NipXfVOJdRE29-GrtO5H0dgC3GSABiTYTA"
+        WebConnect.with(ENDPOINT_POST)
+                .post()
+                .bodyParam(requestMap)
+                .formDataParam(requestMap)
+                .timeOut(100L, 50L)
+                .headerParam(headerMap)
+                .progressListener { time, b, bi ->
+                    Log.d(javaClass.simpleName, "Time = $time, b = $b , b1 = $bi")
+                }
+                .response {
 
-//    fun put() {
-//        val requestMap = LinkedHashMap<String, String>()
-//        requestMap["locale"] = "Amit Singh"
-//        requestMap["name"] = "manager"
-//        requestMap["birth_date"] = "18/08/1987"
-//        requestMap["gender"] = "male"
-//        WebConnect.with(activity, ENDPOINT_PUT)
-//                .put()
-//                .formDataParam(requestMap)
-//                .connect()
-//    }
-//
-//    fun delete() {
-//        val requestMap = LinkedHashMap<String, String>()
-//        requestMap["name"] = "Amit Singh"
-//        requestMap["job"] = "manager"
-//        WebConnect.with(activity, ENDPOINT_PUT)
-//                .download(File("/test"))
-//                .get()
-//                .connect()
-//    }
+                }
+                .connect()
+        return requestMap
+    }
+
+    fun put() {
+        val requestMap = LinkedHashMap<String, String>()
+        requestMap["locale"] = "Amit Singh"
+        requestMap["name"] = "manager"
+        requestMap["birth_date"] = "18/08/1987"
+        requestMap["gender"] = "male"
+        WebConnect.with(ENDPOINT_PUT)
+                .put()
+                .formDataParam(requestMap)
+                .connect()
+    }
+
+    fun delete() {
+        val requestMap = LinkedHashMap<String, String>()
+        requestMap["name"] = "Amit Singh"
+        requestMap["job"] = "manager"
+        WebConnect.with(ENDPOINT_GET)
+                .download(File("/test"))
+                .get()
+                .connect()
+    }
+
+    fun upload() {
+        val map = HashMap<String, Any>()
+        val temp = HashMap<String, String>()
+        temp["code_country"] = "00966"
+        temp["mobile"] = "566566563"
+        map["mobile_number_attributes"] = temp
+        map["name"] = "Hello"
+        val header = HashMap<String, String>()
+        val image = HashMap<String, File>()
+        image["avatar"] = File(Environment.getExternalStorageDirectory(), "temp2.jpg")
+        header["Authorization"] = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NywibmFtZSI6IkFiYyIsImVtYWlsIjoiYWJjQGdtYWlsLmNvbSIsImlhdCI6MTU1MjY0ODM2NCwiZXhwIjoxNTU1MjQwMzY0fQ.0Kb8YjJdCcGGNAJLWJoktXpInoXDjEuUneGx2opMqfI"
+        WebConnect.with("v1/customer_profiles")
+                .multipart()
+                .put()
+                .baseUrl("http://api.iw.dev.clicksandbox.com/")
+                .headerParam(header)
+                .multipartBodyParam(map)
+                //.multipartParamFile(image, getApplication())
+                .response {
+                    Log.i(javaClass.simpleName, this)
+                }
+                .connect()
+    }
 
 
     class MainActivityModelFactory(private val activity: Application) : ViewModelProvider.Factory {
@@ -127,10 +159,10 @@ class MainActivityModel(application: Application) : AndroidViewModel(application
     }
 
     companion object {
+        @JvmStatic
         val ENDPOINT_GET = "offers"
         val ENDPOINT_POST = "users"
         val ENDPOINT_PUT = "users/740"
         val ENDPOINT_BASE = "https://reqres.in/api/"
     }
-
 }

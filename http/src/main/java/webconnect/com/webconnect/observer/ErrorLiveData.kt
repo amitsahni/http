@@ -6,8 +6,9 @@ import android.arch.lifecycle.MutableLiveData
 
 object ErrorLiveData {
 
-    val error = MutableLiveData<String>()
+    internal val error = MutableLiveData<String>()
 
+    @JvmStatic
     fun getErrorLiveData(): LiveData<String> {
         return error
     }

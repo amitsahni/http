@@ -14,37 +14,34 @@ import java.util.*
  * The type Web param.
  */
 class WebParam : Serializable {
-    var context: Context? = null
-    var url: String? = null
-    var baseUrl: String? = null
-    var httpType = HttpType.GET
-    var requestParam: Map<String, Any> = LinkedHashMap()
-    var queryParam: QueryMap<String, String> = QueryMap()
-    var query: Map<String, String> = LinkedHashMap()
-    var multipartParam: Map<String, String> = LinkedHashMap()
-    var multipartParamFile: Map<String, File> = LinkedHashMap()
-    var multipartParamListFile: Map<String, List<File>> = LinkedHashMap()
-    var headerParam: Map<String, String> = LinkedHashMap()
-    var success: OnSuccessListener<Any>? = null
-    var err: OnErrorListener<Any>? = null
-    var failure: OnFailureListener? = null
-    var responseListener: ResponseListener? = null
-    var progressListener: ProgressListener? = null
-    var analyticsListener: AnalyticsListener? = null
-    var loaderListener: LoaderListener? = null
-    var dialog: Dialog? = null
-    var model: Class<*> = Any::class.java
-    var error: Class<*> = Any::class.java
-    var taskId: Int = 0
-    var connectTimeOut: Long = 0L
-    var readTimeOut: Long = 0L
-    var isCacheEnabled = false
-    var debug = false
-    var isJson = false
-    var file: File? = null
-    var requestBodyContentlength: Long = -1L
+    internal var context: Context? = null
+    internal var url: String = ""
+    internal var baseUrl: String = ""
+    internal var httpType = HttpType.GET
+    internal var requestParam: Map<String, Any> = LinkedHashMap()
+    internal var queryParam: QueryMap<String, String> = QueryMap()
+    internal var query: Map<String, String> = LinkedHashMap()
+    internal var multipartParamFile: Map<String, File> = LinkedHashMap()
+    internal var multipartParamListFile: Map<String, List<File>> = LinkedHashMap()
+    internal var headerParam: Map<String, String> = LinkedHashMap()
+    internal var success: OnSuccessListener<Any>? = null
+    internal var err: OnErrorListener<Any>? = null
+    internal var failure: OnFailureListener? = null
+    internal var responseListener: ResponseListener? = null
+    internal var progressListener: ProgressListener? = null
+    internal var analyticsListener: AnalyticsListener? = null
+    internal var loaderListener: LoaderListener? = null
+    internal var model: Class<*> = Any::class.java
+    internal var error: Class<*> = Any::class.java
+    internal var connectTimeOut: Long = 0L
+    internal var readTimeOut: Long = 0L
+    internal var isCacheEnabled = false
+    internal var debug = false
+    internal var isJson = false
+    internal var file: File? = null
+    internal var requestBodyContentlength: Long = -1L
 
-    enum class HttpType {
+    internal enum class HttpType {
         GET,
         POST,
         PUT,

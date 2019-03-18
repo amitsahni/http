@@ -6,8 +6,9 @@ import android.arch.lifecycle.MutableLiveData;
 
 object SuccessLiveData {
 
-    val success = MutableLiveData<String>()
+    internal val success = MutableLiveData<String>()
 
+    @JvmStatic
     fun getSuccessLiveData(): LiveData<String> {
         return success
     }

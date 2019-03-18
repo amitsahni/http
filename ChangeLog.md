@@ -11,3 +11,9 @@
   1. SuccessLiveData
   2. ErrorLiveData
   3. FailureLiveData
+  
+#2.0.0
+* Remove context
+* Remove Java compatible methods
+* Add Extension function for internal use
+* Added higher order function for getting result in same block
