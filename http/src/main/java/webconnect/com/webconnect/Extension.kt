@@ -5,7 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonSyntaxException
+import com.google.gson.JsonIOException
 import com.google.gson.reflect.TypeToken
 import java.net.ConnectException
 import java.net.SocketTimeoutException
@@ -39,6 +39,9 @@ internal fun Any.toJson(): String {
     } catch (e: Exception) {
         e.printStackTrace()
         ""
+    } catch (e: JsonIOException) {
+        e.printStackTrace()
+        ""
     }
 }
 
@@ -48,7 +51,7 @@ private inline fun <reified T> Gson.fromJson(json: String) = fromJson<T>(json, o
 internal inline fun <reified T> String.fromJson(): T? {
     return try {
         gson().fromJson<T>(this)
-    } catch (e: JsonSyntaxException) {
+    } catch (e: java.lang.Exception) {
         e.printStackTrace()
         null
     }
@@ -57,7 +60,7 @@ internal inline fun <reified T> String.fromJson(): T? {
 internal fun String.fromJson(model: Class<*>): Any? {
     return try {
         gson().fromJson(this, model)
-    } catch (e: JsonSyntaxException) {
+    } catch (e: java.lang.Exception) {
         e.printStackTrace()
         null
     }
@@ -66,9 +69,9 @@ internal fun String.fromJson(model: Class<*>): Any? {
 internal fun String.formatJson(): String? {
     return try {
         gson().toJson(gson().fromJson<Any>(this))
-    } catch (e: JsonSyntaxException) {
+    } catch (e: java.lang.Exception) {
         e.printStackTrace()
-        ""
+        null
     }
 }
 

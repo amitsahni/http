@@ -44,21 +44,27 @@ class Callback {
                 var responseString = ""
                 runBlocking(Dispatchers.IO) {
                     responseString = it.string()
+                    param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, it.contentLength(), response.cacheResponse() != null)
+                }
+                val json = responseString.formatJson()
+                if (json != null) {
                     responseString.formatJson()?.let {
                         param.responseListener?.response(it)
                     }
-                    param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, it.contentLength(), response.cacheResponse() != null)
-                }
-                if (response.isSuccessful) {
-                    responseString.fromJson(param.model)?.let {
-                        param.success?.onSuccess(it)
+                    if (response.isSuccessful) {
+                        responseString.fromJson(param.model)?.let {
+                            param.success?.onSuccess(it)
+                        }
+                        SuccessLiveData.success.postValue(responseString)
+                    } else {
+                        responseString.fromJson(param.error)?.let {
+                            param.err?.onError(it)
+                        }
+                        ErrorLiveData.error.postValue(responseString)
                     }
-                    SuccessLiveData.success.postValue(responseString)
                 } else {
-                    responseString.fromJson(param.error)?.let {
-                        param.err?.onError(it)
-                    }
-                    ErrorLiveData.error.postValue(responseString)
+                    val exception = java.lang.Exception(responseString)
+                    param.failure?.onFailure(exception, "Error in response")
                 }
             }
         }
@@ -85,21 +91,27 @@ class Callback {
                 var responseString = ""
                 runBlocking(Dispatchers.IO) {
                     responseString = it.string()
+                    param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, it.contentLength(), response.cacheResponse() != null)
+                }
+                val json = responseString.formatJson()
+                if (json != null) {
                     responseString.formatJson()?.let {
                         param.responseListener?.response(it)
                     }
-                    param.analyticsListener?.onReceived(timeTaken, if (call.request().body() == null) -1 else call.request().body()?.contentLength()!!, it.contentLength(), response.cacheResponse() != null)
-                }
-                if (response.isSuccessful) {
-                    responseString.fromJson(param.model)?.let {
-                        param.success?.onSuccess(it)
+                    if (response.isSuccessful) {
+                        responseString.fromJson(param.model)?.let {
+                            param.success?.onSuccess(it)
+                        }
+                        SuccessLiveData.success.postValue(responseString)
+                    } else {
+                        responseString.fromJson(param.error)?.let {
+                            param.err?.onError(it)
+                        }
+                        ErrorLiveData.error.postValue(responseString)
                     }
-                    SuccessLiveData.success.postValue(responseString)
                 } else {
-                    responseString.fromJson(param.error)?.let {
-                        param.err?.onError(it)
-                    }
-                    ErrorLiveData.error.postValue(responseString)
+                    val exception = java.lang.Exception(responseString)
+                    param.failure?.onFailure(exception, "Error in response")
                 }
             }
         }
