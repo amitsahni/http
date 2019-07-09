@@ -37,6 +37,11 @@ object ApiConfiguration {
         return this
     }
 
+    fun client(client: OkHttpClient): ApiConfiguration {
+        this.okHttpClient = client
+        return this
+    }
+
     fun config() {
         val interceptor = okhttp3.logging.HttpLoggingInterceptor()
         interceptor.level = if (this.isDebug)
